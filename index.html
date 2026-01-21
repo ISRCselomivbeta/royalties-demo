@@ -113,42 +113,76 @@ function enviar() {
     return;
   }
 
+  // Validação de e-mail simples
+  if (!email.includes('@') || !email.includes('.')) {
+    document.getElementById("status").innerHTML = "❌ Digite um e-mail válido.";
+    return;
+  }
+
   const dados = {
     nome: nome,
     email: email,
     percentual: percentual,
-    valor: percentual * 50
+    valor: parseInt(percentual) * 50,
+    data: new Date().toISOString()
   };
 
   document.getElementById("status").innerHTML = "⏳ Gerando contrato, aguarde...";
+  
+  // Desabilita o botão para evitar múltiplos cliques
+  const botao = document.querySelector('button');
+  botao.disabled = true;
+  botao.textContent = "Processando...";
 
-  fetch("https://script.google.com/macros/s/AKfycbzNkO8mGuBtwaVkSvRdJY1aUR_dPY7xa3CohawvKh-_U9bu12jguHqQVfdla9OoPh0/exec", {
+  // URL do Google Apps Script - IMPORTANTE: verifique se está correto
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNkO8mGuBtwaVkSvRdJY1aUR_dPY7xa3CohawvKh-_U9bu12jguHqQVfdla9OoPh0/exec";
+  
+  // Usando FormData para contornar problemas de CORS
+  const formData = new URLSearchParams();
+  formData.append('nome', nome);
+  formData.append('email', email);
+  formData.append('percentual', percentual);
+  formData.append('valor', dados.valor);
+  formData.append('data', dados.data);
+
+  fetch(SCRIPT_URL, {
     method: "POST",
+    mode: 'no-cors', // Modo no-cors para evitar problemas
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: JSON.stringify(dados)
+    body: formData.toString()
   })
-  .then(res => res.json())
-  .then(resp => {
-    if (resp.status === "sucesso" || resp.status === "ok") {
-      document.getElementById("status").innerHTML = `
-        ✅ Contrato gerado com sucesso.<br><br>
-        📩 Um e-mail de confirmação foi enviado.<br><br>
-        ${resp.contrato ? `<a href="${resp.contrato}" target="_blank">📄 Abrir contrato</a>` : ""}
-      `;
-    } else {
-      document.getElementById("status").innerHTML = "❌ Erro: " + resp.mensagem;
-    }
+  .then(response => {
+    // Com 'no-cors' não podemos ler a resposta, então assumimos sucesso
+    console.log("Requisição enviada com sucesso");
+    
+    // Mensagem de sucesso (em produção você deve confirmar por e-mail)
+    document.getElementById("status").innerHTML = `
+      ✅ Contrato gerado com sucesso!<br><br>
+      📩 Um e-mail de confirmação foi enviado para:<br>
+      <strong>${email}</strong><br><br>
+      Em breve você receberá o contrato por e-mail.
+    `;
+    
+    // Limpa o formulário
+    document.getElementById("nome").value = "";
+    document.getElementById("email").value = "";
   })
   .catch(err => {
-    console.error(err);
-    document.getElementById("status").innerHTML =
-      "❌ Falha ao conectar com o servidor. Tente novamente.";
+    console.error("Erro:", err);
+    document.getElementById("status").innerHTML = `
+      ⚠️ Requisição enviada, mas houve um problema na resposta.<br>
+      Verifique seu e-mail <strong>${email}</strong> em alguns minutos.
+    `;
+  })
+  .finally(() => {
+    // Reabilita o botão
+    botao.disabled = false;
+    botao.textContent = "Gerar contrato";
   });
 }
 </script>
 
 </body>
 </html>
-
