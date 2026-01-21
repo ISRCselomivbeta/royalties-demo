@@ -1,44 +1,63 @@
+<div style="max-width:420px;margin:auto;padding:24px;
+background:#161a22;color:#eaeaf0;border-radius:12px;
+font-family:Arial">
+
+<h2>Participação em Royalties</h2>
+<p style="color:#9aa0b3">Simulação pública</p>
+
+<p>Nome</p>
+<div contenteditable="true" id="nome"
+style="padding:10px;background:#0f1115;border-radius:6px"></div>
+
+<p>Email</p>
+<div contenteditable="true" id="email"
+style="padding:10px;background:#0f1115;border-radius:6px"></div>
+
+<p>Percentual</p>
+<div id="percentual" contenteditable="true"
+style="padding:10px;background:#0f1115;border-radius:6px">5</div>
+
+<button onclick="enviar()"
+style="margin-top:16px;width:100%;padding:12px;
+background:#4fd1c5;border:none;border-radius:6px;
+font-weight:bold;cursor:pointer">
+Gerar Contrato
+</button>
+
+<div id="status" style="margin-top:16px"></div>
+</div>
+
 <script>
 function enviar() {
-  const nome = document.getElementById("nome").value.trim();
-  const email = document.getElementById("email").value.trim();
-  const percentual = document.getElementById("percentual").value;
+  const dados = {
+    nome: document.getElementById("nome").innerText.trim(),
+    email: document.getElementById("email").innerText.trim(),
+    percentual: document.getElementById("percentual").innerText.trim(),
+    musica: "Sons da Rua",
+    isrc: "BR-XYZ-26-00001",
+    valor: 50
+  };
 
-  if (!nome || !email) {
-    alert("Preencha nome e email.");
-    return;
-  }
+  document.getElementById("status").innerText = "⏳ Gerando contrato...";
 
-  const params = new URLSearchParams();
-  params.append("nome", nome);
-  params.append("email", email);
-  params.append("musica", "Sons da Rua");
-  params.append("isrc", "BR-XYZ-26-00001");
-  params.append("percentual", percentual);
-  params.append("valor", percentual * 50);
-  params.append("pagamento", "DEMO");
-
-  const status = document.getElementById("status");
-  status.innerText = "⏳ Gerando contrato, aguarde...";
-
-  fetch("https://script.google.com/macros/s/AKfycbz1RJ7w_gSoJRU3tcOsi_Zvtlj0HrqriTRFJlhq7awVFWOx16Jmgm-OISBPIefwU2Dm/exec", {
+  fetch("SUA_URL_DO_SCRIPT_AQUI", {
     method: "POST",
-    body: params
+    body: JSON.stringify(dados)
   })
-  .then(res => res.json())
-  .then(resp => {
-    if (resp.status === "ok") {
-      status.innerHTML =
-        `✅ Contrato gerado com sucesso.<br><br>
-         <a href="${resp.contrato}" target="_blank" style="color:#4fd1c5;">
-         📄 Baixar contrato PDF</a>`;
+  .then(r => r.json())
+  .then(res => {
+    if(res.status === "ok"){
+      document.getElementById("status").innerHTML =
+        "✅ Contrato pronto:<br><a href='" +
+        res.contrato + "' target='_blank'>📄 Baixar PDF</a>";
     } else {
-      status.innerText = "❌ Erro: " + resp.mensagem;
+      document.getElementById("status").innerText =
+        "❌ Erro: " + res.mensagem;
     }
   })
-  .catch(err => {
-    status.innerText = "❌ Falha na conexão com o servidor.";
-    console.error(err);
+  .catch(() => {
+    document.getElementById("status").innerText =
+      "❌ Falha de conexão";
   });
 }
 </script>
