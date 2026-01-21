@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo • Participação em Royalties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f1115;
+      color: #eaeaf0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      background: #161a22;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      border: 1px solid #222;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #9aa0b3;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      background: #4fd1c5;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h1>Demo • Royalties Musicais</h1>
+  <p>Simulação pública. Dados de teste.</p>
+
+  <input id="nome" type="text" placeholder="Seu nome" required>
+  <input id="email" type="email" placeholder="Seu email" required>
+
+  <select id="percentual">
+    <option value="1">1% – R$ 50</option>
+    <option value="5">5% – R$ 250</option>
+    <option value="10">10% – R$ 500</option>
+  </select>
+
+  <button onclick="enviar()">Gerar Contrato (Demo)</button>
+
+  <div class="status" id="status"></div>
+</div>
+
+<script>
+function enviar() {
+  const nome = document.getElementById("nome").value;
+  const email = document.getElementById("email").value;
+  const percentual = document.getElementById("percentual").value;
+
+  if (!nome || !email) {
+    alert("Preencha nome e email.");
+    return;
+  }
+
+  const dados = {
+    nome: nome,
+    email: email,
+    musica: "Sons da Rua",
+    isrc: "BR-XYZ-26-00001",
+    percentual: percentual,
+    valor: percentual * 50,
+    pagamento: "DEMO"
+  };
+
+  document.getElementById("status").innerHTML = "⏳ Gerando contrato...";
+
+  fetch("https://script.google.com/macros/s/AKfycbxH5x2OMrMqxT0tnFKRcTBXP5zD6RAtsHIi3EMEjk7V0c8O1O3ybooCJx-lVnW5Bslx/exec", {
+    method: "POST",
+    body: JSON.stringify(dados)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    if (resp.status === "ok") {
+      document.getElementById("status").innerHTML =
+        `✅ Contrato gerado com sucesso.<br>
+         <a href="${resp.contrato}" target="_blank" style="color:#4fd1c5;">
+         📄 Baixar contrato PDF</a>`;
+    } else {
+      document.getElementById("status").innerHTML = "❌ Erro ao gerar contrato.";
+    }
+  })
+  .catch(err => {
+    document.getElementById("status").innerHTML = "❌ Falha na conexão com o servidor.";
+    console.error(err);
+  });
+}
+</script>
+
+</body>
+</html>
