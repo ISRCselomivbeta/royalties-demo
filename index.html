@@ -1,33 +1,46 @@
-<input id="nome" placeholder="Nome completo">
-<input id="email" placeholder="E-mail">
-<input id="cpf" placeholder="CPF">
-
-<button onclick="gerarContrato()">Gerar contrato</button>
-
 <script>
-async function gerarContrato() {
-  const payload = {
-    nome: document.getElementById("nome").value,
-    email: document.getElementById("email").value,
-    cpf: document.getElementById("cpf").value
+function enviar() {
+  const nome = document.getElementById("nome").value;
+  const email = document.getElementById("email").value;
+  const percentual = document.getElementById("percentual").value;
+
+  if (!nome || !email) {
+    alert("Preencha nome e email.");
+    return;
+  }
+
+  const dados = {
+    nome: nome,
+    email: email,
+    percentual: percentual,
+    valor: percentual * 50
   };
 
-  const response = await fetch(
-    "https://script.google.com/macros/s/AKfycbxsHVN7ICsMwGhS_1XhdJz5fUsMNfqGt-NB4ViVESk6arrSlqP0DOqG3CrP9shD-a8/exec",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+  document.getElementById("status").innerHTML = "⏳ Gerando contrato...";
+
+  fetch("https://script.google.com/macros/s/AKfycbzxgi2esV01dJIuLvJ1xB5kHl0tskhbFzLI4Vadx9BGw3yDyREWGZimeo0XHewTOQo/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dados)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    if (resp.status === "ok") {
+      document.getElementById("status").innerHTML =
+        `✅ Contrato gerado com sucesso.<br>
+         <a href="${resp.contrato}" target="_blank">
+         📄 Abrir contrato</a>`;
+    } else {
+      document.getElementById("status").innerHTML =
+        "❌ Erro: " + resp.mensagem;
     }
-  );
-
-  const result = await response.json();
-
-  if (result.status === "ok") {
-    alert("Contrato criado!");
-    window.open(result.link, "_blank");
-  } else {
-    alert("Erro: " + result.mensagem);
-  }
+  })
+  .catch(err => {
+    document.getElementById("status").innerHTML =
+      "❌ Falha ao conectar com o servidor.";
+    console.error(err);
+  });
 }
 </script>
