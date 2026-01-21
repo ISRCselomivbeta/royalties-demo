@@ -1,95 +1,33 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>Royalties Musicais • Demo</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<input id="nome" placeholder="Nome completo">
+<input id="email" placeholder="E-mail">
+<input id="cpf" placeholder="CPF">
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background:#0f1115;
-  color:#eaeaf0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
-.box {
-  background:#161a22;
-  padding:30px;
-  border-radius:12px;
-  width:100%;
-  max-width:420px;
-}
-input, select, button {
-  width:100%;
-  padding:12px;
-  margin-top:12px;
-}
-button {
-  background:#4fd1c5;
-  font-weight:bold;
-  cursor:pointer;
-}
-a { color:#4fd1c5; }
-</style>
-</head>
-
-<body>
-
-<div class="box">
-  <h2>Royalties Musicais (Demo)</h2>
-  <p>Simulação pública • Dados de teste</p>
-
-  <input id="nome" placeholder="Seu nome">
-  <input id="email" placeholder="Seu email">
-
-  <select id="percentual">
-    <option value="1">1% — R$50</option>
-    <option value="5">5% — R$250</option>
-    <option value="10">10% — R$500</option>
-  </select>
-
-  <a href="https://link.mercadopago.com.br/selomiv" target="_blank">
-    👉 Pagar participação
-  </a>
-
-  <button onclick="gerar()">Gerar Contrato</button>
-
-  <div id="status"></div>
-</div>
+<button onclick="gerarContrato()">Gerar contrato</button>
 
 <script>
-function gerar() {
-  const dados = {
-    nome: nome.value,
-    email: email.value,
-    musica: "Sons da Rua",
-    isrc: "BR-XYZ-26-00001",
-    percentual: percentual.value,
-    valor: percentual.value * 50,
-    pagamento: "Mercado Pago"
+async function gerarContrato() {
+  const payload = {
+    nome: document.getElementById("nome").value,
+    email: document.getElementById("email").value,
+    cpf: document.getElementById("cpf").value
   };
 
-  status.innerHTML = "⏳ Gerando contrato...";
-
-  fetch("AKfycby90zj7keE_1mPX3lItgC7X59P6LPJo9zGWhSvo--4G2O3NbVEF4LakRuK5vR-z-oU", {
-    method: "POST",
-    body: JSON.stringify(dados)
-  })
-  .then(r => r.json())
-  .then(d => {
-    if (d.status === "ok") {
-      status.innerHTML = `✅ <a href="${d.contrato}" target="_blank">Baixar contrato PDF</a>`;
-    } else {
-      status.innerHTML = "❌ Erro: " + d.mensagem;
+  const response = await fetch(
+    "https://script.google.com/macros/s/AKfycbxsHVN7ICsMwGhS_1XhdJz5fUsMNfqGt-NB4ViVESk6arrSlqP0DOqG3CrP9shD-a8/exec",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     }
-  });
+  );
+
+  const result = await response.json();
+
+  if (result.status === "ok") {
+    alert("Contrato criado!");
+    window.open(result.link, "_blank");
+  } else {
+    alert("Erro: " + result.mensagem);
+  }
 }
 </script>
-
-</body>
-</html>
-
-
