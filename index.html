@@ -1,63 +1,93 @@
-<div style="max-width:420px;margin:auto;padding:24px;
-background:#161a22;color:#eaeaf0;border-radius:12px;
-font-family:Arial">
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Royalties Musicais • Demo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<h2>Participação em Royalties</h2>
-<p style="color:#9aa0b3">Simulação pública</p>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#0f1115;
+  color:#eaeaf0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+.box {
+  background:#161a22;
+  padding:30px;
+  border-radius:12px;
+  width:100%;
+  max-width:420px;
+}
+input, select, button {
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+}
+button {
+  background:#4fd1c5;
+  font-weight:bold;
+  cursor:pointer;
+}
+a { color:#4fd1c5; }
+</style>
+</head>
 
-<p>Nome</p>
-<div contenteditable="true" id="nome"
-style="padding:10px;background:#0f1115;border-radius:6px"></div>
+<body>
 
-<p>Email</p>
-<div contenteditable="true" id="email"
-style="padding:10px;background:#0f1115;border-radius:6px"></div>
+<div class="box">
+  <h2>Royalties Musicais (Demo)</h2>
+  <p>Simulação pública • Dados de teste</p>
 
-<p>Percentual</p>
-<div id="percentual" contenteditable="true"
-style="padding:10px;background:#0f1115;border-radius:6px">5</div>
+  <input id="nome" placeholder="Seu nome">
+  <input id="email" placeholder="Seu email">
 
-<button onclick="enviar()"
-style="margin-top:16px;width:100%;padding:12px;
-background:#4fd1c5;border:none;border-radius:6px;
-font-weight:bold;cursor:pointer">
-Gerar Contrato
-</button>
+  <select id="percentual">
+    <option value="1">1% — R$50</option>
+    <option value="5">5% — R$250</option>
+    <option value="10">10% — R$500</option>
+  </select>
 
-<div id="status" style="margin-top:16px"></div>
+  <a href="https://link.mercadopago.com.br/selomiv" target="_blank">
+    👉 Pagar participação
+  </a>
+
+  <button onclick="gerar()">Gerar Contrato</button>
+
+  <div id="status"></div>
 </div>
 
 <script>
-function enviar() {
+function gerar() {
   const dados = {
-    nome: document.getElementById("nome").innerText.trim(),
-    email: document.getElementById("email").innerText.trim(),
-    percentual: document.getElementById("percentual").innerText.trim(),
+    nome: nome.value,
+    email: email.value,
     musica: "Sons da Rua",
     isrc: "BR-XYZ-26-00001",
-    valor: 50
+    percentual: percentual.value,
+    valor: percentual.value * 50,
+    pagamento: "Mercado Pago"
   };
 
-  document.getElementById("status").innerText = "⏳ Gerando contrato...";
+  status.innerHTML = "⏳ Gerando contrato...";
 
-  fetch("SUA_URL_DO_SCRIPT_AQUI", {
+  fetch("COLE_AQUI_SUA_URL_DO_SCRIPT", {
     method: "POST",
     body: JSON.stringify(dados)
   })
   .then(r => r.json())
-  .then(res => {
-    if(res.status === "ok"){
-      document.getElementById("status").innerHTML =
-        "✅ Contrato pronto:<br><a href='" +
-        res.contrato + "' target='_blank'>📄 Baixar PDF</a>";
+  .then(d => {
+    if (d.status === "ok") {
+      status.innerHTML = `✅ <a href="${d.contrato}" target="_blank">Baixar contrato PDF</a>`;
     } else {
-      document.getElementById("status").innerText =
-        "❌ Erro: " + res.mensagem;
+      status.innerHTML = "❌ Erro: " + d.mensagem;
     }
-  })
-  .catch(() => {
-    document.getElementById("status").innerText =
-      "❌ Falha de conexão";
   });
 }
 </script>
+
+</body>
+</html>
