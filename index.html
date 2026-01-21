@@ -3,140 +3,611 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cadastrar Ouvinte - SELO MIV</title>
+  <title>SELO MIV - Plataforma Musical</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script>
-    // URL DA SUA API CORRETA
-    const API_URL = "https://script.google.com/macros/s/AKfycbx7PBO6bOZ9tOFugfaFE-QBiZ5jFtFHddvB42mMH4aJG8LUxR9jkXtjJMJ3-x-0n9v2/exec";
-
-    // Função para cadastrar ouvinte
-    async function cadastrarOuvinte() {
-      const nome = document.getElementById('nome').value.trim();
-      const email = document.getElementById('email').value.trim();
-
-      if (!nome || !email) {
-        alert('❌ Preencha nome e e-mail.');
-        return;
-      }
-
-      // Mostrar loading
-      const btn = document.querySelector('button');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = 'Cadastrando...';
-      btn.disabled = true;
-
-      try {
-        // Método 1: Form URL encoded
-        const formData = new URLSearchParams();
-        formData.append('acao', 'cadastrar_ouvinte');
-        formData.append('nome', nome);
-        formData.append('email', email);
-
-        console.log('Enviando dados:', { nome, email });
-        
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors', // IMPORTANTE para Apps Script
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: formData.toString()
-        });
-
-        // Com no-cors, não podemos ler a resposta normalmente
-        // Vamos fazer uma verificação separada
-        alert('✅ Cadastro enviado! Verifique na planilha.');
-
-        // Limpar campos
-        document.getElementById('nome').value = '';
-        document.getElementById('email').value = '';
-
-        // Testar se foi cadastrado
-        setTimeout(() => testarCadastro(), 2000);
-
-      } catch (err) {
-        console.error('Erro:', err);
-        alert('⚠️ Dados enviados. Pode haver delay no processamento.');
-      } finally {
-        // Restaurar botão
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-      }
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <style>
+    body { 
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #f8f9fa;
     }
-
-    // Função para testar se o cadastro funcionou
-    async function testarCadastro() {
-      try {
-        const res = await fetch(API_URL + '?acao=listar_artistas');
-        const data = await res.json();
-        console.log('Teste API:', data);
-      } catch (e) {
-        console.log('API test response:', e);
-      }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s;
     }
-  </script>
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .nav-tabs .nav-link {
+      color: #adb5bd;
+      border: none;
+    }
+    .nav-tabs .nav-link.active {
+      color: #0d6efd;
+      background: transparent;
+      border-bottom: 2px solid #0d6efd;
+    }
+    .form-control {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid #495057;
+      color: white;
+    }
+    .form-control:focus {
+      background: rgba(0, 0, 0, 0.5);
+      border-color: #0d6efd;
+      color: white;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .status-online { color: #20c997; }
+    .status-offline { color: #dc3545; }
+  </style>
 </head>
-<body class="bg-dark text-white">
-  <div class="container py-5">
-    <h2 class="mb-4">🎧 Cadastrar Ouvinte - SELO MIV</h2>
-    
-    <div class="card bg-secondary text-white mb-4">
-      <div class="card-body">
-        <p><strong>URL API:</strong> <small id="apiUrl"></small></p>
-        <button class="btn btn-sm btn-info mb-2" onclick="testarAPI()">Testar Conexão API</button>
-        <div id="apiStatus"></div>
+<body>
+  <!-- Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="bi bi-vinyl-fill me-2"></i>
+        <strong>SELO MIV</strong>
+      </a>
+      <div class="navbar-text">
+        <span id="apiStatus" class="badge bg-secondary">Testando API...</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <!-- Título -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 mb-3">🎵 Plataforma Musical</h1>
+      <p class="lead">Cadastre artistas, ouvintes e registre plays musicais</p>
+      <div class="d-flex justify-content-center gap-2">
+        <button class="btn btn-outline-info btn-sm" onclick="testarConexao()">
+          <i class="bi bi-wifi"></i> Testar API
+        </button>
+        <button class="btn btn-outline-success btn-sm" onclick="abrirPlanilha()">
+          <i class="bi bi-google"></i> Abrir Planilha
+        </button>
       </div>
     </div>
 
-    <div class="card bg-secondary text-white">
-      <div class="card-body">
-        <div class="mb-3">
-          <label for="nome" class="form-label">Nome Completo</label>
-          <input type="text" class="form-control bg-dark text-white" id="nome" placeholder="Digite seu nome completo">
-        </div>
-
-        <div class="mb-3">
-          <label for="email" class="form-label">E-mail</label>
-          <input type="email" class="form-control bg-dark text-white" id="email" placeholder="exemplo@email.com">
-        </div>
-
-        <button class="btn btn-primary btn-lg w-100" onclick="cadastrarOuvinte()">
-          Cadastrar Ouvinte
+    <!-- Abas -->
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button">
+          <i class="bi bi-house-door"></i> Início
         </button>
-        
-        <div class="mt-3 text-center">
-          <small>Após cadastrar, verifique a planilha "OUVINTES"</small>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="artista-tab" data-bs-toggle="tab" data-bs-target="#artista" type="button">
+          <i class="bi bi-person-badge"></i> Cadastrar Artista
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="ouvinte-tab" data-bs-toggle="tab" data-bs-target="#ouvinte" type="button">
+          <i class="bi bi-headphones"></i> Cadastrar Ouvinte
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="play-tab" data-bs-toggle="tab" data-bs-target="#play" type="button">
+          <i class="bi bi-play-circle"></i> Registrar Play
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="lista-tab" data-bs-toggle="tab" data-bs-target="#lista" type="button">
+          <i class="bi bi-list-ul"></i> Listar Artistas
+        </button>
+      </li>
+    </ul>
+
+    <!-- Conteúdo das Abas -->
+    <div class="tab-content" id="myTabContent">
+      
+      <!-- Tab 1: Início -->
+      <div class="tab-pane fade show active" id="home" role="tabpanel">
+        <div class="row">
+          <div class="col-md-8 mx-auto">
+            <div class="card p-4">
+              <h4 class="mb-3"><i class="bi bi-info-circle"></i> Sobre a Plataforma</h4>
+              <p>A plataforma <strong>SELO MIV</strong> permite gerenciar artistas, ouvintes e registrar plays musicais.</p>
+              
+              <h5 class="mt-4"><i class="bi bi-link"></i> Sua URL da API:</h5>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control" id="apiUrlDisplay" readonly>
+                <button class="btn btn-outline-secondary" onclick="copiarURL()">
+                  <i class="bi bi-clipboard"></i>
+                </button>
+              </div>
+              
+              <h5 class="mt-4"><i class="bi bi-lightning-charge"></i> Status do Sistema:</h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card bg-dark p-3 mb-3">
+                    <h6><i class="bi bi-database"></i> Planilha Google</h6>
+                    <p class="mb-1">ID: <code>1NOc5RHVoWdfdMDur55C5R25FAsAcqQtk5PHVmFlViV0</code></p>
+                    <span class="badge bg-success">Conectada</span>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card bg-dark p-3 mb-3">
+                    <h6><i class="bi bi-cloud"></i> API Apps Script</h6>
+                    <p class="mb-1">Status: <span id="statusDetalhe">Verificando...</span></p>
+                    <span class="badge bg-secondary" id="statusBadge">Desconhecido</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="alert alert-info mt-3">
+                <i class="bi bi-chat-dots"></i> <strong>Dica:</strong> Use as abas acima para realizar as operações.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Cadastrar Artista -->
+      <div class="tab-pane fade" id="artista" role="tabpanel">
+        <div class="row">
+          <div class="col-md-6 mx-auto">
+            <div class="card p-4">
+              <h4 class="mb-4"><i class="bi bi-person-plus"></i> Cadastrar Artista</h4>
+              
+              <div class="mb-3">
+                <label for="artistaNome" class="form-label">Nome Completo *</label>
+                <input type="text" class="form-control" id="artistaNome" placeholder="Nome do artista">
+              </div>
+              
+              <div class="mb-3">
+                <label for="artistaCPF" class="form-label">CPF *</label>
+                <input type="text" class="form-control" id="artistaCPF" placeholder="000.000.000-00" 
+                       oninput="formatarCPF(this)">
+              </div>
+              
+              <div class="mb-3">
+                <label for="artistaEmail" class="form-label">E-mail *</label>
+                <input type="email" class="form-control" id="artistaEmail" placeholder="artista@email.com">
+              </div>
+              
+              <div class="mb-3">
+                <label for="artistaTelefone" class="form-label">Telefone</label>
+                <input type="text" class="form-control" id="artistaTelefone" placeholder="(11) 99999-9999"
+                       oninput="formatarTelefone(this)">
+              </div>
+              
+              <button class="btn btn-primary w-100" onclick="cadastrarArtista()">
+                <i class="bi bi-check-circle"></i> Cadastrar Artista
+              </button>
+              
+              <div id="artistaResultado" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Cadastrar Ouvinte -->
+      <div class="tab-pane fade" id="ouvinte" role="tabpanel">
+        <div class="row">
+          <div class="col-md-6 mx-auto">
+            <div class="card p-4">
+              <h4 class="mb-4"><i class="bi bi-person-add"></i> Cadastrar Ouvinte</h4>
+              
+              <div class="mb-3">
+                <label for="ouvinteNome" class="form-label">Nome *</label>
+                <input type="text" class="form-control" id="ouvinteNome" placeholder="Nome do ouvinte">
+              </div>
+              
+              <div class="mb-3">
+                <label for="ouvinteEmail" class="form-label">E-mail *</label>
+                <input type="email" class="form-control" id="ouvinteEmail" placeholder="ouvinte@email.com">
+              </div>
+              
+              <button class="btn btn-success w-100" onclick="cadastrarOuvinte()">
+                <i class="bi bi-person-check"></i> Cadastrar Ouvinte
+              </button>
+              
+              <div id="ouvinteResultado" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Registrar Play -->
+      <div class="tab-pane fade" id="play" role="tabpanel">
+        <div class="row">
+          <div class="col-md-6 mx-auto">
+            <div class="card p-4">
+              <h4 class="mb-4"><i class="bi bi-play-btn"></i> Registrar Play</h4>
+              
+              <div class="mb-3">
+                <label for="playOuvinteId" class="form-label">ID do Ouvinte *</label>
+                <input type="text" class="form-control" id="playOuvinteId" placeholder="Ex: OUV1234">
+              </div>
+              
+              <div class="mb-3">
+                <label for="playMusicaId" class="form-label">ID da Música *</label>
+                <input type="text" class="form-control" id="playMusicaId" placeholder="Ex: MUS001">
+              </div>
+              
+              <div class="alert alert-warning">
+                <i class="bi bi-coin"></i> <strong>Valor por play:</strong> R$ 0,10
+              </div>
+              
+              <button class="btn btn-warning w-100" onclick="registrarPlay()">
+                <i class="bi bi-play-fill"></i> Registrar Play
+              </button>
+              
+              <div id="playResultado" class="mt-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 5: Listar Artistas -->
+      <div class="tab-pane fade" id="lista" role="tabpanel">
+        <div class="row">
+          <div class="col-md-8 mx-auto">
+            <div class="card p-4">
+              <h4 class="mb-4"><i class="bi bi-people"></i> Artistas Cadastrados</h4>
+              
+              <button class="btn btn-info mb-4" onclick="carregarArtistas()">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar Lista
+              </button>
+              
+              <div id="loadingArtistas" class="text-center py-4 d-none">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2">Carregando artistas...</p>
+              </div>
+              
+              <div id="listaArtistas">
+                <!-- Lista será carregada aqui -->
+                <div class="text-center text-muted py-4">
+                  <i class="bi bi-music-note-beamed display-6"></i>
+                  <p class="mt-2">Nenhum artista carregado</p>
+                  <button class="btn btn-sm btn-outline-info" onclick="carregarArtistas()">
+                    Carregar Artistas
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Mostrar URL da API
-    document.getElementById('apiUrl').textContent = API_URL;
-    
-    // Função para testar conexão
-    async function testarAPI() {
-      try {
-        const statusDiv = document.getElementById('apiStatus');
-        statusDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Testando...';
-        
-        const res = await fetch(API_URL + '?acao=testar_conexao');
-        const data = await res.json();
-        
-        if (data.success) {
-          statusDiv.innerHTML = `<span class="text-success">✅ API Online (${data.data})</span>`;
-        } else {
-          statusDiv.innerHTML = `<span class="text-warning">⚠️ ${data.message}</span>`;
-        }
-      } catch (err) {
-        document.getElementById('apiStatus').innerHTML = 
-          `<span class="text-danger">❌ Erro: ${err.message}</span>`;
+    // Configurações
+    const API_URL = "https://script.google.com/macros/s/AKfycbx7PBO6bOZ9tOFugfaFE-QBiZ5jFtFHddvB42mMH4aJG8LUxR9jkXtjJMJ3-x-0n9v2/exec";
+    const PLANILHA_URL = "https://docs.google.com/spreadsheets/d/1NOc5RHVoWdfdMDur55C5R25FAsAcqQtk5PHVmFlViV0/edit";
+
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('apiUrlDisplay').value = API_URL;
+      testarConexao();
+    });
+
+    // ====================
+    // FUNÇÕES GERAIS
+    // ====================
+
+    function abrirPlanilha() {
+      window.open(PLANILHA_URL, '_blank');
+    }
+
+    function copiarURL() {
+      const input = document.getElementById('apiUrlDisplay');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      mostrarAlerta('URL copiada!', 'success');
+    }
+
+    function mostrarAlerta(mensagem, tipo = 'info', elemento = null) {
+      const alerta = document.createElement('div');
+      alerta.className = `alert alert-${tipo} alert-dismissible fade show`;
+      alerta.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      
+      if (elemento) {
+        elemento.innerHTML = '';
+        elemento.appendChild(alerta);
+      } else {
+        // Mostrar no topo
+        const container = document.querySelector('.container.py-4');
+        container.insertBefore(alerta, container.firstChild);
+        setTimeout(() => alerta.remove(), 5000);
       }
     }
-    
-    // Testar ao carregar a página
-    window.onload = testarAPI;
+
+    // ====================
+    // TESTE DE CONEXÃO
+    // ====================
+
+    async function testarConexao() {
+      const statusSpan = document.getElementById('apiStatus');
+      const statusDetalhe = document.getElementById('statusDetalhe');
+      const statusBadge = document.getElementById('statusBadge');
+      
+      statusSpan.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Testando...';
+      
+      try {
+        const resposta = await fetch(API_URL + '?acao=testar_conexao');
+        const dados = await resposta.json();
+        
+        if (dados.success) {
+          statusSpan.innerHTML = '<i class="bi bi-check-circle"></i> Online';
+          statusSpan.className = 'badge bg-success';
+          statusDetalhe.textContent = dados.data;
+          statusBadge.textContent = 'Online';
+          statusBadge.className = 'badge bg-success';
+          mostrarAlerta('✅ API conectada com sucesso!', 'success');
+        } else {
+          throw new Error(dados.message);
+        }
+      } catch (erro) {
+        statusSpan.innerHTML = '<i class="bi bi-x-circle"></i> Offline';
+        statusSpan.className = 'badge bg-danger';
+        statusDetalhe.textContent = erro.message;
+        statusBadge.textContent = 'Offline';
+        statusBadge.className = 'badge bg-danger';
+        mostrarAlerta(`❌ Erro na conexão: ${erro.message}`, 'danger');
+      }
+    }
+
+    // ====================
+    // CADASTRAR ARTISTA
+    // ====================
+
+    function formatarCPF(input) {
+      let valor = input.value.replace(/\D/g, '');
+      if (valor.length > 11) valor = valor.substring(0, 11);
+      
+      if (valor.length <= 11) {
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      }
+      
+      input.value = valor;
+    }
+
+    function formatarTelefone(input) {
+      let valor = input.value.replace(/\D/g, '');
+      
+      if (valor.length > 11) valor = valor.substring(0, 11);
+      
+      if (valor.length > 10) {
+        valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+      } else if (valor.length > 6) {
+        valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+      } else if (valor.length > 2) {
+        valor = valor.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+      } else if (valor.length > 0) {
+        valor = valor.replace(/^(\d*)/, '($1');
+      }
+      
+      input.value = valor;
+    }
+
+    async function cadastrarArtista() {
+      const nome = document.getElementById('artistaNome').value.trim();
+      const cpf = document.getElementById('artistaCPF').value.trim();
+      const email = document.getElementById('artistaEmail').value.trim();
+      const telefone = document.getElementById('artistaTelefone').value.trim();
+      const resultado = document.getElementById('artistaResultado');
+      
+      if (!nome || !cpf || !email) {
+        mostrarAlerta('❌ Preencha nome, CPF e e-mail.', 'danger', resultado);
+        return;
+      }
+      
+      const cpfLimpo = cpf.replace(/\D/g, '');
+      if (cpfLimpo.length !== 11) {
+        mostrarAlerta('❌ CPF inválido. Deve ter 11 dígitos.', 'danger', resultado);
+        return;
+      }
+      
+      resultado.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Cadastrando...</div>';
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('acao', 'cadastrar_artista');
+        formData.append('nome', nome);
+        formData.append('cpf', cpfLimpo);
+        formData.append('email', email);
+        if (telefone) formData.append('telefone', telefone);
+        
+        const resposta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: formData.toString()
+        });
+        
+        const dados = await resposta.json();
+        
+        if (dados.success) {
+          mostrarAlerta(`✅ Artista cadastrado! ID: ${dados.artista_id}`, 'success', resultado);
+          // Limpar campos
+          document.getElementById('artistaNome').value = '';
+          document.getElementById('artistaCPF').value = '';
+          document.getElementById('artistaEmail').value = '';
+          document.getElementById('artistaTelefone').value = '';
+          
+          // Atualizar lista de artistas se estiver na tab
+          if (document.getElementById('lista-tab').classList.contains('active')) {
+            carregarArtistas();
+          }
+        } else {
+          mostrarAlerta(`❌ Erro: ${dados.message}`, 'danger', resultado);
+        }
+      } catch (erro) {
+        mostrarAlerta(`❌ Erro na conexão: ${erro.message}`, 'danger', resultado);
+      }
+    }
+
+    // ====================
+    // CADASTRAR OUVINTE
+    // ====================
+
+    async function cadastrarOuvinte() {
+      const nome = document.getElementById('ouvinteNome').value.trim();
+      const email = document.getElementById('ouvinteEmail').value.trim();
+      const resultado = document.getElementById('ouvinteResultado');
+      
+      if (!nome || !email) {
+        mostrarAlerta('❌ Preencha nome e e-mail.', 'danger', resultado);
+        return;
+      }
+      
+      resultado.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Cadastrando...</div>';
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('acao', 'cadastrar_ouvinte');
+        formData.append('nome', nome);
+        formData.append('email', email);
+        
+        const resposta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: formData.toString()
+        });
+        
+        const dados = await resposta.json();
+        
+        if (dados.success) {
+          mostrarAlerta(`✅ Ouvinte cadastrado! ID: ${dados.ouvinte_id}`, 'success', resultado);
+          // Limpar campos
+          document.getElementById('ouvinteNome').value = '';
+          document.getElementById('ouvinteEmail').value = '';
+        } else {
+          mostrarAlerta(`❌ Erro: ${dados.message}`, 'danger', resultado);
+        }
+      } catch (erro) {
+        mostrarAlerta(`❌ Erro na conexão: ${erro.message}`, 'danger', resultado);
+      }
+    }
+
+    // ====================
+    // REGISTRAR PLAY
+    // ====================
+
+    async function registrarPlay() {
+      const ouvinteId = document.getElementById('playOuvinteId').value.trim();
+      const musicaId = document.getElementById('playMusicaId').value.trim();
+      const resultado = document.getElementById('playResultado');
+      
+      if (!ouvinteId || !musicaId) {
+        mostrarAlerta('❌ Preencha ID do ouvinte e ID da música.', 'danger', resultado);
+        return;
+      }
+      
+      resultado.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm"></div> Registrando...</div>';
+      
+      try {
+        const formData = new URLSearchParams();
+        formData.append('acao', 'registrar_play');
+        formData.append('ouvinte_id', ouvinteId);
+        formData.append('musica_id', musicaId);
+        
+        const resposta = await fetch(API_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: formData.toString()
+        });
+        
+        const dados = await resposta.json();
+        
+        if (dados.success) {
+          mostrarAlerta(`✅ Play registrado! Valor: R$ ${dados.valor.toFixed(2)}`, 'success', resultado);
+          // Limpar campos
+          document.getElementById('playOuvinteId').value = '';
+          document.getElementById('playMusicaId').value = '';
+        } else {
+          mostrarAlerta(`❌ Erro: ${dados.message}`, 'danger', resultado);
+        }
+      } catch (erro) {
+        mostrarAlerta(`❌ Erro na conexão: ${erro.message}`, 'danger', resultado);
+      }
+    }
+
+    // ====================
+    // LISTAR ARTISTAS
+    // ====================
+
+    async function carregarArtistas() {
+      const loading = document.getElementById('loadingArtistas');
+      const lista = document.getElementById('listaArtistas');
+      
+      loading.classList.remove('d-none');
+      lista.innerHTML = '';
+      
+      try {
+        const resposta = await fetch(API_URL + '?acao=listar_artistas');
+        const dados = await resposta.json();
+        
+        loading.classList.add('d-none');
+        
+        if (!dados.success) {
+          lista.innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bi bi-exclamation-triangle"></i> Erro: ${dados.message}
+            </div>
+          `;
+          return;
+        }
+        
+        if (!dados.artistas || dados.artistas.length === 0) {
+          lista.innerHTML = `
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-people display-6"></i>
+              <p class="mt-2">Nenhum artista cadastrado</p>
+              <p class="small">Use a aba "Cadastrar Artista" para adicionar</p>
+            </div>
+          `;
+          return;
+        }
+        
+        let html = '<div class="table-responsive"><table class="table table-dark table-hover"><thead><tr>';
+        html += '<th>ID</th><th>Nome</th><th>E-mail</th><th>Status</th></tr></thead><tbody>';
+        
+        dados.artistas.forEach(artista => {
+          const statusClass = artista.status === 'ATIVO' ? 'text-success' : 'text-warning';
+          html += `
+            <tr>
+              <td><span class="badge bg-primary">${artista.id}</span></td>
+              <td>${artista.nome}</td>
+              <td>${artista.email}</td>
+              <td><span class="${statusClass}"><i class="bi bi-circle-fill"></i> ${artista.status}</span></td>
+            </tr>
+          `;
+        });
+        
+        html += '</tbody></table></div>';
+        html += `<div class="text-muted text-end small">Total: ${dados.artistas.length} artistas</div>`;
+        
+        lista.innerHTML = html;
+        
+      } catch (erro) {
+        loading.classList.add('d-none');
+        lista.innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Erro ao carregar artistas: ${erro.message}
+          </div>
+        `;
+      }
+    }
+
+    // Carregar artistas quando abrir a tab
+    document.getElementById('lista-tab').addEventListener('click', function() {
+      setTimeout(carregarArtistas, 300);
+    });
   </script>
 </body>
 </html>
