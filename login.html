@@ -3,929 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Selo MIV</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Login - SELO MIV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* ====== VARIÁVEIS ====== */
         :root {
             --primary: #00c6ff;
-            --primary-dark: #0072ff;
-            --secondary: #2c5364;
+            --secondary: #0072ff;
             --dark: #0f2027;
-            --light: #ffffff;
-            --success: #00ff88;
-            --danger: #ff4757;
-            --warning: #ffaa00;
-            --trust-blue: #1a73e8;
         }
-        
-        /* ====== RESET ====== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--dark), var(--secondary));
-            color: var(--light);
+            background: linear-gradient(135deg, var(--dark), #203a43, #2c5364);
             min-height: 100vh;
             display: flex;
             align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
-        
-        .login-container {
-            width: 100%;
-            max-width: 500px;
-            animation: fadeIn 0.8s ease;
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+            max-width: 400px;
+            margin: 0 auto;
         }
-        
-        /* ====== HEADER ====== */
         .login-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        
-        .logo {
-            font-size: 48px;
-            font-weight: 800;
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-        }
-        
-        .security-badge {
-            display: inline-block;
-            background: rgba(0, 255, 136, 0.1);
-            color: var(--success);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            border: 1px solid var(--success);
-            margin-top: 10px;
-        }
-        
-        /* ====== TABS ====== */
-        .auth-tabs {
-            display: flex;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 5px;
-            margin-bottom: 30px;
-        }
-        
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .tab-btn.active {
-            background: var(--primary);
-            color: var(--dark);
-        }
-        
-        /* ====== FORMS ====== */
-        .auth-form {
-            display: none;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .auth-form.active {
-            display: block;
-            animation: slideUp 0.5s ease;
-        }
-        
-        .form-title {
-            font-size: 24px;
-            margin-bottom: 30px;
-            text-align: center;
-            color: var(--light);
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-label i {
-            color: var(--primary);
-            width: 20px;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
             color: white;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(0, 198, 255, 0.1);
-        }
-        
-        .password-wrapper {
-            position: relative;
-        }
-        
-        .toggle-password {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        /* ====== BOTÕES ====== */
-        .btn-primary {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4);
-        }
-        
-        .btn-google {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .btn-google:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        
-        /* ====== PROOF SOCIAL ====== */
-        .social-proof {
-            background: rgba(0, 198, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
-            border: 1px solid rgba(0, 198, 255, 0.1);
-        }
-        
-        .proof-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .proof-item:last-child {
-            margin-bottom: 0;
-        }
-        
-        .proof-icon {
-            font-size: 24px;
-            background: rgba(0, 255, 136, 0.1);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--success);
-        }
-        
-        .proof-text {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        
-        .proof-text strong {
-            color: var(--light);
-            font-size: 16px;
-        }
-        
-        /* ====== LINKS ====== */
-        .auth-links {
+            padding: 30px;
             text-align: center;
-            margin-top: 25px;
-            color: rgba(255, 255, 255, 0.6);
         }
-        
-        .auth-link {
+        .login-body {
+            padding: 30px;
+        }
+        .btn-login {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border: none;
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        .btn-login:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,114,255,0.3);
+        }
+        .back-home {
             color: var(--primary);
             text-decoration: none;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 20px;
         }
-        
-        .auth-link:hover {
-            text-decoration: underline;
-        }
-        
-        /* ====== STATUS ====== */
-        .status-message {
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-            display: none;
-        }
-        
-        .status-success {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--success);
-            display: block;
-        }
-        
-        .status-error {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid var(--danger);
-            display: block;
-        }
-        
-        /* ====== ANIMAÇÕES ====== */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* ====== RESPONSIVO ====== */
-        @media (max-width: 768px) {
-            .auth-form {
-                padding: 25px;
-            }
-            
-            .form-title {
-                font-size: 20px;
-            }
-            
-            .btn-primary {
-                padding: 15px;
-            }
+        .back-home:hover {
+            color: var(--secondary);
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <!-- HEADER -->
-        <div class="login-header">
-            <div class="logo">SELO MIV</div>
-            <div class="security-badge">
-                <i class="fas fa-shield-alt"></i> Sistema Seguro & Verificado
-            </div>
-            <p style="margin-top: 20px; color: rgba(255,255,255,0.7);">
-                Plataforma de investimento em royalties musicais
-            </p>
-        </div>
-        
-        <!-- PROOF SOCIAL -->
-        <div class="social-proof">
-            <div class="proof-item">
-                <div class="proof-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="proof-text">
-                    <strong>247 artistas</strong> já levantaram
-                    <strong>R$ 1.2M</strong> em investimentos
-                </div>
-            </div>
-            <div class="proof-item">
-                <div class="proof-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="proof-text">
-                    <strong>+42%</strong> valorização média
-                    em <strong>3 meses</strong>
-                </div>
-            </div>
-            <div class="proof-item">
-                <div class="proof-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <div class="proof-text">
-                    Artista do Mês: <strong>R$ 15.780</strong>
-                    em royalties distribuídos
-                </div>
-            </div>
-        </div>
-        
-        <!-- TABS -->
-        <div class="auth-tabs">
-            <button class="tab-btn active" onclick="showTab('login')">
-                <i class="fas fa-sign-in-alt"></i> Entrar
-            </button>
-            <button class="tab-btn" onclick="showTab('artist')">
-                <i class="fas fa-microphone"></i> Artista
-            </button>
-            <button class="tab-btn" onclick="showTab('investor')">
-                <i class="fas fa-chart-line"></i> Investidor
-            </button>
-        </div>
-        
-        <!-- FORMULÁRIO DE LOGIN -->
-        <div id="login-form" class="auth-form active">
-            <h2 class="form-title">
-                <i class="fas fa-lock"></i> Acesse sua conta
-            </h2>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-envelope"></i> E-mail
-                </label>
-                <input type="email" id="loginEmail" class="form-input" 
-                       placeholder="seu@email.com" required>
+    <div class="container">
+        <div class="login-card">
+            <div class="login-header">
+                <a href="index.html" class="back-home position-absolute start-3 top-3">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div class="display-1 mb-3">🔐</div>
+                <h2>Acessar Conta</h2>
+                <p class="mb-0">Entre no SELO MIV</p>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-key"></i> Senha
-                </label>
-                <div class="password-wrapper">
-                    <input type="password" id="loginPassword" class="form-input" 
-                           placeholder="Sua senha segura" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('loginPassword')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div style="text-align: right; margin-bottom: 20px;">
-                <a href="#forgot" class="auth-link">Esqueci minha senha</a>
-            </div>
-            
-            <button class="btn-primary" onclick="loginUser()">
-                <i class="fas fa-sign-in-alt"></i> Entrar na Plataforma
-            </button>
-            
-            <div class="auth-links">
-                Novo por aqui? 
-                <a href="#" class="auth-link" onclick="showTab('artist')">Cadastre-se como Artista</a> ou 
-                <a href="#" class="auth-link" onclick="showTab('investor')">como Investidor</a>
-            </div>
-            
-            <div id="login-status" class="status-message"></div>
-        </div>
-        
-        <!-- FORMULÁRIO ARTISTA -->
-        <div id="artist-form" class="auth-form">
-            <h2 class="form-title">
-                <i class="fas fa-microphone"></i> Cadastro de Artista
-            </h2>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-user"></i> Nome Artístico
-                </label>
-                <input type="text" id="artistName" class="form-input" 
-                       placeholder="Como você quer ser conhecido" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-id-card"></i> CPF/CNPJ
-                </label>
-                <input type="text" id="artistDoc" class="form-input" 
-                       placeholder="000.000.000-00" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-envelope"></i> E-mail Profissional
-                </label>
-                <input type="email" id="artistEmail" class="form-input" 
-                       placeholder="seu@email.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-phone"></i> WhatsApp
-                </label>
-                <input type="tel" id="artistWhatsapp" class="form-input" 
-                       placeholder="(11) 99999-9999">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-key"></i> Senha Segura
-                </label>
-                <div class="password-wrapper">
-                    <input type="password" id="artistPassword" class="form-input" 
-                           placeholder="Mínimo 8 caracteres" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('artistPassword')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                <div style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
-                    Use letras, números e símbolos para maior segurança
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label style="display: flex; align-items: start; gap: 10px; color: rgba(255,255,255,0.8);">
-                    <input type="checkbox" id="artistTerms" required style="margin-top: 5px;">
-                    <span>
-                        Aceito os <a href="#" class="auth-link">Termos de Uso</a> e 
-                        <a href="#" class="auth-link">Política de Privacidade</a>. 
-                        Concordo com a tokenização de até 49% dos direitos das minhas músicas.
-                    </span>
-                </label>
-            </div>
-            
-            <button class="btn-primary" onclick="registerArtist()">
-                <i class="fas fa-user-plus"></i> Criar Conta Artística
-            </button>
-            
-            <div class="auth-links">
-                Já tem conta? 
-                <a href="#" class="auth-link" onclick="showTab('login')">Faça login aqui</a>
-            </div>
-            
-            <div id="artist-status" class="status-message"></div>
-        </div>
-        
-        <!-- FORMULÁRIO INVESTIDOR -->
-        <div id="investor-form" class="auth-form">
-            <h2 class="form-title">
-                <i class="fas fa-chart-line"></i> Cadastro de Investidor
-            </h2>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-user"></i> Nome Completo
-                </label>
-                <input type="text" id="investorName" class="form-input" 
-                       placeholder="Nome completo para contratos" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-id-card"></i> CPF
-                </label>
-                <input type="text" id="investorCpf" class="form-input" 
-                       placeholder="000.000.000-00" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-envelope"></i> E-mail
-                </label>
-                <input type="email" id="investorEmail" class="form-input" 
-                       placeholder="seu@email.com" required>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-key"></i> Senha Segura
-                </label>
-                <div class="password-wrapper">
-                    <input type="password" id="investorPassword" class="form-input" 
-                           placeholder="Crie uma senha forte" required>
-                    <button type="button" class="toggle-password" onclick="togglePassword('investorPassword')">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- PERFIL DE RISCO -->
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-balance-scale"></i> Perfil de Investidor
-                </label>
-                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="color: rgba(255,255,255,0.7);">Conservador</span>
-                        <span style="color: rgba(255,255,255,0.7);">Arrojado</span>
+            <div class="login-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label">E-mail ou ID do Artista</label>
+                        <input type="text" class="form-control" id="loginUsuario" required>
                     </div>
-                    <input type="range" id="riskProfile" min="1" max="5" value="3" 
-                           style="width: 100%; height: 8px; border-radius: 4px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 5px;">
-                        <span>Baixo risco</span>
-                        <span>Alto risco</span>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="loginSenha" required>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="lembrar">
+                        <label class="form-check-label" for="lembrar">Lembrar minha senha</label>
+                    </div>
+                    
+                    <button type="button" class="btn-login mb-3" onclick="fazerLogin()">
+                        <i class="bi bi-box-arrow-in-right"></i> Entrar
+                    </button>
+                    
+                    <div class="text-center">
+                        <a href="#" class="text-primary small">Esqueci minha senha</a>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="text-center">
+                        <p class="text-muted">Não tem uma conta?</p>
+                        <a href="index.html#cadastro" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-person-plus"></i> Criar Conta Gratuita
+                        </a>
+                    </div>
+                </form>
+                
+                <!-- API Status -->
+                <div class="alert alert-info mt-4">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <div>
+                            <small><strong>API SELO MIV ONLINE</strong><br>
+                            Sistema funcionando corretamente</small>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label style="display: flex; align-items: start; gap: 10px; color: rgba(255,255,255,0.8);">
-                    <input type="checkbox" id="investorTerms" required style="margin-top: 5px;">
-                    <span>
-                        Declaro que estou ciente dos riscos de investimento em royalties musicais.
-                        Li e aceito os <a href="#" class="auth-link">Termos de Investimento</a>.
-                    </span>
-                </label>
-            </div>
-            
-            <button class="btn-primary" onclick="registerInvestor()">
-                <i class="fas fa-wallet"></i> Abrir Conta de Investimento
-            </button>
-            
-            <div style="text-align: center; margin-top: 20px;">
-                <button class="btn-primary btn-google" onclick="loginWithGoogle()">
-                    <i class="fab fa-google"></i> Cadastrar com Google
-                </button>
-            </div>
-            
-            <div class="auth-links">
-                Já investe conosco? 
-                <a href="#" class="auth-link" onclick="showTab('login')">Acesse sua conta</a>
-            </div>
-            
-            <div id="investor-status" class="status-message"></div>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // CONFIGURAÇÃO
-        // ============================================
-        const API_URL = "https://script.google.com/macros/s/AKfycbzNkO8mGuBtwaVkSvRdJY1aUR_dPY7xa3CohawvKh-_U9bu12jguHqQVfdla9OoPh0/exec";
-        
-        // ============================================
-        // FUNÇÕES DE INTERFACE
-        // ============================================
-        
-        function showTab(tabName) {
-            // Remove active de todas as tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+        // Simulação de login (substituir por API real)
+        function fazerLogin() {
+            const usuario = document.getElementById('loginUsuario').value;
+            const senha = document.getElementById('loginSenha').value;
             
-            // Remove active de todos os forms
-            document.querySelectorAll('.auth-form').forEach(form => {
-                form.classList.remove('active');
-            });
-            
-            // Ativa a tab clicada
-            event.target.classList.add('active');
-            
-            // Mostra o form correspondente
-            document.getElementById(`${tabName}-form`).classList.add('active');
-        }
-        
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const icon = event.currentTarget.querySelector('i');
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                input.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        }
-        
-        // ============================================
-        // FUNÇÕES DE AUTENTICAÇÃO
-        // ============================================
-        
-        async function loginUser() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-            
-            if (!email || !password) {
-                showStatus('login-status', 'Preencha e-mail e senha.', 'error');
+            if (!usuario || !senha) {
+                alert('Preencha todos os campos');
                 return;
             }
             
-            showStatus('login-status', '<i class="fas fa-spinner fa-spin"></i> Verificando acesso...', 'processing');
+            // Criar overlay de loading
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            `;
+            overlay.innerHTML = `
+                <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+            `;
+            document.body.appendChild(overlay);
             
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        acao: 'login',
-                        email: email,
-                        senha: password
-                    })
-                });
+            // Simular delay de login
+            setTimeout(() => {
+                document.body.removeChild(overlay);
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus('login-status', 
-                        `✅ Login realizado! Redirecionando...`, 
-                        'success');
-                    
-                    // Salvar token no localStorage
-                    localStorage.setItem('selomiv_token', result.token || 'demo_token');
-                    localStorage.setItem('selomiv_user', JSON.stringify(result.user));
-                    
-                    // Redirecionar após 2 segundos
-                    setTimeout(() => {
-                        if (result.user.tipo === 'artista') {
-                            window.location.href = 'artista-dashboard.html';
-                        } else {
-                            window.location.href = 'investidor-dashboard.html';
-                        }
-                    }, 2000);
-                    
+                // Verificar se é ID de artista (começa com ART)
+                if (usuario.toUpperCase().startsWith('ART')) {
+                    // Redirecionar para dashboard do artista
+                    localStorage.setItem('userType', 'artista');
+                    localStorage.setItem('userId', usuario);
+                    window.location.href = 'artista-dashboard.html';
                 } else {
-                    showStatus('login-status', 
-                        `❌ ${result.message || 'Credenciais inválidas'}`, 
-                        'error');
-                }
-                
-            } catch (error) {
-                // Modo demonstração
-                showStatus('login-status', 
-                    `⚠️ Modo demonstração ativado. Redirecionando...`, 
-                    'success');
-                
-                setTimeout(() => {
-                    // Simular login bem-sucedido
-                    localStorage.setItem('selomiv_token', 'demo_token_' + Date.now());
-                    localStorage.setItem('selomiv_user', JSON.stringify({
-                        nome: email.split('@')[0],
-                        tipo: 'investidor',
-                        email: email
-                    }));
-                    
+                    // Redirecionar para dashboard do investidor
+                    localStorage.setItem('userType', 'investidor');
                     window.location.href = 'investidor-dashboard.html';
-                }, 1500);
-            }
-        }
-        
-        async function registerArtist() {
-            const nome = document.getElementById('artistName').value.trim();
-            const documento = document.getElementById('artistDoc').value.trim();
-            const email = document.getElementById('artistEmail').value.trim();
-            const whatsapp = document.getElementById('artistWhatsapp').value.trim();
-            const senha = document.getElementById('artistPassword').value;
-            const termos = document.getElementById('artistTerms').checked;
-            
-            if (!nome || !documento || !email || !senha) {
-                showStatus('artist-status', 'Preencha todos os campos obrigatórios.', 'error');
-                return;
-            }
-            
-            if (!termos) {
-                showStatus('artist-status', 'Aceite os termos para continuar.', 'error');
-                return;
-            }
-            
-            if (senha.length < 8) {
-                showStatus('artist-status', 'A senha deve ter no mínimo 8 caracteres.', 'error');
-                return;
-            }
-            
-            showStatus('artist-status', '<i class="fas fa-spinner fa-spin"></i> Criando conta artística...', 'processing');
-            
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        acao: 'cadastrar_artista',
-                        nome: nome,
-                        documento: documento,
-                        email: email,
-                        whatsapp: whatsapp,
-                        senha: senha
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showStatus('artist-status', 
-                        `✅ Conta criada com sucesso!<br><br>
-                        <strong>ID do Artista:</strong> ${result.artistaId}<br>
-                        <strong>Verifique seu e-mail</strong> para ativar a conta.`, 
-                        'success');
-                    
-                    // Limpar formulário
-                    document.getElementById('artistName').value = '';
-                    document.getElementById('artistDoc').value = '';
-                    document.getElementById('artistEmail').value = '';
-                    document.getElementById('artistWhatsapp').value = '';
-                    document.getElementById('artistPassword').value = '';
-                    
-                    // Auto-redirecionar para login após 5 segundos
-                    setTimeout(() => {
-                        showTab('login');
-                    }, 5000);
-                    
-                } else {
-                    showStatus('artist-status', 
-                        `❌ ${result.message || 'Erro ao criar conta'}`, 
-                        'error');
                 }
-                
-            } catch (error) {
-                // Modo demonstração
-                const artistaId = 'ART' + Date.now().toString().slice(-8);
-                
-                showStatus('artist-status', 
-                    `✅ Conta artística criada (modo demonstração)<br><br>
-                    <strong>ID do Artista:</strong> ${artistaId}<br>
-                    <strong>Nome:</strong> ${nome}<br>
-                    <strong>E-mail:</strong> ${email}<br><br>
-                    <em>Em produção, você receberia um e-mail de confirmação.</em>`, 
-                    'success');
-                
-                // Limpar formulário
-                document.getElementById('artistName').value = '';
-                document.getElementById('artistDoc').value = '';
-                document.getElementById('artistEmail').value = '';
-                document.getElementById('artistWhatsapp').value = '';
-                document.getElementById('artistPassword').value = '';
-            }
-        }
-        
-        async function registerInvestor() {
-            const nome = document.getElementById('investorName').value.trim();
-            const cpf = document.getElementById('investorCpf').value.trim();
-            const email = document.getElementById('investorEmail').value.trim();
-            const senha = document.getElementById('investorPassword').value;
-            const termos = document.getElementById('investorTerms').checked;
-            const perfilRisco = document.getElementById('riskProfile').value;
-            
-            if (!nome || !cpf || !email || !senha) {
-                showStatus('investor-status', 'Preencha todos os campos obrigatórios.', 'error');
-                return;
-            }
-            
-            if (!termos) {
-                showStatus('investor-status', 'Aceite os termos de investimento.', 'error');
-                return;
-            }
-            
-            if (senha.length < 8) {
-                showStatus('investor-status', 'A senha deve ter no mínimo 8 caracteres.', 'error');
-                return;
-            }
-            
-            showStatus('investor-status', '<i class="fas fa-spinner fa-spin"></i> Criando conta de investimento...', 'processing');
-            
-            // Modo demonstração (sem API)
-            setTimeout(() => {
-                const investorId = 'INV' + Date.now().toString().slice(-8);
-                
-                showStatus('investor-status', 
-                    `✅ Conta de investimento criada!<br><br>
-                    <strong>ID do Investidor:</strong> ${investorId}<br>
-                    <strong>Nome:</strong> ${nome}<br>
-                    <strong>Saldo inicial:</strong> R$ 1.000,00<br>
-                    <strong>Perfil:</strong> ${getPerfilTexto(perfilRisco)}<br><br>
-                    <button onclick="loginAfterRegister('${email}')" style="
-                        background: var(--success);
-                        color: white;
-                        border: none;
-                        padding: 12px 24px;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-weight: bold;
-                        margin-top: 10px;
-                    ">
-                        <i class="fas fa-sign-in-alt"></i> Acessar Minha Conta
-                    </button>`, 
-                    'success');
-                
-                // Salvar dados simulados
-                const userData = {
-                    id: investorId,
-                    nome: nome,
-                    email: email,
-                    tipo: 'investidor',
-                    saldo: 1000.00,
-                    perfilRisco: perfilRisco,
-                    dataCadastro: new Date().toISOString()
-                };
-                
-                localStorage.setItem('selomiv_demo_investor', JSON.stringify(userData));
-                
-            }, 2000);
-        }
-        
-        function getPerfilTexto(valor) {
-            const perfis = {
-                1: 'Conservador',
-                2: 'Moderado-Conservador', 
-                3: 'Moderado',
-                4: 'Arrojado-Moderado',
-                5: 'Arrojado'
-            };
-            return perfis[valor] || 'Moderado';
-        }
-        
-        function loginAfterRegister(email) {
-            localStorage.setItem('selomiv_token', 'demo_token_' + Date.now());
-            localStorage.setItem('selomiv_user', JSON.stringify({
-                nome: document.getElementById('investorName').value.trim(),
-                tipo: 'investidor',
-                email: email,
-                saldo: 1000.00
-            }));
-            
-            window.location.href = 'investidor-dashboard.html';
-        }
-        
-        function loginWithGoogle() {
-            showStatus('investor-status', '<i class="fas fa-spinner fa-spin"></i> Conectando com Google...', 'processing');
-            
-            // Simulação de login com Google
-            setTimeout(() => {
-                showStatus('investor-status', 
-                    `⚠️ Login com Google em desenvolvimento.<br>
-                    Use o cadastro normal por enquanto.`, 
-                    'error');
             }, 1500);
         }
         
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        
-        function showStatus(elementId, mensagem, tipo) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = mensagem;
-            element.className = 'status-message';
-            
-            switch(tipo) {
-                case 'success':
-                    element.classList.add('status-success');
-                    break;
-                case 'error':
-                    element.classList.add('status-error');
-                    break;
-                case 'processing':
-                    element.style.color = 'var(--warning)';
-                    break;
-            }
-            
-            // Auto-remover após 10 segundos (exceto processing)
-            if (tipo !== 'processing') {
-                setTimeout(() => {
-                    element.style.display = 'none';
-                }, 10000);
-            }
-        }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔐 Sistema de autenticação Selo MIV carregado');
-            
-            // Verificar se já está logado
-            const token = localStorage.getItem('selomiv_token');
-            if (token) {
-                // Redirecionar para dashboard apropriado
-                const user = JSON.parse(localStorage.getItem('selomiv_user') || '{}');
-                if (user.tipo === 'artista') {
-                    window.location.href = 'artista-dashboard.html';
-                } else {
-                    window.location.href = 'investidor-dashboard.html';
-                }
+        // Permitir login com Enter
+        document.getElementById('loginForm').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                fazerLogin();
             }
         });
     </script>
