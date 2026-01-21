@@ -3,1209 +3,624 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selo MIV Beta - Sistema de Royalties</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SELO MIV - Plataforma de Royalties Musicais</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* ====== VARIÁVEIS ====== */
         :root {
             --primary: #00c6ff;
-            --primary-dark: #0072ff;
-            --secondary: #2c5364;
+            --secondary: #0072ff;
             --dark: #0f2027;
-            --light: #ffffff;
-            --success: #00ff88;
-            --danger: #ff4757;
-            --warning: #ffaa00;
+            --success: #28a745;
         }
-        
-        /* ====== RESET ====== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--dark), var(--secondary));
-            color: var(--light);
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        /* ====== HEADER ====== */
-        .header {
-            background: rgba(17, 17, 17, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 20px 0;
-            position: fixed;
-            width: 100%;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .logo-icon {
-            font-size: 32px;
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .logo-text {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .beta-badge {
-            background: var(--warning);
-            color: var(--dark);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--light);
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        
-        .nav-btn:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-        
-        /* ====== HERO SECTION ====== */
-        .hero {
-            padding: 180px 0 100px;
-            text-align: center;
+        .hero-section {
+            background: linear-gradient(135deg, var(--dark), #203a43, #2c5364);
+            color: white;
+            padding: 100px 0;
             position: relative;
             overflow: hidden;
         }
-        
-        .hero::before {
+        .hero-section::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 114, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(0, 198, 255, 0.1) 0%, transparent 50%);
-            z-index: -1;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%2300c6ff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
         }
-        
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            line-height: 1.2;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 700px;
-            margin: 0 auto 40px;
-        }
-        
-        /* ====== BUTTONS ====== */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 16px 32px;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            color: white;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
+        .feature-card {
             border: none;
-            cursor: pointer;
-            margin: 10px;
-            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4);
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #00b09b, #96c93d);
-        }
-        
-        .btn-large {
-            padding: 20px 40px;
-            font-size: 1.2rem;
-        }
-        
-        /* ====== CARDS ====== */
-        .section {
-            padding: 80px 0;
-        }
-        
-        .section-title {
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 50px;
-            color: var(--light);
-        }
-        
-        .section-title span {
-            color: var(--primary);
-        }
-        
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 35px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--success));
-        }
-        
-        .card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: var(--primary);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        }
-        
-        .card-icon {
-            font-size: 48px;
-            margin-bottom: 25px;
-            background: linear-gradient(45deg, var(--primary), var(--success));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-            color: var(--light);
-        }
-        
-        .card p {
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.7;
-        }
-        
-        /* ====== FORMS ====== */
-        .form-section {
-            padding: 100px 0;
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        .form-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        .form-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-        
-        .form-title {
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            color: var(--light);
-            text-align: center;
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .form-label i {
-            color: var(--primary);
-            width: 20px;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 16px 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.08);
-            box-shadow: 0 0 0 3px rgba(0, 198, 255, 0.1);
-        }
-        
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.4);
-        }
-        
-        /* ====== STATUS MESSAGES ====== */
-        .status {
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 25px;
-            display: none;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .status-success {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--success);
-            display: block;
-        }
-        
-        .status-error {
-            background: rgba(255, 71, 87, 0.1);
-            border: 1px solid var(--danger);
-            display: block;
-        }
-        
-        .status-processing {
-            background: rgba(255, 170, 0, 0.1);
-            border: 1px solid var(--warning);
-            display: block;
-        }
-        
-        /* ====== MARKET SECTION ====== */
-        .market-section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 40px;
-        }
-        
-        .market-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-        
-        .market-filters {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            color: var(--light);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .filter-btn.active {
-            background: var(--primary);
-            color: var(--dark);
-            font-weight: 600;
-        }
-        
-        .music-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .music-item {
-            background: rgba(255, 255, 255, 0.03);
             border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
             transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,198,255,0.1);
         }
-        
-        .music-item:hover {
-            background: rgba(0, 198, 255, 0.05);
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,198,255,0.15);
             border-color: var(--primary);
-            transform: translateX(10px);
         }
-        
-        .music-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .music-title {
-            font-size: 1.3rem;
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
             font-weight: 600;
-            color: var(--light);
+            transition: all 0.3s;
         }
-        
-        .music-artist {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
+        .btn-gradient:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,114,255,0.3);
+            color: white;
         }
-        
-        .music-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+        .api-status {
+            background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
         }
-        
-        .stat-item {
-            text-align: center;
+        .user-type-card {
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
         }
-        
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary);
+        .user-type-card:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
         }
-        
-        .stat-label {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-top: 5px;
+        .user-type-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(0,198,255,0.05), rgba(0,114,255,0.05));
         }
-        
-        /* ====== FOOTER ====== */
-        .footer {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 60px 0 30px;
-            margin-top: 80px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-        .footer-section h3 {
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 10px;
-        }
-        
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .footer-links a:hover {
-            color: var(--primary);
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-        }
-        
-        /* ====== ANIMATIONS ====== */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        /* ====== RESPONSIVE ====== */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
-            }
-            
-            .nav-links {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .music-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .btn {
-                display: block;
-                margin: 10px 0;
-            }
-            
-            .form-card {
-                padding: 25px;
-            }
+            0% { box-shadow: 0 0 0 0 rgba(0,198,255,0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0,198,255,0); }
+            100% { box-shadow: 0 0 0 0 rgba(0,198,255,0); }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <header class="header">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: var(--dark);">
         <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <i class="fas fa-file-contract logo-icon"></i>
-                    <span class="logo-text">SELO MIV</span>
-                    <span class="beta-badge">BETA</span>
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <div class="bg-primary rounded-circle p-2 me-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" class="bi bi-music-note-beamed" viewBox="0 0 16 16">
+                        <path d="M6 13c0 1.105-1.12 2-2.5 2S1 14.105 1 13s1.12-2 2.5-2 2.5.895 2.5 2m9-2c0 1.105-1.12 2-2.5 2s-2.5-.895-2.5-2 1.12-2 2.5-2 2.5.895 2.5 2"/>
+                        <path fill-rule="evenodd" d="M14 11V2h1v9zM6 3v10H5V3z"/>
+                        <path d="M5 2.905a1 1 0 0 1 .9-.995l8-.8a1 1 0 0 1 1.1.995V3L5 4z"/>
+                    </svg>
                 </div>
-                <nav class="nav-links">
-    <a href="#inicio" class="nav-btn">🏠 Início</a>
-    <a href="#como-funciona" class="nav-btn">⚙️ Como Funciona</a>
-    <a href="login.html" class="nav-btn">🔐 Login/Cadastro</a> <a href="https://isrcselomivbeta.github.io/royalties-demo/login.html">
-</nav>
-            </div>
-        </div>
-    </header>
-
-    <!-- HERO SECTION -->
-    <section id="inicio" class="hero">
-        <div class="container">
-            <h1>Transforme Música em Investimento</h1>
-            <p class="hero-subtitle">
-                Compre ações de músicas, receba royalties automáticos e faça parte da revolução 
-                do mercado musical. Cada stream conta, cada ação vale.
-            </p>
-            <div>
-                <button onclick="abrirSecao('artista')" class="btn btn-large">
-                    <i class="fas fa-microphone"></i> Cadastrar como Artista
-                </button>
-                <button onclick="abrirSecao('investidor')" class="btn btn-large btn-success">
-                    <i class="fas fa-chart-line"></i> Começar a Investir
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- COMO FUNCIONA -->
-    <section id="como-funciona" class="section">
-        <div class="container">
-            <h2 class="section-title">Como <span>Funciona</span> o Sistema</h2>
-            <div class="cards-grid">
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                    <h3>1. Artista Cadastra</h3>
-                    <p>Artista registra a música no sistema. Define quantos % dos direitos serão tokenizados (até 49%).</p>
+                <div>
+                    <span class="fw-bold fs-4" style="color: var(--primary)">SELO</span>
+                    <span class="fw-bold fs-4">MIV</span>
                 </div>
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                    <h3>2. Música é Tokenizada</h3>
-                    <p>A música vira 100 ações. Artista mantém 51%, 49% são disponibilizadas para venda.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                    </div>
-                    <h3>3. Investidor Compra</h3>
-                    <p>Investidores compram ações. Cada ação dá direito a % dos royalties futuros.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-headphones"></i>
-                    </div>
-                    <h3>4. Música Toca</h3>
-                    <p>Cada play (30s) gera royalties. Spotify, YouTube, Deezer, Apple Music, etc.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <h3>5. Sistema Calcula</h3>
-                    <p>Royalties são calculados automaticamente: R$0,003 por stream em média.</p>
-                </div>
-                <div class="card">
-                    <div class="card-icon">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <h3>6. Todos Recebem</h3>
-                    <p>Distribuição automática: 51% artista, 49% investidores, 5% comissão selo.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEÇÃO ARTISTA -->
-    <section id="artista" class="form-section" style="display: none;">
-        <div class="container">
-            <div class="form-container">
-                <div class="form-card">
-                    <h2 class="form-title">
-                        <i class="fas fa-microphone"></i> Cadastro de Artista
-                    </h2>
-                    
-                    <form id="formArtista">
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-user"></i> Nome Artístico / Banda
-                            </label>
-                            <input type="text" class="form-control" id="artistaNome" 
-                                   placeholder="Seu nome ou nome da banda" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-id-card"></i> CPF ou CNPJ
-                            </label>
-                            <input type="text" class="form-control" id="artistaDocumento" 
-                                   placeholder="000.000.000-00 ou 00.000.000/0000-00" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-envelope"></i> E-mail Profissional
-                            </label>
-                            <input type="email" class="form-control" id="artistaEmail" 
-                                   placeholder="seu@email.com" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-phone"></i> WhatsApp
-                            </label>
-                            <input type="text" class="form-control" id="artistaWhatsapp" 
-                                   placeholder="(11) 99999-9999">
-                        </div>
-                        
-                        <button type="button" onclick="cadastrarArtista()" class="btn" style="width: 100%;">
-                            <i class="fas fa-check-circle"></i> Cadastrar como Artista
-                        </button>
-                    </form>
-                    
-                    <div id="statusArtista" class="status"></div>
-                    
-                    <div style="margin-top: 30px; padding: 20px; background: rgba(0,198,255,0.05); border-radius: 10px;">
-                        <h4 style="color: var(--primary); margin-bottom: 10px;">
-                            <i class="fas fa-info-circle"></i> Como funciona para artistas:
-                        </h4>
-                        <ul style="color: rgba(255,255,255,0.7); padding-left: 20px;">
-                            <li>Você mantém 51% dos direitos da música</li>
-                            <li>Pode tokenizar até 49% para vender como ações</li>
-                            <li>Recebe royalties automáticos de streams</li>
-                            <li>Acompanha tudo em tempo real</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SEÇÃO INVESTIDOR -->
-    <section id="investidor" class="form-section" style="display: none;">
-        <div class="container">
-            <div class="form-container">
-                <div class="form-card">
-                    <h2 class="form-title">
-                        <i class="fas fa-chart-line"></i> Área do Investidor
-                    </h2>
-                    
-                    <!-- Cadastro Rápido -->
-                    <div style="margin-bottom: 40px;">
-                        <h3 style="color: var(--light); margin-bottom: 20px;">
-                            <i class="fas fa-user-plus"></i> Cadastro Rápido
-                        </h3>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-user"></i> Seu Nome Completo
-                            </label>
-                            <input type="text" class="form-control" id="investidorNome" 
-                                   placeholder="Nome completo">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-id-card"></i> CPF
-                            </label>
-                            <input type="text" class="form-control" id="investidorCpf" 
-                                   placeholder="000.000.000-00">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">
-                                <i class="fas fa-envelope"></i> E-mail
-                            </label>
-                            <input type="email" class="form-control" id="investidorEmail" 
-                                   placeholder="investidor@email.com">
-                        </div>
-                        
-                        <button onclick="cadastrarInvestidor()" class="btn btn-success" style="width: 100%;">
-                            <i class="fas fa-user-check"></i> Criar Conta de Investidor
-                        </button>
-                    </div>
-                    
-                    <div id="statusInvestidor" class="status"></div>
-                    
-                    <!-- Mercado de Ações -->
-                    <div class="market-section">
-                        <div class="market-header">
-                            <h3 style="color: var(--light); margin: 0;">
-                                <i class="fas fa-store"></i> Mercado de Ações
-                            </h3>
-                            <div class="market-filters">
-                                <button class="filter-btn active" onclick="filtrarMusicas('todas')">Todas</button>
-                                <button class="filter-btn" onclick="filtrarMusicas('pop')">POP</button>
-                                <button class="filter-btn" onclick="filtrarMusicas('funk')">FUNK</button>
-                                <button class="filter-btn" onclick="filtrarMusicas('sertanejo')">Sertanejo</button>
-                            </div>
-                        </div>
-                        
-                        <div class="music-list" id="listaMusicas">
-                            <!-- Músicas serão carregadas aqui -->
-                            <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
-                                <i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom: 20px;"></i>
-                                <p>Carregando músicas disponíveis...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Selo MIV</h3>
-                    <p style="color: rgba(255,255,255,0.7);">
-                        Sistema de tokenização de músicas e distribuição de royalties.
-                        Transformando o mercado musical.
-                    </p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Links Rápidos</h3>
-                    <ul class="footer-links">
-                        <li><a href="#inicio">Início</a></li>
-                        <li><a href="#como-funciona">Como Funciona</a></li>
-                        <li><a href="#artista">Para Artistas</a></li>
-                        <li><a href="#investidor">Para Investidores</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contato</h3>
-                    <ul class="footer-links">
-                        <li><i class="fas fa-envelope"></i> contato@selomiv.com</li>
-                        <li><i class="fas fa-phone"></i> (11) 99999-9999</li>
-                        <li><i class="fab fa-whatsapp"></i> WhatsApp</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul class="footer-links">
-                        <li><a href="#">Termos de Uso</a></li>
-                        <li><a href="#">Política de Privacidade</a></li>
-                        <li><a href="#">Contrato de Investimento</a></li>
-                    </ul>
-                </div>
-            </div>
+            </a>
             
-            <div class="copyright">
-                <p>&copy; 2024 Selo MIV Beta. Todos os direitos reservados.</p>
-                <p style="margin-top: 10px; font-size: 0.8rem;">
-                    Este é um sistema em fase beta. Valores e funcionalidades podem ser alterados.
-                </p>
+            <div class="d-flex align-items-center">
+                <a href="login.html" class="btn btn-outline-light me-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </a>
+                <a href="#cadastro" class="btn btn-gradient pulse-animation">
+                    <i class="bi bi-person-plus"></i> Cadastrar
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-4">
+                        Transforme sua <span style="color: var(--primary)">música</span><br>
+                        em <span style="color: var(--primary)">renda recorrente</span>
+                    </h1>
+                    <p class="lead mb-4">
+                        A primeira plataforma brasileira que conecta artistas a investidores 
+                        através de contratos inteligentes de royalties musicais.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#cadastro" class="btn btn-gradient btn-lg">
+                            <i class="bi bi-lightning-charge"></i> Começar Agora
+                        </a>
+                        <a href="#como-funciona" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-play-circle"></i> Ver Demonstração
+                        </a>
+                    </div>
+                    
+                    <!-- API Status -->
+                    <div class="api-status mt-5">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-success rounded-circle p-2 me-3">
+                                <i class="bi bi-check-lg"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">✅ API SELO MIV ONLINE</h5>
+                                <p class="mb-0 small">
+                                    Sistema funcionando corretamente. 
+                                    <span class="text-warning">URL da API:</span> 
+                                    <code class="text-light">/exec (POST)</code>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card feature-card">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="display-1 mb-3" style="color: var(--primary)">🎵</div>
+                                <h3>Dashboard em Tempo Real</h3>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="p-3">
+                                        <h4 class="text-primary">15K+</h4>
+                                        <small>Artistas</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3">
+                                        <h4 class="text-primary">R$ 2.5M</h4>
+                                        <small>Royalties</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-3">
+                                        <h4 class="text-primary">98%</h4>
+                                        <small>Satisfação</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="como-funciona" class="py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">Como funciona a <span style="color: var(--primary)">plataforma</span></h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <span class="badge bg-primary rounded-circle p-3">1</span>
+                            </div>
+                            <h4>Cadastro Simples</h4>
+                            <p class="text-muted">
+                                Artistas se cadastram em minutos com documentos verificados.
+                                Receba seu ID exclusivo para gerenciamento.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <span class="badge bg-primary rounded-circle p-3">2</span>
+                            </div>
+                            <h4>Contratos Inteligentes</h4>
+                            <p class="text-muted">
+                                Defina percentuais de royalties (10-50%).
+                                Contratos gerados automaticamente com assinatura digital.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <span class="badge bg-primary rounded-circle p-3">3</span>
+                            </div>
+                            <h4>Gestão Completa</h4>
+                            <p class="text-muted">
+                                Dashboard personalizado para artistas e investidores.
+                                Relatórios detalhados e pagamentos automáticos.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cadastro Section -->
+    <section id="cadastro" class="py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-5">
+                                <h2 class="fw-bold">Cadastre-se Gratuitamente</h2>
+                                <p class="text-muted">Escolha seu perfil na plataforma</p>
+                            </div>
+                            
+                            <!-- User Type Selection -->
+                            <div class="row g-4 mb-5">
+                                <div class="col-md-6">
+                                    <div class="card user-type-card h-100 text-center p-4" 
+                                         onclick="selectUserType('artista')"
+                                         id="artistaCard">
+                                        <div class="card-body">
+                                            <div class="display-1 mb-3">🎤</div>
+                                            <h4>Artista</h4>
+                                            <p class="text-muted small">
+                                                Cadastre suas músicas, gere contratos e 
+                                                receba royalties regularmente.
+                                            </p>
+                                            <div class="mt-3">
+                                                <span class="badge bg-primary">Para Cantores</span>
+                                                <span class="badge bg-primary">Compositores</span>
+                                                <span class="badge bg-primary">Produtores</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card user-type-card h-100 text-center p-4" 
+                                         onclick="selectUserType('investidor')"
+                                         id="investidorCard">
+                                        <div class="card-body">
+                                            <div class="display-1 mb-3">💼</div>
+                                            <h4>Investidor</h4>
+                                            <p class="text-muted small">
+                                                Invista em talentos musicais e receba 
+                                                retornos sobre os royalties gerados.
+                                            </p>
+                                            <div class="mt-3">
+                                                <span class="badge bg-primary">Patrocínio</span>
+                                                <span class="badge bg-primary">Royalties</span>
+                                                <span class="badge bg-primary">Investimento</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Registration Form -->
+                            <div id="registrationForm" style="display: none;">
+                                <form id="formCadastro" onsubmit="return false;">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Nome Completo *</label>
+                                            <input type="text" class="form-control" id="nomeCadastro" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">CPF *</label>
+                                            <input type="text" class="form-control" id="cpfCadastro" 
+                                                   placeholder="Somente números" maxlength="11" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">E-mail *</label>
+                                            <input type="email" class="form-control" id="emailCadastro" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Telefone</label>
+                                            <input type="text" class="form-control" id="telefoneCadastro" 
+                                                   placeholder="(11) 99999-9999">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Senha *</label>
+                                            <input type="password" class="form-control" id="senhaCadastro" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Confirmar Senha *</label>
+                                            <input type="password" class="form-control" id="confirmaSenha" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="termos" required>
+                                            <label class="form-check-label small" for="termos">
+                                                Concordo com os <a href="#" class="text-primary">Termos de Uso</a> e 
+                                                <a href="#" class="text-primary">Política de Privacidade</a>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-grid mt-4">
+                                        <button type="button" class="btn btn-gradient btn-lg" onclick="cadastrarUsuario()">
+                                            <i class="bi bi-person-plus"></i> Criar Minha Conta
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Login Link -->
+                            <div class="text-center mt-4">
+                                <p class="text-muted">
+                                    Já tem uma conta? 
+                                    <a href="login.html" class="text-primary fw-bold">Faça login aqui</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Demo -->
+    <section class="py-5 bg-dark text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-3">⚡ API SELO MIV - Endpoints Disponíveis</h4>
+                    <div class="bg-dark border border-secondary rounded p-3 mb-3">
+                        <code class="text-info">
+                            {<br>
+                            &nbsp;&nbsp;"acao": "cadastrar_artista",<br>
+                            &nbsp;&nbsp;"nome": "Nome do Artista",<br>
+                            &nbsp;&nbsp;"cpf": "12345678909",<br>
+                            &nbsp;&nbsp;"email": "artista@email.com",<br>
+                            &nbsp;&nbsp;"telefone": "(11) 99999-9999"<br>
+                            }
+                        </code>
+                    </div>
+                    <button class="btn btn-outline-light" onclick="testarAPI()">
+                        <i class="bi bi-plug"></i> Testar Conexão com API
+                    </button>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="display-1 mb-3">🔌</div>
+                    <p class="small">API ativa e processando dados</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-music-note-beamed"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">SELO MIV</h5>
+                            <small class="text-muted">Plataforma de Royalties Musicais</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">© 2024 Todos os direitos reservados</small>
+                </div>
             </div>
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- JavaScript -->
     <script>
-        // ============================================
-        // CONFIGURAÇÃO DO SISTEMA
-        // ============================================
-        
-        // URL do seu Google Apps Script - IMPORTANTE: Cole sua URL aqui!
-        // Depois de publicar o Apps Script, cole a URL aqui:
         const API_URL = "https://script.google.com/macros/s/AKfycbztk1ciaAYousnQgD3oTAtgVtiilhbiG25WcmP85QZatociltDhbc_wOnkeFrTwKoY/exec";
+        let selectedUserType = '';
         
-        // ============================================
-        // FUNÇÕES DE NAVEGAÇÃO
-        // ============================================
-        
-        function abrirSecao(secaoId) {
-            // Esconde todas as seções de formulário
-            document.querySelectorAll('.form-section').forEach(sec => {
-                sec.style.display = 'none';
-            });
-            
-            // Mostra a seção selecionada
-            const secao = document.getElementById(secaoId);
-            if (secao) {
-                secao.style.display = 'block';
-                secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            
-            // Se for a seção de investidor, carrega as músicas
-            if (secaoId === 'investidor') {
-                carregarMusicas();
-            }
-        }
-        
-        // Navegação pelos links do header
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                abrirSecao(targetId);
-            });
+        // Formatar CPF
+        document.getElementById('cpfCadastro')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            e.target.value = value;
         });
         
-        // ============================================
-        // FUNÇÕES DO ARTISTA
-        // ============================================
-        
-        async function cadastrarArtista() {
-            const nome = document.getElementById('artistaNome').value.trim();
-            const documento = document.getElementById('artistaDocumento').value.trim();
-            const email = document.getElementById('artistaEmail').value.trim();
-            const whatsapp = document.getElementById('artistaWhatsapp').value.trim();
+        // Formatar telefone
+        document.getElementById('telefoneCadastro')?.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
             
-            // Validação simples
-            if (!nome || !documento || !email) {
-                mostrarStatus('statusArtista', 'Por favor, preencha todos os campos obrigatórios.', 'error');
-                return;
-            }
-            
-            if (!validarEmail(email)) {
-                mostrarStatus('statusArtista', 'Por favor, digite um e-mail válido.', 'error');
-                return;
-            }
-            
-            // Mostrar status de processamento
-            mostrarStatus('statusArtista', 
-                '<i class="fas fa-spinner fa-spin"></i> Cadastrando artista...', 
-                'processing');
-            
-            try {
-                // Se API_URL estiver configurada, usa a API real
-                if (API_URL.includes('AKfycb')) {
-                    const response = await fetch(API_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            acao: 'cadastrar_artista',
-                            nome: nome,
-                            cpf: documento.replace(/\D/g, ''),
-                            email: email,
-                            telefone: whatsapp
-                        })
-                    });
-                    
-                    const resultado = await response.json();
-                    
-                    if (resultado.success) {
-                        mostrarStatus('statusArtista', 
-                            `✅ <strong>Artista cadastrado com sucesso!</strong><br><br>
-                            <strong>ID do Artista:</strong> ${resultado.artistaId}<br>
-                            <strong>Nome:</strong> ${nome}<br>
-                            <strong>E-mail:</strong> ${email}<br><br>
-                            Agora você pode cadastrar suas músicas!`, 
-                            'success');
-                        
-                        // Limpa o formulário
-                        document.getElementById('formArtista').reset();
-                    } else {
-                        mostrarStatus('statusArtista', 
-                            `❌ <strong>Erro no cadastro:</strong><br>${resultado.message}`, 
-                            'error');
-                    }
+            if (value.length > 0) {
+                if (value.length <= 2) {
+                    value = `(${value}`;
+                } else if (value.length <= 7) {
+                    value = `(${value.substring(0,2)}) ${value.substring(2)}`;
                 } else {
-                    // Simulação para demonstração
-                    setTimeout(() => {
-                        const artistaId = 'ART' + Date.now().toString().slice(-8);
-                        mostrarStatus('statusArtista', 
-                            `✅ <strong>Artista cadastrado com sucesso!</strong><br><br>
-                            <strong>ID do Artista:</strong> ${artistaId}<br>
-                            <strong>Nome:</strong> ${nome}<br>
-                            <strong>Status:</strong> Pendente de verificação<br><br>
-                            <em>Em produção, isso criaria um registro real no sistema.</em>`, 
-                            'success');
-                        
-                        document.getElementById('formArtista').reset();
-                    }, 1500);
+                    value = `(${value.substring(0,2)}) ${value.substring(2,7)}-${value.substring(7)}`;
                 }
-                
-            } catch (error) {
-                mostrarStatus('statusArtista', 
-                    `❌ <strong>Erro de conexão:</strong><br>${error.message}`, 
-                    'error');
-            }
-        }
-        
-        // ============================================
-        // FUNÇÕES DO INVESTIDOR
-        // ============================================
-        
-        async function cadastrarInvestidor() {
-            const nome = document.getElementById('investidorNome').value.trim();
-            const cpf = document.getElementById('investidorCpf').value.trim();
-            const email = document.getElementById('investidorEmail').value.trim();
-            
-            if (!nome || !cpf || !email) {
-                mostrarStatus('statusInvestidor', 'Preencha todos os campos para cadastro.', 'error');
-                return;
             }
             
-            if (!validarCPF(cpf.replace(/\D/g, ''))) {
-                mostrarStatus('statusInvestidor', 'Digite um CPF válido.', 'error');
-                return;
-            }
-            
-            mostrarStatus('statusInvestidor', 
-                '<i class="fas fa-spinner fa-spin"></i> Criando conta de investidor...', 
-                'processing');
-            
-            try {
-                // Simulação para demonstração
-                setTimeout(() => {
-                    mostrarStatus('statusInvestidor', 
-                        `✅ <strong>Conta criada com sucesso!</strong><br><br>
-                        <strong>Nome:</strong> ${nome}<br>
-                        <strong>Saldo inicial:</strong> R$ 1.000,00<br>
-                        <strong>Status:</strong> Ativo<br><br>
-                        Agora você pode comprar ações das músicas disponíveis.`, 
-                        'success');
-                }, 1500);
-                
-            } catch (error) {
-                mostrarStatus('statusInvestidor', 
-                    `❌ Erro: ${error.message}`, 
-                    'error');
-            }
-        }
+            e.target.value = value;
+        });
         
-        // ============================================
-        // MERCADO DE AÇÕES
-        // ============================================
-        
-        async function carregarMusicas() {
-            const lista = document.getElementById('listaMusicas');
+        // Selecionar tipo de usuário
+        function selectUserType(tipo) {
+            selectedUserType = tipo;
             
-            // Dados de exemplo (em produção viriam da API)
-            const musicasExemplo = [
-                {
-                    id: 'MSC001',
-                    nome: 'Vibe do Verão',
-                    artista: 'MC Digital',
-                    genero: 'FUNK',
-                    valorAcao: 12.50,
-                    acoesDisponiveis: 30,
-                    acoesTotais: 49,
-                    streams: 12500,
-                    royalties: 375.00,
-                    isrc: 'BR-MIV-23-001'
-                },
-                {
-                    id: 'MSC002',
-                    nome: 'Amor Eletrônico',
-                    artista: 'DJ Beta',
-                    genero: 'ELETRÔNICA',
-                    valorAcao: 18.75,
-                    acoesDisponiveis: 15,
-                    acoesTotais: 49,
-                    streams: 8900,
-                    royalties: 267.00,
-                    isrc: 'BR-MIV-23-002'
-                },
-                {
-                    id: 'MSC003',
-                    nome: 'Sertanejo Raiz',
-                    artista: 'Dupla Teste',
-                    genero: 'SERTANEJO',
-                    valorAcao: 22.00,
-                    acoesDisponiveis: 8,
-                    acoesTotais: 49,
-                    streams: 15600,
-                    royalties: 468.00,
-                    isrc: 'BR-MIV-23-003'
-                },
-                {
-                    id: 'MSC004',
-                    nome: 'Pop Internacional',
-                    artista: 'Banda Global',
-                    genero: 'POP',
-                    valorAcao: 15.30,
-                    acoesDisponiveis: 42,
-                    acoesTotais: 49,
-                    streams: 7800,
-                    royalties: 234.00,
-                    isrc: 'BR-MIV-23-004'
-                }
-            ];
+            // Reset cards
+            document.getElementById('artistaCard').classList.remove('selected');
+            document.getElementById('investidorCard').classList.remove('selected');
             
-            // Mostrar loading
-            lista.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-spinner fa-spin"></i> Carregando mercado...
-                </div>
-            `;
+            // Select clicked card
+            document.getElementById(tipo + 'Card').classList.add('selected');
             
-            // Simular carregamento
-            setTimeout(() => {
-                lista.innerHTML = '';
-                
-                musicasExemplo.forEach(musica => {
-                    const porcentagemVendida = ((musica.acoesTotais - musica.acoesDisponiveis) / musica.acoesTotais * 100).toFixed(0);
-                    
-                    const item = document.createElement('div');
-                    item.className = 'music-item';
-                    item.dataset.genero = musica.genero.toLowerCase();
-                    item.innerHTML = `
-                        <div class="music-header">
-                            <div>
-                                <div class="music-title">${musica.nome}</div>
-                                <div class="music-artist">${musica.artista} • ${musica.genero}</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-size: 1.8rem; font-weight: bold; color: #00ff88;">
-                                    R$ ${musica.valorAcao.toFixed(2)}
-                                </div>
-                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
-                                    por ação
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="music-stats">
-                            <div class="stat-item">
-                                <div class="stat-value">${musica.acoesDisponiveis}</div>
-                                <div class="stat-label">Ações Disp.</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">${porcentagemVendida}%</div>
-                                <div class="stat-label">Vendidas</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">${musica.streams.toLocaleString()}</div>
-                                <div class="stat-label">Streams</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">R$ ${musica.royalties.toFixed(2)}</div>
-                                <div class="stat-label">Royalties</div>
-                            </div>
-                        </div>
-                        
-                        <button onclick="comprarAcoes('${musica.id}', '${musica.nome}')" 
-                                class="btn" style="width: 100%;">
-                            <i class="fas fa-shopping-cart"></i> Comprar Ações
-                        </button>
-                    `;
-                    
-                    lista.appendChild(item);
-                });
-            }, 1000);
-        }
-        
-        function filtrarMusicas(genero) {
-            const botoes = document.querySelectorAll('.filter-btn');
-            botoes.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            // Show form
+            document.getElementById('registrationForm').style.display = 'block';
             
-            const itens = document.querySelectorAll('.music-item');
-            
-            itens.forEach(item => {
-                if (genero === 'todas' || item.dataset.genero === genero) {
-                    item.style.display = 'block';
-                    setTimeout(() => {
-                        item.style.opacity = '1';
-                        item.style.transform = 'translateX(0)';
-                    }, 10);
-                } else {
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateX(-20px)';
-                    setTimeout(() => {
-                        item.style.display = 'none';
-                    }, 300);
-                }
+            // Scroll to form
+            document.getElementById('registrationForm').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
             });
         }
         
-        function comprarAcoes(musicaId, musicaNome) {
-            alert(`🎵 Compra de ações iniciada!\n\nMúsica: ${musicaNome}\nID: ${musicaId}\n\nEm produção, isso abriria um modal para selecionar quantidade.`);
-        }
-        
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        
-        function mostrarStatus(elementId, mensagem, tipo) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = mensagem;
-            element.className = 'status';
+        // Cadastrar usuário
+        async function cadastrarUsuario() {
+            const nome = document.getElementById('nomeCadastro').value.trim();
+            const cpf = document.getElementById('cpfCadastro').value.replace(/\D/g, '');
+            const email = document.getElementById('emailCadastro').value.trim();
+            const telefone = document.getElementById('telefoneCadastro').value.replace(/\D/g, '');
+            const senha = document.getElementById('senhaCadastro').value;
+            const confirmaSenha = document.getElementById('confirmaSenha').value;
             
-            switch(tipo) {
-                case 'success':
-                    element.classList.add('status-success');
-                    break;
-                case 'error':
-                    element.classList.add('status-error');
-                    break;
-                case 'processing':
-                    element.classList.add('status-processing');
-                    break;
+            // Validações
+            if (!nome || !cpf || !email || !senha) {
+                alert('Preencha todos os campos obrigatórios (*)');
+                return;
             }
             
-            // Rolar para o status
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        function validarEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-        
-        function validarCPF(cpf) {
-            cpf = cpf.replace(/[^\d]/g, '');
-            if (cpf.length !== 11) return false;
-            return true; // Validação simplificada para demo
-        }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🎵 Selo MIV Beta carregado');
-            console.log('📊 Sistema de tokenização musical');
-            console.log('🌐 Repositório: https://github.com/ISRCselomivbeta/royalties-demo');
+            if (cpf.length !== 11) {
+                alert('CPF deve ter 11 dígitos');
+                return;
+            }
             
-            // Verificar se API_URL está configurada
-            if (!API_URL.includes('AKfycb')) {
-                console.warn('⚠️ API_URL não configurada. Configure com sua URL do Google Apps Script.');
+            if (!email.includes('@') || !email.includes('.')) {
+                alert('E-mail inválido');
+                return;
+            }
+            
+            if (senha !== confirmaSenha) {
+                alert('As senhas não coincidem');
+                return;
+            }
+            
+            if (!document.getElementById('termos').checked) {
+                alert('Você deve aceitar os termos de uso');
+                return;
+            }
+            
+            // Criar overlay de loading
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+                color: white;
+            `;
+            overlay.innerHTML = `
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <h4>Cadastrando no SELO MIV...</h4>
+                <p class="text-center">Estamos processando seu cadastro</p>
+            `;
+            document.body.appendChild(overlay);
+            
+            try {
+                // Enviar para API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        acao: 'cadastrar_artista',
+                        nome: nome,
+                        cpf: cpf,
+                        email: email,
+                        telefone: telefone || ''
+                    })
+                });
                 
-                // Mostrar alerta sutil
-                setTimeout(() => {
-                    const alerta = document.createElement('div');
-                    alerta.style.cssText = `
-                        position: fixed;
-                        bottom: 20px;
-                        right: 20px;
-                        background: rgba(255, 170, 0, 0.9);
-                        color: #333;
-                        padding: 15px;
-                        border-radius: 10px;
-                        z-index: 10000;
-                        max-width: 300px;
-                        font-size: 14px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                const resultado = await response.json();
+                
+                // Remover overlay
+                document.body.removeChild(overlay);
+                
+                if (resultado.success) {
+                    // Mostrar mensagem de sucesso
+                    const successModal = document.createElement('div');
+                    successModal.style.cssText = overlay.style.cssText;
+                    successModal.innerHTML = `
+                        <div class="bg-white text-dark p-5 rounded-4 text-center" style="max-width: 500px;">
+                            <div class="display-1 text-success mb-3">✅</div>
+                            <h3 class="mb-3">Cadastro Concluído!</h3>
+                            <p class="mb-4">${resultado.message}</p>
+                            <div class="alert alert-info mb-4">
+                                <strong>ID do Artista:</strong> ${resultado.artistaId}<br>
+                                <small>Guarde este número para acesso futuro</small>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-lg" onclick="window.location.href='login.html'">
+                                    <i class="bi bi-box-arrow-in-right"></i> Fazer Login Agora
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="this.parentElement.parentElement.remove()">
+                                    Continuar no Site
+                                </button>
+                            </div>
+                        </div>
                     `;
-                    alerta.innerHTML = `
-                        <strong><i class="fas fa-exclamation-triangle"></i> Modo Demonstração</strong><br>
-                        Configure a API_URL no código para usar o sistema completo.
-                    `;
-                    document.body.appendChild(alerta);
+                    document.body.appendChild(successModal);
                     
-                    setTimeout(() => {
-                        alerta.remove();
-                    }, 10000);
-                }, 3000);
+                    // Limpar formulário
+                    document.getElementById('formCadastro').reset();
+                    
+                } else {
+                    alert(`Erro: ${resultado.message}`);
+                }
+                
+            } catch (error) {
+                document.body.removeChild(overlay);
+                alert(`Erro de conexão: ${error.message}`);
+                console.error('Erro:', error);
             }
+        }
+        
+        // Testar conexão com API
+        async function testarAPI() {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        acao: 'listar_artistas'
+                    })
+                });
+                
+                const resultado = await response.json();
+                
+                if (resultado.success) {
+                    alert(`✅ API funcionando perfeitamente!\n\nArtistas cadastrados: ${resultado.count || 0}`);
+                } else {
+                    alert(`⚠️ API respondeu com erro: ${resultado.message}`);
+                }
+                
+            } catch (error) {
+                alert(`❌ Erro ao conectar com API: ${error.message}`);
+            }
+        }
+        
+        // Scroll suave para seções
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId !== '#') {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
         });
     </script>
 </body>
