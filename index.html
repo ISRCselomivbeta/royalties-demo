@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Demo • Participação em Royalties</title>
+  <title>Demo • Participação em Royalties Musicais</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <style>
@@ -14,6 +14,7 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      margin: 0;
     }
 
     .box {
@@ -23,6 +24,7 @@
       width: 100%;
       max-width: 420px;
       border: 1px solid #222;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
     }
 
     h1 {
@@ -33,6 +35,7 @@
     p {
       font-size: 0.9rem;
       color: #9aa0b3;
+      line-height: 1.4;
     }
 
     input, select, button {
@@ -41,17 +44,36 @@
       margin-top: 12px;
       border-radius: 6px;
       border: none;
+      font-size: 0.95rem;
+    }
+
+    input, select {
+      background: #0f1115;
+      color: #eaeaf0;
+      border: 1px solid #2a2f3a;
     }
 
     button {
       background: #4fd1c5;
       font-weight: bold;
       cursor: pointer;
+      margin-top: 18px;
+    }
+
+    button:hover {
+      opacity: 0.9;
     }
 
     .status {
       margin-top: 20px;
       font-size: 0.9rem;
+      min-height: 24px;
+    }
+
+    .legal {
+      margin-top: 18px;
+      font-size: 11px;
+      opacity: 0.65;
     }
   </style>
 </head>
@@ -60,30 +82,39 @@
 
 <div class="box">
   <h1>Demo • Royalties Musicais</h1>
-  <p>Simulação pública. Dados de teste.</p>
+  <p>
+    Simulação pública para demonstração do funcionamento de contratos
+    de participação em receitas musicais.
+  </p>
 
-  <input id="nome" type="text" placeholder="Seu nome" required>
-  <input id="email" type="email" placeholder="Seu email" required>
+  <input id="nome" type="text" placeholder="Seu nome completo">
+  <input id="email" type="email" placeholder="Seu email">
 
   <select id="percentual">
-    <option value="1">1% – R$ 50</option>
-    <option value="5">5% – R$ 250</option>
-    <option value="10">10% – R$ 500</option>
+    <option value="1">1% de participação — R$ 50</option>
+    <option value="5">5% de participação — R$ 250</option>
+    <option value="10">10% de participação — R$ 500</option>
   </select>
 
-  <button onclick="enviar()">Gerar Contrato (Demo)</button>
+  <button onclick="enviar()">Gerar contrato (demo)</button>
 
   <div class="status" id="status"></div>
+
+  <div class="legal">
+    Este registro não caracteriza investimento financeiro regulado.
+    Representa participação demonstrativa em receitas musicais futuras.
+    Dados utilizados apenas para teste e validação do sistema.
+  </div>
 </div>
 
 <script>
 function enviar() {
-  const nome = document.getElementById("nome").value;
-  const email = document.getElementById("email").value;
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
   const percentual = document.getElementById("percentual").value;
 
   if (!nome || !email) {
-    alert("Preencha nome e email.");
+    alert("Por favor, preencha nome e email.");
     return;
   }
 
@@ -97,26 +128,29 @@ function enviar() {
     pagamento: "DEMO"
   };
 
-  document.getElementById("status").innerHTML = "⏳ Gerando contrato...";
+  const status = document.getElementById("status");
+  status.innerText = "⏳ Gerando contrato, aguarde...";
 
-  fetch("https://script.google.com/macros/s/AKfycbxH5x2OMrMqxT0tnFKRcTBXP5zD6RAtsHIi3EMEjk7V0c8O1O3ybooCJx-lVnW5Bslx/exec", {
+  fetch("https://script.google.com/macros/s/AKfycbz1RJ7w_gSoJRU3tcOsi_Zvtlj0HrqriTRFJlhq7awVFWOx16Jmgm-OISBPIefwU2Dm/exec", {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(dados)
   })
-  .then(res => res.json())
+  .then(response => response.json())
   .then(resp => {
     if (resp.status === "ok") {
-      document.getElementById("status").innerHTML =
-        `✅ Contrato gerado com sucesso.<br>
-         <a href="${resp.contrato}" target="_blank" style="color:#4fd1c5;">
-         📄 Baixar contrato PDF</a>`;
+      status.innerHTML =
+        "✅ Contrato gerado com sucesso.<br><br>" +
+        `<a href="${resp.contrato}" target="_blank" style="color:#4fd1c5;">📄 Baixar contrato em PDF</a>`;
     } else {
-      document.getElementById("status").innerHTML = "❌ Erro ao gerar contrato.";
+      status.innerText = "❌ Erro ao gerar contrato.";
     }
   })
-  .catch(err => {
-    document.getElementById("status").innerHTML = "❌ Falha na conexão com o servidor.";
-    console.error(err);
+  .catch(error => {
+    status.innerText = "❌ Falha na conexão com o servidor.";
+    console.error(error);
   });
 }
 </script>
