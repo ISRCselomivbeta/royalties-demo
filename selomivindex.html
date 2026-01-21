@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selo MIV Beta - Sistema de Royalties</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ====== VARIÁVEIS ====== */
+        :root {
+            --primary: #00c6ff;
+            --primary-dark: #0072ff;
+            --secondary: #2c5364;
+            --dark: #0f2027;
+            --light: #ffffff;
+            --success: #00ff88;
+            --danger: #ff4757;
+            --warning: #ffaa00;
+        }
+        
+        /* ====== RESET ====== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark), var(--secondary));
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* ====== HEADER ====== */
+        .header {
+            background: rgba(17, 17, 17, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .logo-text {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .beta-badge {
+            background: var(--warning);
+            color: var(--dark);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .nav-btn:hover {
+            background: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        /* ====== HERO SECTION ====== */
+        .hero {
+            padding: 180px 0 100px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 114, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 198, 255, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+        
+        /* ====== BUTTONS ====== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #00b09b, #96c93d);
+        }
+        
+        .btn-large {
+            padding: 20px 40px;
+            font-size: 1.2rem;
+        }
+        
+        /* ====== CARDS ====== */
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--light);
+        }
+        
+        .section-title span {
+            color: var(--primary);
+        }
+        
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 25px;
+            background: linear-gradient(45deg, var(--primary), var(--success));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--light);
+        }
+        
+        .card p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.7;
+        }
+        
+        /* ====== FORMS ====== */
+        .form-section {
+            padding: 100px 0;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--light);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-label i {
+            color: var(--primary);
+            width: 20px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(0, 198, 255, 0.1);
+        }
+        
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        /* ====== STATUS MESSAGES ====== */
+        .status {
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 25px;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .status-success {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--success);
+            display: block;
+        }
+        
+        .status-error {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--danger);
+            display: block;
+        }
+        
+        .status-processing {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid var(--warning);
+            display: block;
+        }
+        
+        /* ====== MARKET SECTION ====== */
+        .market-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+        }
+        
+        .market-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .market-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--dark);
+            font-weight: 600;
+        }
+        
+        .music-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .music-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .music-item:hover {
+            background: rgba(0, 198, 255, 0.05);
+            border-color: var(--primary);
+            transform: translateX(10px);
+        }
+        
+        .music-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .music-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+        
+        .music-artist {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .music-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+        }
+        
+        /* ====== FOOTER ====== */
+        .footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 60px 0 30px;
+            margin-top: 80px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-section h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        /* ====== ANIMATIONS ====== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        /* ====== RESPONSIVE ====== */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .music-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .btn {
+                display: block;
+                margin: 10px 0;
+            }
+            
+            .form-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-file-contract logo-icon"></i>
+                    <span class="logo-text">SELO MIV</span>
+                    <span class="beta-badge">BETA</span>
+                </div>
+                <nav class="nav-links">
+                    <a href="#inicio" class="nav-btn">🏠 Início</a>
+                    <a href="#como-funciona" class="nav-btn">⚙️ Como Funciona</a>
+                    <a href="#artista" class="nav-btn">🎤 Sou Artista</a>
+                    <a href="#investidor" class="nav-btn">💰 Sou Investidor</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section id="inicio" class="hero">
+        <div class="container">
+            <h1>Transforme Música em Investimento</h1>
+            <p class="hero-subtitle">
+                Compre ações de músicas, receba royalties automáticos e faça parte da revolução 
+                do mercado musical. Cada stream conta, cada ação vale.
+            </p>
+            <div>
+                <button onclick="abrirSecao('artista')" class="btn btn-large">
+                    <i class="fas fa-microphone"></i> Cadastrar como Artista
+                </button>
+                <button onclick="abrirSecao('investidor')" class="btn btn-large btn-success">
+                    <i class="fas fa-chart-line"></i> Começar a Investir
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section id="como-funciona" class="section">
+        <div class="container">
+            <h2 class="section-title">Como <span>Funciona</span> o Sistema</h2>
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <h3>1. Artista Cadastra</h3>
+                    <p>Artista registra a música no sistema. Define quantos % dos direitos serão tokenizados (até 49%).</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <h3>2. Música é Tokenizada</h3>
+                    <p>A música vira 100 ações. Artista mantém 51%, 49% são disponibilizadas para venda.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <h3>3. Investidor Compra</h3>
+                    <p>Investidores compram ações. Cada ação dá direito a % dos royalties futuros.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-headphones"></i>
+                    </div>
+                    <h3>4. Música Toca</h3>
+                    <p>Cada play (30s) gera royalties. Spotify, YouTube, Deezer, Apple Music, etc.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>5. Sistema Calcula</h3>
+                    <p>Royalties são calculados automaticamente: R$0,003 por stream em média.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <h3>6. Todos Recebem</h3>
+                    <p>Distribuição automática: 51% artista, 49% investidores, 5% comissão selo.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO ARTISTA -->
+    <section id="artista" class="form-section" style="display: none;">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-microphone"></i> Cadastro de Artista
+                    </h2>
+                    
+                    <form id="formArtista">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i> Nome Artístico / Banda
+                            </label>
+                            <input type="text" class="form-control" id="artistaNome" 
+                                   placeholder="Seu nome ou nome da banda" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-id-card"></i> CPF ou CNPJ
+                            </label>
+                            <input type="text" class="form-control" id="artistaDocumento" 
+                                   placeholder="000.000.000-00 ou 00.000.000/0000-00" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> E-mail Profissional
+                            </label>
+                            <input type="email" class="form-control" id="artistaEmail" 
+                                   placeholder="seu@email.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-phone"></i> WhatsApp
+                            </label>
+                            <input type="text" class="form-control" id="artistaWhatsapp" 
+                                   placeholder="(11) 99999-9999">
+                        </div>
+                        
+                        <button type="button" onclick="cadastrarArtista()" class="btn" style="width: 100%;">
+                            <i class="fas fa-check-circle"></i> Cadastrar como Artista
+                        </button>
+                    </form>
+                    
+                    <div id="statusArtista" class="status"></div>
+                    
+                    <div style="margin-top: 30px; padding: 20px; background: rgba(0,198,255,0.05); border-radius: 10px;">
+                        <h4 style="color: var(--primary); margin-bottom: 10px;">
+                            <i class="fas fa-info-circle"></i> Como funciona para artistas:
+                        </h4>
+                        <ul style="color: rgba(255,255,255,0.7); padding-left: 20px;">
+                            <li>Você mantém 51% dos direitos da música</li>
+                            <li>Pode tokenizar até 49% para vender como ações</li>
+                            <li>Recebe royalties automáticos de streams</li>
+                            <li>Acompanha tudo em tempo real</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SEÇÃO INVESTIDOR -->
+    <section id="investidor" class="form-section" style="display: none;">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-card">
+                    <h2 class="form-title">
+                        <i class="fas fa-chart-line"></i> Área do Investidor
+                    </h2>
+                    
+                    <!-- Cadastro Rápido -->
+                    <div style="margin-bottom: 40px;">
+                        <h3 style="color: var(--light); margin-bottom: 20px;">
+                            <i class="fas fa-user-plus"></i> Cadastro Rápido
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i> Seu Nome Completo
+                            </label>
+                            <input type="text" class="form-control" id="investidorNome" 
+                                   placeholder="Nome completo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-id-card"></i> CPF
+                            </label>
+                            <input type="text" class="form-control" id="investidorCpf" 
+                                   placeholder="000.000.000-00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-envelope"></i> E-mail
+                            </label>
+                            <input type="email" class="form-control" id="investidorEmail" 
+                                   placeholder="investidor@email.com">
+                        </div>
+                        
+                        <button onclick="cadastrarInvestidor()" class="btn btn-success" style="width: 100%;">
+                            <i class="fas fa-user-check"></i> Criar Conta de Investidor
+                        </button>
+                    </div>
+                    
+                    <div id="statusInvestidor" class="status"></div>
+                    
+                    <!-- Mercado de Ações -->
+                    <div class="market-section">
+                        <div class="market-header">
+                            <h3 style="color: var(--light); margin: 0;">
+                                <i class="fas fa-store"></i> Mercado de Ações
+                            </h3>
+                            <div class="market-filters">
+                                <button class="filter-btn active" onclick="filtrarMusicas('todas')">Todas</button>
+                                <button class="filter-btn" onclick="filtrarMusicas('pop')">POP</button>
+                                <button class="filter-btn" onclick="filtrarMusicas('funk')">FUNK</button>
+                                <button class="filter-btn" onclick="filtrarMusicas('sertanejo')">Sertanejo</button>
+                            </div>
+                        </div>
+                        
+                        <div class="music-list" id="listaMusicas">
+                            <!-- Músicas serão carregadas aqui -->
+                            <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                                <i class="fas fa-spinner fa-spin fa-2x" style="margin-bottom: 20px;"></i>
+                                <p>Carregando músicas disponíveis...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Selo MIV</h3>
+                    <p style="color: rgba(255,255,255,0.7);">
+                        Sistema de tokenização de músicas e distribuição de royalties.
+                        Transformando o mercado musical.
+                    </p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Links Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#inicio">Início</a></li>
+                        <li><a href="#como-funciona">Como Funciona</a></li>
+                        <li><a href="#artista">Para Artistas</a></li>
+                        <li><a href="#investidor">Para Investidores</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contato</h3>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-envelope"></i> contato@selomiv.com</li>
+                        <li><i class="fas fa-phone"></i> (11) 99999-9999</li>
+                        <li><i class="fab fa-whatsapp"></i> WhatsApp</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Termos de Uso</a></li>
+                        <li><a href="#">Política de Privacidade</a></li>
+                        <li><a href="#">Contrato de Investimento</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2024 Selo MIV Beta. Todos os direitos reservados.</p>
+                <p style="margin-top: 10px; font-size: 0.8rem;">
+                    Este é um sistema em fase beta. Valores e funcionalidades podem ser alterados.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // CONFIGURAÇÃO DO SISTEMA
+        // ============================================
+        
+        // URL do seu Google Apps Script - IMPORTANTE: Cole sua URL aqui!
+        // Depois de publicar o Apps Script, cole a URL aqui:
+        const API_URL = "https://script.google.com/macros/s/AKfycbyYOUR_SCRIPT_ID_HERE/exec";
+        
+        // ============================================
+        // FUNÇÕES DE NAVEGAÇÃO
+        // ============================================
+        
+        function abrirSecao(secaoId) {
+            // Esconde todas as seções de formulário
+            document.querySelectorAll('.form-section').forEach(sec => {
+                sec.style.display = 'none';
+            });
+            
+            // Mostra a seção selecionada
+            const secao = document.getElementById(secaoId);
+            if (secao) {
+                secao.style.display = 'block';
+                secao.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            // Se for a seção de investidor, carrega as músicas
+            if (secaoId === 'investidor') {
+                carregarMusicas();
+            }
+        }
+        
+        // Navegação pelos links do header
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                abrirSecao(targetId);
+            });
+        });
+        
+        // ============================================
+        // FUNÇÕES DO ARTISTA
+        // ============================================
+        
+        async function cadastrarArtista() {
+            const nome = document.getElementById('artistaNome').value.trim();
+            const documento = document.getElementById('artistaDocumento').value.trim();
+            const email = document.getElementById('artistaEmail').value.trim();
+            const whatsapp = document.getElementById('artistaWhatsapp').value.trim();
+            
+            // Validação simples
+            if (!nome || !documento || !email) {
+                mostrarStatus('statusArtista', 'Por favor, preencha todos os campos obrigatórios.', 'error');
+                return;
+            }
+            
+            if (!validarEmail(email)) {
+                mostrarStatus('statusArtista', 'Por favor, digite um e-mail válido.', 'error');
+                return;
+            }
+            
+            // Mostrar status de processamento
+            mostrarStatus('statusArtista', 
+                '<i class="fas fa-spinner fa-spin"></i> Cadastrando artista...', 
+                'processing');
+            
+            try {
+                // Se API_URL estiver configurada, usa a API real
+                if (API_URL.includes('AKfycb')) {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            acao: 'cadastrar_artista',
+                            nome: nome,
+                            cpf: documento.replace(/\D/g, ''),
+                            email: email,
+                            telefone: whatsapp
+                        })
+                    });
+                    
+                    const resultado = await response.json();
+                    
+                    if (resultado.success) {
+                        mostrarStatus('statusArtista', 
+                            `✅ <strong>Artista cadastrado com sucesso!</strong><br><br>
+                            <strong>ID do Artista:</strong> ${resultado.artistaId}<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>E-mail:</strong> ${email}<br><br>
+                            Agora você pode cadastrar suas músicas!`, 
+                            'success');
+                        
+                        // Limpa o formulário
+                        document.getElementById('formArtista').reset();
+                    } else {
+                        mostrarStatus('statusArtista', 
+                            `❌ <strong>Erro no cadastro:</strong><br>${resultado.message}`, 
+                            'error');
+                    }
+                } else {
+                    // Simulação para demonstração
+                    setTimeout(() => {
+                        const artistaId = 'ART' + Date.now().toString().slice(-8);
+                        mostrarStatus('statusArtista', 
+                            `✅ <strong>Artista cadastrado com sucesso!</strong><br><br>
+                            <strong>ID do Artista:</strong> ${artistaId}<br>
+                            <strong>Nome:</strong> ${nome}<br>
+                            <strong>Status:</strong> Pendente de verificação<br><br>
+                            <em>Em produção, isso criaria um registro real no sistema.</em>`, 
+                            'success');
+                        
+                        document.getElementById('formArtista').reset();
+                    }, 1500);
+                }
+                
+            } catch (error) {
+                mostrarStatus('statusArtista', 
+                    `❌ <strong>Erro de conexão:</strong><br>${error.message}`, 
+                    'error');
+            }
+        }
+        
+        // ============================================
+        // FUNÇÕES DO INVESTIDOR
+        // ============================================
+        
+        async function cadastrarInvestidor() {
+            const nome = document.getElementById('investidorNome').value.trim();
+            const cpf = document.getElementById('investidorCpf').value.trim();
+            const email = document.getElementById('investidorEmail').value.trim();
+            
+            if (!nome || !cpf || !email) {
+                mostrarStatus('statusInvestidor', 'Preencha todos os campos para cadastro.', 'error');
+                return;
+            }
+            
+            if (!validarCPF(cpf.replace(/\D/g, ''))) {
+                mostrarStatus('statusInvestidor', 'Digite um CPF válido.', 'error');
+                return;
+            }
+            
+            mostrarStatus('statusInvestidor', 
+                '<i class="fas fa-spinner fa-spin"></i> Criando conta de investidor...', 
+                'processing');
+            
+            try {
+                // Simulação para demonstração
+                setTimeout(() => {
+                    mostrarStatus('statusInvestidor', 
+                        `✅ <strong>Conta criada com sucesso!</strong><br><br>
+                        <strong>Nome:</strong> ${nome}<br>
+                        <strong>Saldo inicial:</strong> R$ 1.000,00<br>
+                        <strong>Status:</strong> Ativo<br><br>
+                        Agora você pode comprar ações das músicas disponíveis.`, 
+                        'success');
+                }, 1500);
+                
+            } catch (error) {
+                mostrarStatus('statusInvestidor', 
+                    `❌ Erro: ${error.message}`, 
+                    'error');
+            }
+        }
+        
+        // ============================================
+        // MERCADO DE AÇÕES
+        // ============================================
+        
+        async function carregarMusicas() {
+            const lista = document.getElementById('listaMusicas');
+            
+            // Dados de exemplo (em produção viriam da API)
+            const musicasExemplo = [
+                {
+                    id: 'MSC001',
+                    nome: 'Vibe do Verão',
+                    artista: 'MC Digital',
+                    genero: 'FUNK',
+                    valorAcao: 12.50,
+                    acoesDisponiveis: 30,
+                    acoesTotais: 49,
+                    streams: 12500,
+                    royalties: 375.00,
+                    isrc: 'BR-MIV-23-001'
+                },
+                {
+                    id: 'MSC002',
+                    nome: 'Amor Eletrônico',
+                    artista: 'DJ Beta',
+                    genero: 'ELETRÔNICA',
+                    valorAcao: 18.75,
+                    acoesDisponiveis: 15,
+                    acoesTotais: 49,
+                    streams: 8900,
+                    royalties: 267.00,
+                    isrc: 'BR-MIV-23-002'
+                },
+                {
+                    id: 'MSC003',
+                    nome: 'Sertanejo Raiz',
+                    artista: 'Dupla Teste',
+                    genero: 'SERTANEJO',
+                    valorAcao: 22.00,
+                    acoesDisponiveis: 8,
+                    acoesTotais: 49,
+                    streams: 15600,
+                    royalties: 468.00,
+                    isrc: 'BR-MIV-23-003'
+                },
+                {
+                    id: 'MSC004',
+                    nome: 'Pop Internacional',
+                    artista: 'Banda Global',
+                    genero: 'POP',
+                    valorAcao: 15.30,
+                    acoesDisponiveis: 42,
+                    acoesTotais: 49,
+                    streams: 7800,
+                    royalties: 234.00,
+                    isrc: 'BR-MIV-23-004'
+                }
+            ];
+            
+            // Mostrar loading
+            lista.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando mercado...
+                </div>
+            `;
+            
+            // Simular carregamento
+            setTimeout(() => {
+                lista.innerHTML = '';
+                
+                musicasExemplo.forEach(musica => {
+                    const porcentagemVendida = ((musica.acoesTotais - musica.acoesDisponiveis) / musica.acoesTotais * 100).toFixed(0);
+                    
+                    const item = document.createElement('div');
+                    item.className = 'music-item';
+                    item.dataset.genero = musica.genero.toLowerCase();
+                    item.innerHTML = `
+                        <div class="music-header">
+                            <div>
+                                <div class="music-title">${musica.nome}</div>
+                                <div class="music-artist">${musica.artista} • ${musica.genero}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #00ff88;">
+                                    R$ ${musica.valorAcao.toFixed(2)}
+                                </div>
+                                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                                    por ação
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="music-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">${musica.acoesDisponiveis}</div>
+                                <div class="stat-label">Ações Disp.</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${porcentagemVendida}%</div>
+                                <div class="stat-label">Vendidas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">${musica.streams.toLocaleString()}</div>
+                                <div class="stat-label">Streams</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">R$ ${musica.royalties.toFixed(2)}</div>
+                                <div class="stat-label">Royalties</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="comprarAcoes('${musica.id}', '${musica.nome}')" 
+                                class="btn" style="width: 100%;">
+                            <i class="fas fa-shopping-cart"></i> Comprar Ações
+                        </button>
+                    `;
+                    
+                    lista.appendChild(item);
+                });
+            }, 1000);
+        }
+        
+        function filtrarMusicas(genero) {
+            const botoes = document.querySelectorAll('.filter-btn');
+            botoes.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const itens = document.querySelectorAll('.music-item');
+            
+            itens.forEach(item => {
+                if (genero === 'todas' || item.dataset.genero === genero) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateX(0)';
+                    }, 10);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-20px)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+        
+        function comprarAcoes(musicaId, musicaNome) {
+            alert(`🎵 Compra de ações iniciada!\n\nMúsica: ${musicaNome}\nID: ${musicaId}\n\nEm produção, isso abriria um modal para selecionar quantidade.`);
+        }
+        
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        
+        function mostrarStatus(elementId, mensagem, tipo) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = mensagem;
+            element.className = 'status';
+            
+            switch(tipo) {
+                case 'success':
+                    element.classList.add('status-success');
+                    break;
+                case 'error':
+                    element.classList.add('status-error');
+                    break;
+                case 'processing':
+                    element.classList.add('status-processing');
+                    break;
+            }
+            
+            // Rolar para o status
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function validarEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/[^\d]/g, '');
+            if (cpf.length !== 11) return false;
+            return true; // Validação simplificada para demo
+        }
+        
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎵 Selo MIV Beta carregado');
+            console.log('📊 Sistema de tokenização musical');
+            console.log('🌐 Repositório: https://github.com/ISRCselomivbeta/royalties-demo');
+            
+            // Verificar se API_URL está configurada
+            if (!API_URL.includes('AKfycb')) {
+                console.warn('⚠️ API_URL não configurada. Configure com sua URL do Google Apps Script.');
+                
+                // Mostrar alerta sutil
+                setTimeout(() => {
+                    const alerta = document.createElement('div');
+                    alerta.style.cssText = `
+                        position: fixed;
+                        bottom: 20px;
+                        right: 20px;
+                        background: rgba(255, 170, 0, 0.9);
+                        color: #333;
+                        padding: 15px;
+                        border-radius: 10px;
+                        z-index: 10000;
+                        max-width: 300px;
+                        font-size: 14px;
+                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    `;
+                    alerta.innerHTML = `
+                        <strong><i class="fas fa-exclamation-triangle"></i> Modo Demonstração</strong><br>
+                        Configure a API_URL no código para usar o sistema completo.
+                    `;
+                    document.body.appendChild(alerta);
+                    
+                    setTimeout(() => {
+                        alerta.remove();
+                    }, 10000);
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
