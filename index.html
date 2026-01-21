@@ -1,46 +1,153 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbxhi1aXXq_nvFAUW_pzv4Fjao267qLMvt_n07Gk5bke1gLbjiZ0jWsqJc3Jb1vFHNQ/exec";
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Gerar Contrato | Selo MIV</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-document.getElementById("formContrato").addEventListener("submit", async (e) => {
-  e.preventDefault();
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
 
-  const mensagem = document.getElementById("mensagem");
-  mensagem.textContent = "⏳ Enviando solicitação...";
-  mensagem.style.color = "black";
+    .card {
+      background: #111;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+    }
 
-  const formData = new FormData(e.target);
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
 
-  const payload = {
-    nome: formData.get("nome"),
-    email: formData.get("email")
+    label {
+      display: block;
+      margin-top: 15px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background: #00c6ff;
+      background: linear-gradient(to right, #0072ff, #00c6ff);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    a {
+      color: #00c6ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Geração de Contrato</h1>
+
+    <label for="nome">Nome completo</label>
+    <input id="nome" type="text" placeholder="Seu nome" autocomplete="name">
+
+    <label for="email">E-mail</label>
+    <input id="email" type="email" placeholder="seu@email.com" autocomplete="email">
+
+    <label for="percentual">Percentual de royalties</label>
+    <select id="percentual">
+      <option value="10">10%</option>
+      <option value="20">20%</option>
+      <option value="30">30%</option>
+      <option value="40">40%</option>
+      <option value="50">50%</option>
+    </select>
+
+    <button onclick="enviar()">Gerar contrato</button>
+
+    <div id="status"></div>
+  </div>
+
+<script>
+function enviar() {
+  const nome = document.getElementById("nome").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const percentual = document.getElementById("percentual").value;
+
+  if (!nome || !email) {
+    document.getElementById("status").innerHTML = "❌ Preencha nome e e-mail.";
+    return;
+  }
+
+  const dados = {
+    nome: nome,
+    email: email,
+    percentual: percentual,
+    valor: percentual * 50
   };
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
+  document.getElementById("status").innerHTML = "⏳ Gerando contrato, aguarde...";
 
-    if (!response.ok) {
-      throw new Error("Servidor não respondeu corretamente");
-    }
-
-    const data = await response.json();
-
-    if (data.status === "sucesso") {
-      mensagem.textContent = "✅ Solicitação enviada! O comprador recebeu o e-mail de confirmação.";
-      mensagem.style.color = "green";
-      e.target.reset();
+  fetch("https://script.google.com/macros/s/AKfycbxhi1aXXq_nvFAUW_pzv4Fjao267qLMvt_n07Gk5bke1gLbjiZ0jWsqJc3Jb1vFHNQ/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(dados)
+  })
+  .then(res => res.json())
+  .then(resp => {
+    if (resp.status === "sucesso" || resp.status === "ok") {
+      document.getElementById("status").innerHTML = `
+        ✅ Contrato gerado com sucesso.<br><br>
+        📩 Um e-mail de confirmação foi enviado.<br><br>
+        ${resp.contrato ? `<a href="${resp.contrato}" target="_blank">📄 Abrir contrato</a>` : ""}
+      `;
     } else {
-      mensagem.textContent = "⚠️ Erro: " + (data.mensagem || "Falha ao gerar contrato");
-      mensagem.style.color = "orange";
+      document.getElementById("status").innerHTML = "❌ Erro: " + resp.mensagem;
     }
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("status").innerHTML =
+      "❌ Falha ao conectar com o servidor. Tente novamente.";
+  });
+}
+</script>
 
-  } catch (error) {
-    mensagem.textContent = "❌ Falha ao conectar com o servidor.";
-    mensagem.style.color = "red";
-    console.error(error);
-  }
-});
+</body>
+</html>
