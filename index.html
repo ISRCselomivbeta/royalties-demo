@@ -3,215 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SELO MIV — Royalties Musicais</title>
-
-  <!-- Bootstrap -->
+  <title>Cadastrar Ouvinte - SELO MIV</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script>
+    // URL da API
+    const API_URL = "https://script.google.com/macros/s/AKfycbw6WpjiLomixA6H3IK-y5-VNoCq3WbstZhYbjHrM8ueJX-LmWsNxFcOxAwi6wCRxXK7/exec";
 
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .hero {
-      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-      color: white;
-      padding: 80px 20px;
+    // Função para cadastrar ouvinte
+    async function cadastrarOuvinte() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+
+      if (!nome || !email) {
+        alert('❌ Preencha nome e e-mail.');
+        return;
+      }
+
+      try {
+        const formData = new URLSearchParams();
+        formData.append('acao', 'cadastrar_ouvinte');
+        formData.append('nome', nome);
+        formData.append('email', email);
+
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: formData.toString()
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert(`✅ Ouvinte cadastrado!\nID: ${data.ouvinte_id}`);
+          // Limpar campos
+          document.getElementById('nome').value = '';
+          document.getElementById('email').value = '';
+        } else {
+          alert(`❌ Erro: ${data.message}`);
+        }
+      } catch (err) {
+        alert(`❌ Erro na conexão: ${err.message}`);
+      }
     }
-    .card-hover:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,.15);
-    }
-    .selected {
-      border: 2px solid #0d6efd;
-      background: #f0f8ff;
-    }
-  </style>
+  </script>
 </head>
+<body class="bg-dark text-white">
+  <div class="container py-5">
+    <h2 class="mb-4">Cadastrar Ouvinte - SELO MIV</h2>
 
-<body>
-
-<!-- NAV -->
-<nav class="navbar navbar-dark bg-dark">
-  <div class="container">
-    <span class="navbar-brand fw-bold">🎵 SELO MIV</span>
-  </div>
-</nav>
-
-<!-- HERO -->
-<section class="hero text-center">
-  <div class="container">
-    <h1 class="fw-bold">Ouvir é investir.<br>Investir é ganhar.</h1>
-    <p class="lead mt-3">
-      Plataforma de royalties musicais onde artistas, ouvintes e investidores ganham juntos.
-    </p>
-    <a href="#cadastro" class="btn btn-primary btn-lg mt-3">Começar Agora</a>
-  </div>
-</section>
-
-<!-- COMO FUNCIONA -->
-<section class="py-5">
-  <div class="container text-center">
-    <h2 class="mb-4">Como Funciona</h2>
-    <div class="row g-4">
-      <div class="col-md-4">
-        <div class="card card-hover h-100 p-4">
-          <h4>🎧 Ouvinte</h4>
-          <p>Ouve música, já paga e recebe retorno automaticamente.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card card-hover h-100 p-4">
-          <h4>🎤 Artista</h4>
-          <p>Cadastra músicas e recebe royalties por cada play.</p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card card-hover h-100 p-4">
-          <h4>💼 Investidor</h4>
-          <p>Compra participação em músicas e ganha com o crescimento.</p>
-        </div>
-      </div>
+    <div class="mb-3">
+      <label for="nome" class="form-label">Nome</label>
+      <input type="text" class="form-control bg-secondary text-white" id="nome" placeholder="Digite seu nome">
     </div>
-  </div>
-</section>
 
-<!-- CADASTRO -->
-<section id="cadastro" class="py-5 bg-light">
-  <div class="container">
-    <div class="card shadow p-4">
-      <h2 class="text-center mb-4">Cadastro Gratuito</h2>
-
-      <!-- TIPO -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="card p-3 text-center card-hover" id="artistaCard"
-               onclick="selectUserType('artista')">
-            🎤 <strong>Sou Artista</strong>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card p-3 text-center card-hover" id="investidorCard"
-               onclick="selectUserType('investidor')">
-            💼 <strong>Sou Investidor</strong>
-          </div>
-        </div>
-      </div>
-
-      <!-- FORM -->
-      <form id="formCadastro" style="display:none;">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <input class="form-control" id="nome" placeholder="Nome completo*" required>
-          </div>
-          <div class="col-md-6">
-            <input class="form-control" id="cpf" placeholder="CPF (11 dígitos)*" required>
-          </div>
-          <div class="col-md-6">
-            <input class="form-control" id="email" placeholder="E-mail*" required>
-          </div>
-          <div class="col-md-6">
-            <input class="form-control" id="telefone" placeholder="Telefone">
-          </div>
-        </div>
-
-        <div class="form-check mt-3">
-          <input class="form-check-input" type="checkbox" id="termos">
-          <label class="form-check-label">Aceito os termos</label>
-        </div>
-
-        <button type="button" class="btn btn-success w-100 mt-4"
-                onclick="cadastrar()">
-          Criar Conta
-        </button>
-      </form>
+    <div class="mb-3">
+      <label for="email" class="form-label">E-mail</label>
+      <input type="email" class="form-control bg-secondary text-white" id="email" placeholder="Digite seu e-mail">
     </div>
+
+    <button class="btn btn-primary" onclick="cadastrarOuvinte()">
+      Cadastrar Ouvinte
+    </button>
   </div>
-</section>
-
-<!-- STATUS -->
-<section class="py-4 bg-dark text-white text-center">
-  <p id="apiStatus">🔄 Verificando API...</p>
-</section>
-
-<!-- FOOTER -->
-<footer class="py-3 bg-black text-white text-center">
-  <small>© SELO MIV — Todos os direitos reservados</small>
-</footer>
-
-<script>
-/* ================= CONFIG ================= */
-const API_URL = "https://script.google.com/macros/s/AKfycbw6WpjiLomixA6H3IK-y5-VNoCq3WbstZhYbjHrM8ueJX-LmWsNxFcOxAwi6wCRxXK7/exec";
-let tipoUsuario = "";
-
-/* ================= UI ================= */
-function selectUserType(tipo) {
-  tipoUsuario = tipo;
-  document.getElementById("formCadastro").style.display = "block";
-  document.getElementById("artistaCard").classList.remove("selected");
-  document.getElementById("investidorCard").classList.remove("selected");
-  document.getElementById(tipo + "Card").classList.add("selected");
-}
-
-/* ================= CADASTRO ================= */
-function cadastrar() {
-  const nome = nome.value.trim();
-  const cpf = cpf.value.replace(/\D/g,"");
-  const email = email.value.trim();
-  const telefone = telefone.value.replace(/\D/g,"");
-
-  if (!tipoUsuario || !nome || !cpf || !email) {
-    alert("❌ Preencha todos os campos obrigatórios");
-    return;
-  }
-  if (cpf.length !== 11) {
-    alert("❌ CPF inválido");
-    return;
-  }
-  if (!termos.checked) {
-    alert("❌ Aceite os termos");
-    return;
-  }
-
-  const dados = new URLSearchParams({
-    acao: tipoUsuario === "artista"
-      ? "cadastrar_artista"
-      : "cadastrar_investidor",
-    nome, cpf, email, telefone
-  });
-
-  fetch(API_URL, {
-    method: "POST",
-    headers: {"Content-Type":"application/x-www-form-urlencoded"},
-    body: dados.toString()
-  })
-  .then(r => r.json())
-  .then(res => {
-    if (res.status === "ok") {
-      alert(`✅ Cadastro realizado!\nID: ${res.id}`);
-      document.getElementById("formCadastro").reset();
-    } else {
-      alert("❌ Erro: " + res.mensagem);
-    }
-  })
-  .catch(() => alert("❌ Erro de conexão com a API"));
-}
-
-/* ================= TESTE API ================= */
-function testarAPI() {
-  fetch(API_URL, {
-    method:"POST",
-    headers:{"Content-Type":"application/x-www-form-urlencoded"},
-    body:"acao=testar_conexao"
-  })
-  .then(r=>r.text())
-  .then(t=>{
-    apiStatus.innerText = t.includes("ONLINE")
-      ? "✅ API SELO MIV ONLINE"
-      : "⚠️ API respondeu, mas formato inesperado";
-  })
-  .catch(()=> apiStatus.innerText="❌ API OFFLINE");
-}
-
-window.onload = testarAPI;
-</script>
-
 </body>
 </html>
