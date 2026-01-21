@@ -1,237 +1,46 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Participação em Royalties Musicais • Demo</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+const API_URL = "https://script.google.com/macros/s/AKfycbyNi7O48t2ZV9vc98bxAn-J766IQNZp7fSeE8wkiVNR-a2D3pBP5o7cxmR5s0zzOKs/exec";
 
-  <style>
-    :root {
-      --bg: #0e1015;
-      --card: #161a22;
-      --border: #242938;
-      --text: #eaeaf0;
-      --muted: #9aa0b3;
-      --accent: #4fd1c5;
-      --danger: #ff6b6b;
-    }
+document.getElementById("formContrato").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    * {
-      box-sizing: border-box;
-    }
+  const mensagem = document.getElementById("mensagem");
+  mensagem.textContent = "⏳ Enviando solicitação...";
+  mensagem.style.color = "black";
 
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: radial-gradient(circle at top, #141824, #0e1015);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+  const formData = new FormData(e.target);
 
-    .container {
-      width: 100%;
-      max-width: 420px;
-      padding: 20px;
-    }
+  const payload = {
+    nome: formData.get("nome"),
+    email: formData.get("email")
+  };
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
-    }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: 1.6rem;
-      letter-spacing: -0.5px;
-    }
-
-    .subtitle {
-      font-size: 0.9rem;
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.4;
-    }
-
-    label {
-      font-size: 0.75rem;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 6px;
-      margin-top: 16px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #0f1320;
-      color: var(--text);
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    input::placeholder {
-      color: #6f768f;
-    }
-
-    input:focus, select:focus {
-      border-color: var(--accent);
-    }
-
-    button {
-      width: 100%;
-      margin-top: 24px;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #4fd1c5, #38b2ac);
-      color: #0b1212;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
-      box-shadow: 0 8px 20px rgba(79, 209, 197, 0.25);
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 12px 28px rgba(79, 209, 197, 0.35);
-    }
-
-    .status {
-      margin-top: 20px;
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
-
-    .status a {
-      color: var(--accent);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .status a:hover {
-      text-decoration: underline;
-    }
-
-    .footer-note {
-      margin-top: 20px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      text-align: center;
-      line-height: 1.4;
-    }
-
-    .badge {
-      display: inline-block;
-      margin-top: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      background: rgba(79, 209, 197, 0.15);
-      color: var(--accent);
-      border: 1px solid rgba(79, 209, 197, 0.3);
-    }
-  </style>
-</head>
-
-<body>
-
-  <div class="container">
-    <div class="card">
-
-      <h1>Royalties Musicais</h1>
-      <div class="subtitle">
-        Simulação pública de participação em royalties.<br>
-        Contrato gerado automaticamente.
-      </div>
-
-      <span class="badge">DEMO • AMBIENTE DE TESTE</span>
-
-      <label for="nome">Nome completo</label>
-      <input id="nome" type="text" placeholder="Seu nome" autocomplete="name">
-
-      <label for="email">E-mail</label>
-      <input id="email" type="email" placeholder="seu@email.com" autocomplete="email">
-
-      <label for="percentual">Participação desejada</label>
-      <select id="percentual">
-        <option value="1">1% — R$ 50</option>
-        <option value="5">5% — R$ 250</option>
-        <option value="10">10% — R$ 500</option>
-      </select>
-
-      <button onclick="enviar()">Gerar contrato</button>
-
-      <div class="status" id="status"></div>
-
-      <div class="footer-note">
-        Não se trata de investimento financeiro regulado.<br>
-        Participação em royalties musicais futuros.
-      </div>
-
-    </div>
-  </div>
-
-  <!-- ⚠️ CÓDIGO FUNCIONAL MANTIDO INTACTO -->
-  <script>
-  function enviar() {
-    const nome = document.getElementById("nome").value;
-    const email = document.getElementById("email").value;
-    const percentual = document.getElementById("percentual").value;
-
-    if (!nome || !email) {
-      alert("Preencha nome e email.");
-      return;
-    }
-
-    const dados = {
-      nome: nome,
-      email: email,
-      percentual: percentual,
-      valor: percentual * 50
-    };
-
-    document.getElementById("status").innerHTML = "⏳ Gerando contrato...";
-
-    fetch("https://script.google.com/macros/s/AKfycbyNi7O48t2ZV9vc98bxAn-J766IQNZp7fSeE8wkiVNR-a2D3pBP5o7cxmR5s0zzOKs/exec", {
+  try {
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(dados)
-    })
-    .then(res => res.json())
-    .then(resp => {
-      if (resp.status === "ok") {
-        document.getElementById("status").innerHTML =
-          `✅ Contrato gerado com sucesso.<br>
-           <a href="${resp.contrato}" target="_blank">
-           📄 Abrir contrato</a>`;
-      } else {
-        document.getElementById("status").innerHTML =
-          "❌ Erro: " + resp.mensagem;
-      }
-    })
-    .catch(err => {
-      document.getElementById("status").innerHTML =
-        "❌ Falha ao conectar com o servidor.";
-      console.error(err);
+      body: JSON.stringify(payload)
     });
+
+    if (!response.ok) {
+      throw new Error("Servidor não respondeu corretamente");
+    }
+
+    const data = await response.json();
+
+    if (data.status === "sucesso") {
+      mensagem.textContent = "✅ Solicitação enviada! O comprador recebeu o e-mail de confirmação.";
+      mensagem.style.color = "green";
+      e.target.reset();
+    } else {
+      mensagem.textContent = "⚠️ Erro: " + (data.mensagem || "Falha ao gerar contrato");
+      mensagem.style.color = "orange";
+    }
+
+  } catch (error) {
+    mensagem.textContent = "❌ Falha ao conectar com o servidor.";
+    mensagem.style.color = "red";
+    console.error(error);
   }
-  </script>
-
-</body>
-</html>
-
-
-
+});
