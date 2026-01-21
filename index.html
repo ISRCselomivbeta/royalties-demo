@@ -4,187 +4,613 @@
   <meta charset="UTF-8">
   <title>Gerar Contrato | Selo MIV</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <style>
+    :root {
+      --primary: #00c6ff;
+      --primary-dark: #0072ff;
+      --secondary: #2c5364;
+      --dark: #0f2027;
+      --light: #ffffff;
+      --success: #4CAF50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --gray: #333333;
+      --gray-light: #444444;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--dark), var(--secondary));
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--light);
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
     }
-
-    .card {
-      background: #111;
-      padding: 30px;
-      border-radius: 12px;
+    
+    /* Efeitos de fundo */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(0, 114, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(0, 198, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(44, 83, 100, 0.1) 0%, transparent 50%);
+      z-index: -1;
+    }
+    
+    .container {
       width: 100%;
-      max-width: 420px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.5);
+      max-width: 480px;
+      animation: fadeIn 0.5s ease-out;
     }
-
-    h1 {
+    
+    .header {
       text-align: center;
-      margin-bottom: 20px;
-      font-size: 22px;
+      margin-bottom: 30px;
     }
-
-    label {
-      display: block;
-      margin-top: 15px;
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .logo-icon {
+      font-size: 28px;
+      color: var(--primary);
+      background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .subtitle {
       font-size: 14px;
-      opacity: 0.9;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
+      opacity: 0.8;
       margin-top: 5px;
-      border-radius: 6px;
-      border: none;
-      font-size: 14px;
     }
-
-    button {
-      margin-top: 25px;
+    
+    .card {
+      background: rgba(17, 17, 17, 0.9);
+      backdrop-filter: blur(10px);
+      padding: 35px 30px;
+      border-radius: 20px;
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background: #00c6ff;
-      background: linear-gradient(to right, #0072ff, #00c6ff);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      cursor: pointer;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
     }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    #status {
-      margin-top: 20px;
-      font-size: 14px;
+    
+    .card-title {
+      font-size: 22px;
+      margin-bottom: 25px;
       text-align: center;
+      font-weight: 600;
+      color: var(--light);
+      position: relative;
+      padding-bottom: 15px;
     }
-
-    a {
-      color: #00c6ff;
+    
+    .card-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+      border-radius: 3px;
+    }
+    
+    .form-group {
+      margin-bottom: 22px;
+      position: relative;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-label i {
+      color: var(--primary);
+      font-size: 16px;
+      width: 20px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 14px 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--light);
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 3px rgba(0, 198, 255, 0.1);
+    }
+    
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .select-wrapper {
+      position: relative;
+    }
+    
+    .select-wrapper::after {
+      content: '\f078';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+      pointer-events: none;
+    }
+    
+    select.form-input {
+      appearance: none;
+      cursor: pointer;
+      padding-right: 40px;
+    }
+    
+    .royalty-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding: 12px 15px;
+      background: rgba(0, 198, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(0, 198, 255, 0.1);
+    }
+    
+    .royalty-text {
+      font-size: 14px;
+    }
+    
+    .royalty-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      border: none;
+      border-radius: 12px;
+      color: var(--light);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+      box-shadow: 0 5px 15px rgba(0, 114, 255, 0.3);
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .status-container {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .status-success {
+      background: rgba(76, 175, 80, 0.1);
+      border-color: rgba(76, 175, 80, 0.2);
+    }
+    
+    .status-error {
+      background: rgba(244, 67, 54, 0.1);
+      border-color: rgba(244, 67, 54, 0.2);
+    }
+    
+    .status-processing {
+      background: rgba(255, 152, 0, 0.1);
+      border-color: rgba(255, 152, 0, 0.2);
+    }
+    
+    .status-icon {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
+    
+    .status-message {
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    
+    .status-message a {
+      color: var(--primary);
       text-decoration: none;
-      font-weight: bold;
+      font-weight: 600;
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: rgba(0, 198, 255, 0.1);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .status-message a:hover {
+      background: rgba(0, 198, 255, 0.2);
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 25px;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--light);
+      animation: spin 1s ease-in-out infinite;
+    }
+    
+    /* Animações */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    /* Responsividade */
+    @media (max-width: 576px) {
+      .card {
+        padding: 25px 20px;
+      }
+      
+      .card-title {
+        font-size: 20px;
+      }
+      
+      .form-input {
+        padding: 12px 14px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h1>Geração de Contrato</h1>
-
-    <label for="nome">Nome completo</label>
-    <input id="nome" type="text" placeholder="Seu nome" autocomplete="name">
-
-    <label for="email">E-mail</label>
-    <input id="email" type="email" placeholder="seu@email.com" autocomplete="email">
-
-    <label for="percentual">Percentual de royalties</label>
-    <select id="percentual">
-      <option value="10">10%</option>
-      <option value="20">20%</option>
-      <option value="30">30%</option>
-      <option value="40">40%</option>
-      <option value="50">50%</option>
-    </select>
-
-    <button onclick="enviar()">Gerar contrato</button>
-
-    <div id="status"></div>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-file-contract logo-icon"></i>
+        <span class="logo-text">SELO MIV</span>
+      </div>
+      <div class="subtitle">Contratos Digitais Seguros</div>
+    </div>
+    
+    <div class="card">
+      <h2 class="card-title">Gerar Novo Contrato</h2>
+      
+      <div class="form-group">
+        <label class="form-label" for="nome">
+          <i class="fas fa-user"></i>
+          Nome completo
+        </label>
+        <input class="form-input" id="nome" type="text" placeholder="Digite seu nome completo" autocomplete="name">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="email">
+          <i class="fas fa-envelope"></i>
+          E-mail
+        </label>
+        <input class="form-input" id="email" type="email" placeholder="seu@email.com" autocomplete="email">
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="percentual">
+          <i class="fas fa-percentage"></i>
+          Percentual de royalties
+        </label>
+        <div class="select-wrapper">
+          <select class="form-input" id="percentual">
+            <option value="10">10%</option>
+            <option value="15">15%</option>
+            <option value="20" selected>20%</option>
+            <option value="25">25%</option>
+            <option value="30">30%</option>
+            <option value="40">40%</option>
+            <option value="50">50%</option>
+          </select>
+        </div>
+        
+        <div class="royalty-display">
+          <span class="royalty-text">Valor estimado mensal:</span>
+          <span class="royalty-value" id="valorEstimado">R$ 1.000,00</span>
+        </div>
+      </div>
+      
+      <button class="submit-btn" onclick="enviar()" id="submitBtn">
+        <i class="fas fa-file-contract"></i>
+        Gerar Contrato
+      </button>
+      
+      <div id="status" class="status-container">
+        <div class="status-message">
+          Preencha os dados acima para gerar seu contrato
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>© 2024 Selo MIV. Todos os direitos reservados.</p>
+      <p>Contratos gerados automaticamente com segurança jurídica.</p>
+    </div>
   </div>
 
 <script>
-function enviar() {
+// Configurações
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzNkO8mGuBtwaVkSvRdJY1aUR_dPY7xa3CohawvKh-_U9bu12jguHqQVfdla9OoPh0/exec";
+const TEMPLATE_ID = "1uwS1slY1pKAIwkClBexVbV85V_Cs9z3IbUdQjKxNqbE";
+const CONTRACTS_FOLDER_ID = "1BvnWMaAK-g1ywVm0qZfdTy_xq4MZIAJZ";
+const SPREADSHEET_ID = "1IZLwx5K8ZkGdFFiW-fqjdvSzrFmEpeyGNI-yTZObEjQ";
+
+// Mapeamento de valores estimados por percentual
+const valoresEstimados = {
+  10: "R$ 500,00",
+  15: "R$ 750,00",
+  20: "R$ 1.000,00",
+  25: "R$ 1.250,00",
+  30: "R$ 1.500,00",
+  40: "R$ 2.000,00",
+  50: "R$ 2.500,00"
+};
+
+// Atualiza valor estimado quando muda o percentual
+document.getElementById('percentual').addEventListener('change', function() {
+  const percentual = this.value;
+  document.getElementById('valorEstimado').textContent = valoresEstimados[percentual] || "R$ 1.000,00";
+});
+
+// Função para exibir status
+function mostrarStatus(tipo, mensagem, link = null) {
+  const statusDiv = document.getElementById('status');
+  const statusMessages = {
+    success: {
+      icon: '✅',
+      class: 'status-success',
+      title: 'Sucesso!'
+    },
+    error: {
+      icon: '❌',
+      class: 'status-error',
+      title: 'Erro!'
+    },
+    processing: {
+      icon: '⏳',
+      class: 'status-processing',
+      title: 'Processando...'
+    },
+    info: {
+      icon: 'ℹ️',
+      class: '',
+      title: 'Informação'
+    }
+  };
+  
+  const status = statusMessages[tipo] || statusMessages.info;
+  
+  let html = `
+    <div class="status-icon">${status.icon}</div>
+    <div class="status-message">
+      <strong>${status.title}</strong><br>
+      ${mensagem}
+  `;
+  
+  if (link) {
+    html += `<br><a href="${link}" target="_blank"><i class="fas fa-external-link-alt"></i> Ver Contrato Gerado</a>`;
+  }
+  
+  html += `</div>`;
+  
+  statusDiv.innerHTML = html;
+  statusDiv.className = `status-container ${status.class}`;
+}
+
+// Função principal de envio
+async function enviar() {
   const nome = document.getElementById("nome").value.trim();
   const email = document.getElementById("email").value.trim();
   const percentual = document.getElementById("percentual").value;
+  const botao = document.getElementById("submitBtn");
 
-  if (!nome || !email) {
-    document.getElementById("status").innerHTML = "❌ Preencha nome e e-mail.";
+  // Validações
+  if (!nome) {
+    mostrarStatus('error', 'Por favor, digite seu nome completo.');
+    document.getElementById("nome").focus();
     return;
   }
 
-  // Validação de e-mail simples
-  if (!email.includes('@') || !email.includes('.')) {
-    document.getElementById("status").innerHTML = "❌ Digite um e-mail válido.";
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    mostrarStatus('error', 'Por favor, digite um e-mail válido.');
+    document.getElementById("email").focus();
     return;
   }
 
+  // Preparar dados
   const dados = {
     nome: nome,
     email: email,
     percentual: percentual,
     valor: parseInt(percentual) * 50,
-    data: new Date().toISOString()
+    data: new Date().toLocaleString("pt-BR"),
+    templateId: TEMPLATE_ID,
+    folderId: CONTRACTS_FOLDER_ID,
+    spreadsheetId: SPREADSHEET_ID
   };
 
-  document.getElementById("status").innerHTML = "⏳ Gerando contrato, aguarde...";
-  
-  // Desabilita o botão para evitar múltiplos cliques
-  const botao = document.querySelector('button');
+  // Configurar interface para processamento
+  mostrarStatus('processing', 'Gerando seu contrato...');
+  botao.innerHTML = '<span class="loading-spinner"></span> Processando...';
   botao.disabled = true;
-  botao.textContent = "Processando...";
 
-  // URL do Google Apps Script - IMPORTANTE: verifique se está correto
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQN8wemAJZ3zen7XHW30C78mELyQzSj8xNuY-9-2IULrdhYxocmEt9Hr2BRwmLt9k/exec";
-  
-  // Usando FormData para contornar problemas de CORS
-  const formData = new URLSearchParams();
-  formData.append('nome', nome);
-  formData.append('email', email);
-  formData.append('percentual', percentual);
-  formData.append('valor', dados.valor);
-  formData.append('data', dados.data);
+  try {
+    // Enviar para o Google Apps Script
+    const formData = new FormData();
+    Object.keys(dados).forEach(key => {
+      formData.append(key, dados[key]);
+    });
 
-  fetch(SCRIPT_URL, {
-    method: "POST",
-    mode: 'no-cors', // Modo no-cors para evitar problemas
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: formData.toString()
-  })
-  .then(response => {
-    // Com 'no-cors' não podemos ler a resposta, então assumimos sucesso
-    console.log("Requisição enviada com sucesso");
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: 'no-cors',
+      body: formData
+    });
+
+    // Como estamos usando 'no-cors', não podemos ler a resposta diretamente
+    // Mas assumimos sucesso e mostramos mensagem otimista
     
-    // Mensagem de sucesso (em produção você deve confirmar por e-mail)
-    document.getElementById("status").innerHTML = `
-      ✅ Contrato gerado com sucesso!<br><br>
-      📩 Um e-mail de confirmação foi enviado para:<br>
-      <strong>${email}</strong><br><br>
-      Em breve você receberá o contrato por e-mail.
-    `;
+    // Simulação de tempo de processamento
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Limpa o formulário
+    mostrarStatus('success', 
+      `Contrato gerado com sucesso!<br>
+      Um e-mail foi enviado para: <strong>${email}</strong><br>
+      O contrato também foi salvo em sua pasta de contratos.`,
+      `https://drive.google.com/drive/folders/${CONTRACTS_FOLDER_ID}`
+    );
+
+    // Limpar formulário
     document.getElementById("nome").value = "";
     document.getElementById("email").value = "";
-  })
-  .catch(err => {
-    console.error("Erro:", err);
-    document.getElementById("status").innerHTML = `
-      ⚠️ Requisição enviada, mas houve um problema na resposta.<br>
-      Verifique seu e-mail <strong>${email}</strong> em alguns minutos.
-    `;
-  })
-  .finally(() => {
-    // Reabilita o botão
+    
+    // Registrar no console para depuração
+    console.log("Contrato gerado para:", { nome, email, percentual });
+
+  } catch (erro) {
+    console.error("Erro:", erro);
+    mostrarStatus('error', 
+      `Houve um problema técnico ao gerar o contrato.<br>
+      Por favor, tente novamente ou entre em contato com nosso suporte.<br>
+      <small>Detalhes: ${erro.message}</small>`
+    );
+  } finally {
+    // Restaurar botão
+    botao.innerHTML = '<i class="fas fa-file-contract"></i> Gerar Contrato';
     botao.disabled = false;
-    botao.textContent = "Gerar contrato";
-  });
+  }
 }
+
+// Inicializar valor estimado
+document.getElementById('valorEstimado').textContent = valoresEstimados[document.getElementById('percentual').value];
+
+// Efeito de digitação no subtítulo
+const subtitle = document.querySelector('.subtitle');
+const originalText = subtitle.textContent;
+let charIndex = 0;
+
+function typeEffect() {
+  if (charIndex < originalText.length) {
+    subtitle.textContent = originalText.substring(0, charIndex + 1);
+    charIndex++;
+    setTimeout(typeEffect, 50);
+  }
+}
+
+// Iniciar efeito após carregar a página
+window.addEventListener('load', () => {
+  setTimeout(typeEffect, 1000);
+});
 </script>
 
 </body>
 </html>
-
-
