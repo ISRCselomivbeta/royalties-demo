@@ -1,807 +1,217 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SELO MIV - Plataforma de Royalties Musicais</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root {
-            --primary: #00c6ff;
-            --secondary: #0072ff;
-            --dark: #0f2027;
-            --success: #28a745;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow-x: hidden;
-        }
-        
-        .hero-section {
-            background: linear-gradient(135deg, var(--dark), #203a43, #2c5364);
-            color: white;
-            padding: 100px 0;
-            position: relative;
-        }
-        
-        .feature-card {
-            border: none;
-            border-radius: 15px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: 1px solid rgba(0,198,255,0.1);
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,198,255,0.15);
-        }
-        
-        .btn-gradient {
-            background: linear-gradient(135deg, var(--secondary), var(--primary));
-            border: none;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .btn-gradient:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,114,255,0.3);
-            color: white;
-        }
-        
-        .api-status {
-            background: linear-gradient(135deg, #1a3a1a, #2d5a2d);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-        }
-        
-        .user-type-card {
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .user-type-card:hover, .user-type-card.selected {
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(0,198,255,0.05), rgba(0,114,255,0.05));
-        }
-        
-        /* Animação de spinner */
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Ajustes para responsividade */
-        @media (max-width: 768px) {
-            .hero-section {
-                padding: 60px 0;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .display-4 {
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SELO MIV — Royalties Musicais</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .hero {
+      background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      color: white;
+      padding: 80px 20px;
+    }
+    .card-hover:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,.15);
+    }
+    .selected {
+      border: 2px solid #0d6efd;
+      background: #f0f8ff;
+    }
+  </style>
 </head>
+
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background-color: var(--dark);">
-        <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <div class="bg-primary rounded-circle p-2 me-2">
-                    <i class="bi bi-music-note-beamed"></i>
-                </div>
-                <div>
-                    <span class="fw-bold fs-4" style="color: var(--primary)">SELO</span>
-                    <span class="fw-bold fs-4">MIV</span>
-                </div>
-            </a>
-            
-            <div class="d-flex align-items-center">
-                <a href="login.html" class="btn btn-outline-light me-3">
-                    <i class="bi bi-box-arrow-in-right"></i> Entrar
-                </a>
-                <a href="#cadastro" class="btn btn-gradient">
-                    <i class="bi bi-person-plus"></i> Cadastrar
-                </a>
-            </div>
+
+<!-- NAV -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <span class="navbar-brand fw-bold">🎵 SELO MIV</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero text-center">
+  <div class="container">
+    <h1 class="fw-bold">Ouvir é investir.<br>Investir é ganhar.</h1>
+    <p class="lead mt-3">
+      Plataforma de royalties musicais onde artistas, ouvintes e investidores ganham juntos.
+    </p>
+    <a href="#cadastro" class="btn btn-primary btn-lg mt-3">Começar Agora</a>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section class="py-5">
+  <div class="container text-center">
+    <h2 class="mb-4">Como Funciona</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card card-hover h-100 p-4">
+          <h4>🎧 Ouvinte</h4>
+          <p>Ouve música, já paga e recebe retorno automaticamente.</p>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <h1 class="display-4 fw-bold mb-4">
-                        Transforme sua <span style="color: var(--primary)">música</span><br>
-                        em <span style="color: var(--primary)">renda recorrente</span>
-                    </h1>
-                    <p class="lead mb-4">
-                        A primeira plataforma brasileira que conecta artistas a investidores 
-                        através de contratos inteligentes de royalties musicais.
-                    </p>
-                    <div class="d-flex flex-wrap gap-3">
-                        <a href="#cadastro" class="btn btn-gradient btn-lg">
-                            <i class="bi bi-lightning-charge"></i> Começar Agora
-                        </a>
-                        <a href="#como-funciona" class="btn btn-outline-light btn-lg">
-                            <i class="bi bi-play-circle"></i> Ver Demonstração
-                        </a>
-                    </div>
-                    
-                    <!-- API Status -->
-                    <div class="api-status mt-5">
-                        <div class="d-flex align-items-center">
-                            <div class="bg-success rounded-circle p-2 me-3">
-                                <i class="bi bi-check-lg"></i>
-                            </div>
-                            <div>
-                                <h5 class="mb-1">✅ API SELO MIV ONLINE</h5>
-                                <p class="mb-0 small">
-                                    Sistema funcionando corretamente. 
-                                    <button class="btn btn-sm btn-outline-light ms-2" onclick="testarConexaoAPI()">
-                                        Testar Conexão
-                                    </button>
-                                </p>
-                            </div>
-                        </div>
-                        <div id="apiTestResult" class="mt-2" style="display: none;"></div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="card feature-card">
-                        <div class="card-body p-4">
-                            <div class="text-center mb-4">
-                                <div class="display-1 mb-3" style="color: var(--primary)">🎵</div>
-                                <h3>Dashboard em Tempo Real</h3>
-                            </div>
-                            <div class="row text-center">
-                                <div class="col-4">
-                                    <div class="p-3">
-                                        <h4 class="text-primary">15K+</h4>
-                                        <small>Artistas</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3">
-                                        <h4 class="text-primary">R$ 2.5M</h4>
-                                        <small>Royalties</small>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="p-3">
-                                        <h4 class="text-primary">98%</h4>
-                                        <small>Satisfação</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-hover h-100 p-4">
+          <h4>🎤 Artista</h4>
+          <p>Cadastra músicas e recebe royalties por cada play.</p>
         </div>
-    </section>
-
-    <!-- Features -->
-    <section id="como-funciona" class="py-5">
-        <div class="container">
-            <h2 class="text-center mb-5">Como funciona a <span style="color: var(--primary)">plataforma</span></h2>
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <span class="badge bg-primary rounded-circle p-3">1</span>
-                            </div>
-                            <h4>Cadastro Simples</h4>
-                            <p class="text-muted">
-                                Artistas se cadastram em minutos com documentos verificados.
-                                Receba seu ID exclusivo para gerenciamento.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <span class="badge bg-primary rounded-circle p-3">2</span>
-                            </div>
-                            <h4>Contratos Inteligentes</h4>
-                            <p class="text-muted">
-                                Defina percentuais de royalties (10-50%).
-                                Contratos gerados automaticamente com assinatura digital.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body p-4">
-                            <div class="mb-3">
-                                <span class="badge bg-primary rounded-circle p-3">3</span>
-                            </div>
-                            <h4>Gestão Completa</h4>
-                            <p class="text-muted">
-                                Dashboard personalizado para artistas e investidores.
-                                Relatórios detalhados e pagamentos automáticos.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-hover h-100 p-4">
+          <h4>💼 Investidor</h4>
+          <p>Compra participação em músicas e ganha com o crescimento.</p>
         </div>
-    </section>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Cadastro Section -->
-    <section id="cadastro" class="py-5 bg-light">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="card border-0 shadow-lg">
-                        <div class="card-body p-5">
-                            <div class="text-center mb-5">
-                                <h2 class="fw-bold">Cadastre-se Gratuitamente</h2>
-                                <p class="text-muted">Escolha seu perfil na plataforma</p>
-                            </div>
-                            
-                            <!-- User Type Selection -->
-                            <div class="row g-4 mb-5">
-                                <div class="col-md-6">
-                                    <div class="card user-type-card h-100 text-center p-4" 
-                                         onclick="selectUserType('artista')"
-                                         id="artistaCard">
-                                        <div class="card-body">
-                                            <div class="display-1 mb-3">🎤</div>
-                                            <h4>Artista</h4>
-                                            <p class="text-muted small">
-                                                Cadastre suas músicas, gere contratos e 
-                                                receba royalties regularmente.
-                                            </p>
-                                            <div class="mt-3">
-                                                <span class="badge bg-primary">Para Cantores</span>
-                                                <span class="badge bg-primary">Compositores</span>
-                                                <span class="badge bg-primary">Produtores</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card user-type-card h-100 text-center p-4" 
-                                         onclick="selectUserType('investidor')"
-                                         id="investidorCard">
-                                        <div class="card-body">
-                                            <div class="display-1 mb-3">💼</div>
-                                            <h4>Investidor</h4>
-                                            <p class="text-muted small">
-                                                Invista em talentos musicais e receba 
-                                                retornos sobre os royalties gerados.
-                                            </p>
-                                            <div class="mt-3">
-                                                <span class="badge bg-primary">Patrocínio</span>
-                                                <span class="badge bg-primary">Royalties</span>
-                                                <span class="badge bg-primary">Investimento</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<!-- CADASTRO -->
+<section id="cadastro" class="py-5 bg-light">
+  <div class="container">
+    <div class="card shadow p-4">
+      <h2 class="text-center mb-4">Cadastro Gratuito</h2>
 
-                            <!-- Registration Form -->
-                            <div id="registrationForm" style="display: none;">
-                                <form id="formCadastro">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Nome Completo *</label>
-                                            <input type="text" class="form-control" id="nomeCadastro" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">CPF *</label>
-                                            <input type="text" class="form-control" id="cpfCadastro" 
-                                                   placeholder="Somente números" maxlength="11" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">E-mail *</label>
-                                            <input type="email" class="form-control" id="emailCadastro" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Telefone</label>
-                                            <input type="text" class="form-control" id="telefoneCadastro" 
-                                                   placeholder="(11) 99999-9999">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Senha *</label>
-                                            <input type="password" class="form-control" id="senhaCadastro" required>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label fw-bold">Confirmar Senha *</label>
-                                            <input type="password" class="form-control" id="confirmaSenha" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="termos" required>
-                                            <label class="form-check-label small" for="termos">
-                                                Concordo com os <a href="#" class="text-primary">Termos de Uso</a> e 
-                                                <a href="#" class="text-primary">Política de Privacidade</a>
-                                            </label>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-grid mt-4">
-                                        <button type="button" class="btn btn-gradient btn-lg" onclick="cadastrarUsuario()">
-                                            <i class="bi bi-person-plus"></i> Criar Minha Conta
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <!-- Login Link -->
-                            <div class="text-center mt-4">
-                                <p class="text-muted">
-                                    Já tem uma conta? 
-                                    <a href="login.html" class="text-primary fw-bold">Faça login aqui</a>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- TIPO -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card p-3 text-center card-hover" id="artistaCard"
+               onclick="selectUserType('artista')">
+            🎤 <strong>Sou Artista</strong>
+          </div>
         </div>
-    </section>
-
-    <!-- API Demo -->
-    <section class="py-5 bg-dark text-white">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h4 class="mb-3">⚡ API SELO MIV - Endpoints Disponíveis</h4>
-                    <div class="bg-dark border border-secondary rounded p-3 mb-3">
-                        <code class="text-info">
-                            {<br>
-                            &nbsp;&nbsp;"acao": "cadastrar_artista",<br>
-                            &nbsp;&nbsp;"nome": "Nome do Artista",<br>
-                            &nbsp;&nbsp;"cpf": "12345678909",<br>
-                            &nbsp;&nbsp;"email": "artista@email.com",<br>
-                            &nbsp;&nbsp;"telefone": "(11) 99999-9999"<br>
-                            }
-                        </code>
-                    </div>
-                </div>
-                <div class="col-md-4 text-center">
-                    <div class="display-1 mb-3">🔌</div>
-                    <p class="small">API ativa e processando dados</p>
-                </div>
-            </div>
+        <div class="col-md-6">
+          <div class="card p-3 text-center card-hover" id="investidorCard"
+               onclick="selectUserType('investidor')">
+            💼 <strong>Sou Investidor</strong>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <footer class="py-4 bg-dark text-white">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary rounded-circle p-2 me-3">
-                            <i class="bi bi-music-note-beamed"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0">SELO MIV</h5>
-                            <small class="text-muted">Plataforma de Royalties Musicais</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <small class="text-muted">© 2024 Todos os direitos reservados</small>
-                </div>
-            </div>
+      <!-- FORM -->
+      <form id="formCadastro" style="display:none;">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <input class="form-control" id="nome" placeholder="Nome completo*" required>
+          </div>
+          <div class="col-md-6">
+            <input class="form-control" id="cpf" placeholder="CPF (11 dígitos)*" required>
+          </div>
+          <div class="col-md-6">
+            <input class="form-control" id="email" placeholder="E-mail*" required>
+          </div>
+          <div class="col-md-6">
+            <input class="form-control" id="telefone" placeholder="Telefone">
+          </div>
         </div>
-    </footer>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- JavaScript Principal ATUALIZADO -->
-    <script>
-        // Configurações da API
-        const API_URL = "https://script.google.com/macros/s/AKfycbw6WpjiLomixA6H3IK-y5-VNoCq3WbstZhYbjHrM8ueJX-LmWsNxFcOxAwi6wCRxXK7/exec";
-        let selectedUserType = '';
-        
-        // Formatar CPF (somente números)
-        document.getElementById('cpfCadastro')?.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.substring(0, 11);
-            e.target.value = value;
-        });
-        
-        // Formatar telefone
-        document.getElementById('telefoneCadastro')?.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 11) value = value.substring(0, 11);
-            
-            if (value.length > 0) {
-                if (value.length <= 2) {
-                    value = `(${value}`;
-                } else if (value.length <= 7) {
-                    value = `(${value.substring(0,2)}) ${value.substring(2)}`;
-                } else {
-                    value = `(${value.substring(0,2)}) ${value.substring(2,7)}-${value.substring(7)}`;
-                }
-            }
-            
-            e.target.value = value;
-        });
-        
-        // Selecionar tipo de usuário
-        function selectUserType(tipo) {
-            selectedUserType = tipo;
-            
-            // Reset cards
-            document.getElementById('artistaCard').classList.remove('selected');
-            document.getElementById('investidorCard').classList.remove('selected');
-            
-            // Select clicked card
-            document.getElementById(tipo + 'Card').classList.add('selected');
-            
-            // Show form
-            document.getElementById('registrationForm').style.display = 'block';
-            
-            // Scroll to form
-            document.getElementById('registrationForm').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
-            });
-        }
-        
-        // FUNÇÃO PRINCIPAL DE CADASTRO - VERSÃO CORRIGIDA E TESTADA
-        function cadastrarUsuario() {
-            console.log("🎤 Iniciando cadastro no SELO MIV...");
-            
-            // 1. COLETAR DADOS
-            const nome = document.getElementById('nomeCadastro').value.trim();
-            const cpf = document.getElementById('cpfCadastro').value.replace(/\D/g, '');
-            const email = document.getElementById('emailCadastro').value.trim();
-            const telefone = document.getElementById('telefoneCadastro').value.replace(/\D/g, '');
-            const senha = document.getElementById('senhaCadastro').value;
-            const confirmaSenha = document.getElementById('confirmaSenha').value;
-            
-            console.log("📝 Dados coletados:", { nome, cpf, email, telefone });
-            
-            // 2. VALIDAÇÕES
-            if (!nome || !cpf || !email || !senha) {
-                alert('❌ Preencha todos os campos obrigatórios (*)');
-                return;
-            }
-            
-            if (cpf.length !== 11) {
-                alert('❌ CPF deve ter 11 dígitos');
-                return;
-            }
-            
-            if (!email.includes('@') || !email.includes('.')) {
-                alert('❌ E-mail inválido');
-                return;
-            }
-            
-            if (senha !== confirmaSenha) {
-                alert('❌ As senhas não coincidem');
-                return;
-            }
-            
-            if (!document.getElementById('termos').checked) {
-                alert('❌ Você deve aceitar os termos de uso');
-                return;
-            }
-            
-            // 3. CRIAR TELA DE LOADING
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = 'loadingCadastro';
-            loadingDiv.style.position = 'fixed';
-            loadingDiv.style.top = '0';
-            loadingDiv.style.left = '0';
-            loadingDiv.style.width = '100%';
-            loadingDiv.style.height = '100%';
-            loadingDiv.style.background = 'rgba(0, 0, 0, 0.95)';
-            loadingDiv.style.display = 'flex';
-            loadingDiv.style.flexDirection = 'column';
-            loadingDiv.style.justifyContent = 'center';
-            loadingDiv.style.alignItems = 'center';
-            loadingDiv.style.zIndex = '9999';
-            loadingDiv.style.color = 'white';
-            loadingDiv.style.fontFamily = 'Arial, sans-serif';
-            
-            // Spinner animado
-            const spinner = document.createElement('div');
-            spinner.style.width = '60px';
-            spinner.style.height = '60px';
-            spinner.style.border = '5px solid rgba(255, 255, 255, 0.3)';
-            spinner.style.borderTop = '5px solid #00c6ff';
-            spinner.style.borderRadius = '50%';
-            spinner.style.animation = 'spin 1s linear infinite';
-            
-            // Texto do loading
-            const loadingText = document.createElement('div');
-            loadingText.innerHTML = `
-                <h3 style="margin-top: 30px; color: #00c6ff;">SELO MIV</h3>
-                <h4 style="margin-top: 20px;">Cadastrando Artista...</h4>
-                <p style="margin-top: 10px; opacity: 0.8;">Por favor, aguarde alguns instantes</p>
-            `;
-            
-            loadingDiv.appendChild(spinner);
-            loadingDiv.appendChild(loadingText);
-            document.body.appendChild(loadingDiv);
-            
-            // 4. ENVIAR PARA API (MÉTODO SIMPLES QUE FUNCIONA)
-            setTimeout(() => {
-                // Criar formulário invisível
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = API_URL;
-                form.target = '_blank'; // Abre em nova aba
-                form.style.display = 'none';
-                
-                // Adicionar campos ao formulário
-                const campos = [
-                    ['acao', 'cadastrar_artista'],
-                    ['nome', nome],
-                    ['cpf', cpf],
-                    ['email', email]
-                ];
-                
-                if (telefone) campos.push(['telefone', telefone]);
-                
-                campos.forEach(([name, value]) => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value;
-                    form.appendChild(input);
-                });
-                
-                document.body.appendChild(form);
-                form.submit();
-                
-                // Remover formulário após envio
-                setTimeout(() => {
-                    if (form.parentNode) {
-                        document.body.removeChild(form);
-                    }
-                }, 1000);
-                
-                // 5. MOSTRAR RESULTADO DO CADASTRO
-                setTimeout(() => {
-                    // Remover tela de loading
-                    if (loadingDiv.parentNode) {
-                        document.body.removeChild(loadingDiv);
-                    }
-                    
-                    // Criar ID do artista
-                    const artistaId = "ART" + Math.floor(1000 + Math.random() * 9000);
-                    const dataAtual = new Date().toLocaleString('pt-BR');
-                    
-                    // Criar modal de sucesso
-                    const modal = document.createElement('div');
-                    modal.id = 'modalSucesso';
-                    modal.style.position = 'fixed';
-                    modal.style.top = '0';
-                    modal.style.left = '0';
-                    modal.style.width = '100%';
-                    modal.style.height = '100%';
-                    modal.style.background = 'rgba(0, 0, 0, 0.95)';
-                    modal.style.display = 'flex';
-                    modal.style.justifyContent = 'center';
-                    modal.style.alignItems = 'center';
-                    modal.style.zIndex = '9998';
-                    modal.style.padding = '20px';
-                    
-                    // Conteúdo do modal
-                    const modalContent = document.createElement('div');
-                    modalContent.style.background = 'white';
-                    modalContent.style.borderRadius = '15px';
-                    modalContent.style.padding = '40px';
-                    modalContent.style.maxWidth = '500px';
-                    modalContent.style.width = '100%';
-                    modalContent.style.textAlign = 'center';
-                    modalContent.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
-                    
-                    // Ícone de sucesso
-                    const icon = document.createElement('div');
-                    icon.textContent = '✅';
-                    icon.style.fontSize = '70px';
-                    icon.style.color = '#28a745';
-                    icon.style.marginBottom = '20px';
-                    
-                    // Título
-                    const titulo = document.createElement('h2');
-                    titulo.textContent = 'CADASTRO CONCLUÍDO!';
-                    titulo.style.color = '#333';
-                    titulo.style.marginBottom = '10px';
-                    
-                    // Mensagem
-                    const mensagem = document.createElement('p');
-                    mensagem.textContent = 'Artista cadastrado com sucesso no SELO MIV!';
-                    mensagem.style.color = '#666';
-                    mensagem.style.marginBottom = '30px';
-                    
-                    // Container de dados
-                    const dadosContainer = document.createElement('div');
-                    dadosContainer.style.background = '#f8f9fa';
-                    dadosContainer.style.padding = '20px';
-                    dadosContainer.style.borderRadius = '10px';
-                    dadosContainer.style.margin = '20px 0';
-                    dadosContainer.style.textAlign = 'left';
-                    
-                    const dadosTitulo = document.createElement('h5');
-                    dadosTitulo.textContent = '📋 SEUS DADOS';
-                    dadosTitulo.style.color = '#0072ff';
-                    dadosTitulo.style.marginBottom = '15px';
-                    
-                    const dadosLista = document.createElement('div');
-                    dadosLista.innerHTML = `
-                        <p><strong>Nome:</strong> ${nome}</p>
-                        <p><strong>Email:</strong> ${email}</p>
-                        <p><strong>CPF:</strong> ${cpf}</p>
-                        ${telefone ? `<p><strong>Telefone:</strong> ${telefone}</p>` : ''}
-                        <p><strong>ID do Artista:</strong> <span style="background: #0072ff; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold;">${artistaId}</span></p>
-                        <p><strong>Data do Cadastro:</strong> ${dataAtual}</p>
-                    `;
-                    
-                    dadosContainer.appendChild(dadosTitulo);
-                    dadosContainer.appendChild(dadosLista);
-                    
-                    // Link para planilha
-                    const linkPlanilha = document.createElement('a');
-                    linkPlanilha.href = 'https://docs.google.com/spreadsheets/d/1NOc5RHVoWdfdMDur55C5R25FAsAcqQtk5PHVmFlViV0/edit';
-                    linkPlanilha.target = '_blank';
-                    linkPlanilha.textContent = '📊 Ver Planilha com seus dados';
-                    linkPlanilha.style.display = 'block';
-                    linkPlanilha.style.background = '#e9ecef';
-                    linkPlanilha.style.color = '#495057';
-                    linkPlanilha.style.padding = '12px';
-                    linkPlanilha.style.borderRadius = '8px';
-                    linkPlanilha.style.textDecoration = 'none';
-                    linkPlanilha.style.margin = '15px 0';
-                    linkPlanilha.style.fontWeight = 'bold';
-                    
-                    // Botões de ação
-                    const botoesContainer = document.createElement('div');
-                    botoesContainer.style.display = 'flex';
-                    botoesContainer.style.gap = '10px';
-                    botoesContainer.style.justifyContent = 'center';
-                    botoesContainer.style.marginTop = '25px';
-                    
-                    const btnLogin = document.createElement('button');
-                    btnLogin.textContent = '📝 Fazer Login';
-                    btnLogin.style.background = '#00c6ff';
-                    btnLogin.style.color = 'white';
-                    btnLogin.style.border = 'none';
-                    btnLogin.style.padding = '12px 25px';
-                    btnLogin.style.borderRadius = '8px';
-                    btnLogin.style.fontWeight = 'bold';
-                    btnLogin.style.cursor = 'pointer';
-                    btnLogin.style.flex = '1';
-                    btnLogin.onclick = function() {
-                        window.location.href = 'login.html?artistaId=' + artistaId + '&nome=' + encodeURIComponent(nome);
-                    };
-                    
-                    const btnNovo = document.createElement('button');
-                    btnNovo.textContent = '✨ Novo Cadastro';
-                    btnNovo.style.background = '#6c757d';
-                    btnNovo.style.color = 'white';
-                    btnNovo.style.border = 'none';
-                    btnNovo.style.padding = '12px 25px';
-                    btnNovo.style.borderRadius = '8px';
-                    btnNovo.style.fontWeight = 'bold';
-                    btnNovo.style.cursor = 'pointer';
-                    btnNovo.style.flex = '1';
-                    btnNovo.onclick = function() {
-                        document.body.removeChild(modal);
-                        document.getElementById('formCadastro').reset();
-                    };
-                    
-                    botoesContainer.appendChild(btnLogin);
-                    botoesContainer.appendChild(btnNovo);
-                    
-                    // Montar modal
-                    modalContent.appendChild(icon);
-                    modalContent.appendChild(titulo);
-                    modalContent.appendChild(mensagem);
-                    modalContent.appendChild(dadosContainer);
-                    modalContent.appendChild(linkPlanilha);
-                    modalContent.appendChild(botoesContainer);
-                    
-                    modal.appendChild(modalContent);
-                    document.body.appendChild(modal);
-                    
-                    // Limpar formulário
-                    document.getElementById('formCadastro').reset();
-                    
-                    console.log("✅ Cadastro realizado com sucesso! ID:", artistaId);
-                    
-                }, 2000); // Esperar 2 segundos para mostrar resultado
-                
-            }, 1000); // Pequeno delay antes de enviar
-        }
-        
-        // Função para testar conexão com API
-        function testarConexaoAPI() {
-            const resultDiv = document.getElementById('apiTestResult');
-            resultDiv.innerHTML = '<div class="spinner-border spinner-border-sm"></div> Testando conexão...';
-            resultDiv.style.display = 'block';
-            resultDiv.className = 'alert alert-info';
-            
-            // Testar com form-urlencoded (funciona melhor com Google Apps Script)
-            const formData = new URLSearchParams();
-            formData.append('acao', 'testar_conexao');
-            
-            fetch(API_URL, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: formData.toString()
-            })
-            .then(response => response.text())
-            .then(texto => {
-                if (texto.includes('API SELO MIV ONLINE') || texto.includes('success')) {
-                    resultDiv.innerHTML = '✅ <strong>API FUNCIONANDO!</strong> Sistema conectado com sucesso.';
-                    resultDiv.className = 'alert alert-success';
-                } else {
-                    resultDiv.innerHTML = '⚠️ <strong>API RESPONDEU</strong> mas com formato inesperado.';
-                    resultDiv.className = 'alert alert-warning';
-                }
-            })
-            .catch(erro => {
-                resultDiv.innerHTML = '❌ <strong>ERRO DE CONEXÃO:</strong> ' + erro.message;
-                resultDiv.className = 'alert alert-danger';
-            });
-            
-            // Auto-esconder após 5 segundos
-            setTimeout(() => {
-                resultDiv.style.display = 'none';
-            }, 5000);
-        }
-        
-        // Teste inicial da API ao carregar a página
-        window.addEventListener('load', function() {
-            console.log("🔧 SELO MIV - Sistema iniciado");
-            console.log("🔗 URL da API:", API_URL);
-            
-            // Testar API após 3 segundos
-            setTimeout(() => {
-                testarConexaoAPI();
-            }, 3000);
-        });
-        
-        // Scroll suave para links internos
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href !== '#' && href !== '#!') {
-                    e.preventDefault();
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                    }
-                }
-            });
-        });
-    </script>
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="termos">
+          <label class="form-check-label">Aceito os termos</label>
+        </div>
+
+        <button type="button" class="btn btn-success w-100 mt-4"
+                onclick="cadastrar()">
+          Criar Conta
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS -->
+<section class="py-4 bg-dark text-white text-center">
+  <p id="apiStatus">🔄 Verificando API...</p>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-3 bg-black text-white text-center">
+  <small>© SELO MIV — Todos os direitos reservados</small>
+</footer>
+
+<script>
+/* ================= CONFIG ================= */
+const API_URL = "https://script.google.com/macros/s/AKfycbw6WpjiLomixA6H3IK-y5-VNoCq3WbstZhYbjHrM8ueJX-LmWsNxFcOxAwi6wCRxXK7/exec";
+let tipoUsuario = "";
+
+/* ================= UI ================= */
+function selectUserType(tipo) {
+  tipoUsuario = tipo;
+  document.getElementById("formCadastro").style.display = "block";
+  document.getElementById("artistaCard").classList.remove("selected");
+  document.getElementById("investidorCard").classList.remove("selected");
+  document.getElementById(tipo + "Card").classList.add("selected");
+}
+
+/* ================= CADASTRO ================= */
+function cadastrar() {
+  const nome = nome.value.trim();
+  const cpf = cpf.value.replace(/\D/g,"");
+  const email = email.value.trim();
+  const telefone = telefone.value.replace(/\D/g,"");
+
+  if (!tipoUsuario || !nome || !cpf || !email) {
+    alert("❌ Preencha todos os campos obrigatórios");
+    return;
+  }
+  if (cpf.length !== 11) {
+    alert("❌ CPF inválido");
+    return;
+  }
+  if (!termos.checked) {
+    alert("❌ Aceite os termos");
+    return;
+  }
+
+  const dados = new URLSearchParams({
+    acao: tipoUsuario === "artista"
+      ? "cadastrar_artista"
+      : "cadastrar_investidor",
+    nome, cpf, email, telefone
+  });
+
+  fetch(API_URL, {
+    method: "POST",
+    headers: {"Content-Type":"application/x-www-form-urlencoded"},
+    body: dados.toString()
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.status === "ok") {
+      alert(`✅ Cadastro realizado!\nID: ${res.id}`);
+      document.getElementById("formCadastro").reset();
+    } else {
+      alert("❌ Erro: " + res.mensagem);
+    }
+  })
+  .catch(() => alert("❌ Erro de conexão com a API"));
+}
+
+/* ================= TESTE API ================= */
+function testarAPI() {
+  fetch(API_URL, {
+    method:"POST",
+    headers:{"Content-Type":"application/x-www-form-urlencoded"},
+    body:"acao=testar_conexao"
+  })
+  .then(r=>r.text())
+  .then(t=>{
+    apiStatus.innerText = t.includes("ONLINE")
+      ? "✅ API SELO MIV ONLINE"
+      : "⚠️ API respondeu, mas formato inesperado";
+  })
+  .catch(()=> apiStatus.innerText="❌ API OFFLINE");
+}
+
+window.onload = testarAPI;
+</script>
+
 </body>
 </html>
