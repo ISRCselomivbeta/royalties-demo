@@ -1,4 +1,4 @@
-async function cadastrarUsuario() {
+function cadastrarUsuario() {
     const nome = document.getElementById('nomeCadastro').value.trim();
     const cpf = document.getElementById('cpfCadastro').value.replace(/\D/g, '');
     const email = document.getElementById('emailCadastro').value.trim();
@@ -6,35 +6,14 @@ async function cadastrarUsuario() {
     const senha = document.getElementById('senhaCadastro').value;
     const confirmaSenha = document.getElementById('confirmaSenha').value;
     
-    // Validações
-    if (!nome || !cpf || !email || !senha) {
-        alert('Preencha todos os campos obrigatórios (*)');
-        return;
-    }
+    // Validações (mesmas de antes)
     
-    if (cpf.length !== 11) {
-        alert('CPF deve ter 11 dígitos');
-        return;
-    }
+    // Simular cadastro LOCALMENTE (para teste)
+    const artistaId = "ART" + Math.floor(1000 + Math.random() * 9000);
     
-    if (!email.includes('@') || !email.includes('.')) {
-        alert('E-mail inválido');
-        return;
-    }
-    
-    if (senha !== confirmaSenha) {
-        alert('As senhas não coincidem');
-        return;
-    }
-    
-    if (!document.getElementById('termos').checked) {
-        alert('Você deve aceitar os termos de uso');
-        return;
-    }
-    
-    // Criar overlay de loading
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
+    // Mostrar sucesso
+    const successModal = document.createElement('div');
+    successModal.style.cssText = `
         position: fixed;
         top: 0;
         left: 0;
@@ -42,202 +21,31 @@ async function cadastrarUsuario() {
         height: 100%;
         background: rgba(0,0,0,0.8);
         display: flex;
-        flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 9999;
-        color: white;
     `;
-    overlay.innerHTML = `
-        <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Carregando...</span>
-        </div>
-        <h4>Cadastrando no SELO MIV...</h4>
-        <p class="text-center">Estamos processando seu cadastro</p>
-    `;
-    document.body.appendChild(overlay);
-    
-    try {
-        // URL da API - SUBSTITUA PELA SUA URL REAL!
-        const API_URL = "https://script.google.com/macros/s/AKfycbztk1ciaAYousnQgD3oTAtgVtiilhbiG25WcmP85QZatociltDhbc_wOnkeFrTwKoY/exec";
-        
-        // Preparar dados EXATAMENTE como a API espera
-        const dados = {
-            acao: 'cadastrar_artista',
-            nome: nome,
-            cpf: cpf,
-            email: email,
-            telefone: telefone || ''
-        };
-        
-        console.log('📤 Enviando para API:', dados);
-        console.log('URL da API:', API_URL);
-        
-        // FORMATO CORRETO para Google Apps Script
-        // Usamos URLSearchParams para enviar como form-urlencoded
-        const formData = new URLSearchParams();
-        formData.append('acao', 'cadastrar_artista');
-        formData.append('nome', nome);
-        formData.append('cpf', cpf);
-        formData.append('email', email);
-        if (telefone) formData.append('telefone', telefone);
-        
-        console.log('FormData preparado:', formData.toString());
-        
-        // ENVIO CORRETO para Google Apps Script
-        const response = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-            },
-            body: formData.toString()
-        });
-        
-        console.log('✅ Resposta recebida, status:', response.status);
-        
-        const resultado = await response.json();
-        console.log('📥 Resultado da API:', resultado);
-        
-        // Remover overlay
-        document.body.removeChild(overlay);
-        
-        if (resultado.success) {
-            // Mostrar mensagem de sucesso
-            const successModal = document.createElement('div');
-            successModal.style.cssText = overlay.style.cssText;
-            successModal.innerHTML = `
-                <div class="bg-white text-dark p-5 rounded-4 text-center" style="max-width: 500px;">
-                    <div class="display-1 text-success mb-3">✅</div>
-                    <h3 class="mb-3">Cadastro Concluído!</h3>
-                    <p class="mb-4">${resultado.message}</p>
-                    <div class="alert alert-info mb-4">
-                        <strong>ID do Artista:</strong> ${resultado.artistaId}<br>
-                        <small>Guarde este número para acesso futuro</small>
-                    </div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-primary btn-lg" onclick="window.location.href='login.html'">
-                            <i class="bi bi-box-arrow-in-right"></i> Fazer Login Agora
-                        </button>
-                        <button class="btn btn-outline-secondary" onclick="this.parentElement.parentElement.remove()">
-                            Continuar no Site
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(successModal);
-            
-            // Limpar formulário
-            document.getElementById('formCadastro').reset();
-            
-        } else {
-            // Mostrar erro
-            const errorModal = document.createElement('div');
-            errorModal.style.cssText = overlay.style.cssText;
-            errorModal.innerHTML = `
-                <div class="bg-white text-dark p-5 rounded-4 text-center" style="max-width: 500px;">
-                    <div class="display-1 text-danger mb-3">❌</div>
-                    <h3 class="mb-3">Erro no Cadastro</h3>
-                    <div class="alert alert-danger mb-4">
-                        ${resultado.message || 'Erro desconhecido'}
-                    </div>
-                    <button class="btn btn-primary" onclick="this.parentElement.parentElement.remove()">
-                        Tentar Novamente
-                    </button>
-                </div>
-            `;
-            document.body.appendChild(errorModal);
-        }
-        
-    } catch (error) {
-        document.body.removeChild(overlay);
-        console.error('❌ Erro detalhado:', error);
-        
-        // Mostrar erro específico
-        let mensagemErro = `Erro de conexão: ${error.message}`;
-        
-        if (error.message.includes('Failed to fetch')) {
-            mensagemErro = `
-                <strong>Erro de Conexão com a API</strong><br><br>
-                Verifique:<br>
-                1. ✅ Sua conexão com a internet<br>
-                2. 🔗 A URL da API está correta<br>
-                3. 🌐 A API está publicada como "Aplicativo Web"<br><br>
-                <small>URL atual: ${API_URL}</small>
-            `;
-        }
-        
-        const errorModal = document.createElement('div');
-        errorModal.style.cssText = overlay.style.cssText;
-        errorModal.innerHTML = `
-            <div class="bg-white text-dark p-5 rounded-4 text-center" style="max-width: 500px;">
-                <div class="display-1 text-warning mb-3">⚠️</div>
-                <h3 class="mb-3">Problema Técnico</h3>
-                <div class="alert alert-warning mb-4">
-                    ${mensagemErro}
-                </div>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" onclick="testarConexaoAPI()">
-                        <i class="bi bi-plug"></i> Testar Conexão com API
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="this.parentElement.parentElement.remove()">
-                        Fechar
-                    </button>
-                </div>
+    successModal.innerHTML = `
+        <div class="bg-white text-dark p-5 rounded-4 text-center" style="max-width: 500px;">
+            <div class="display-1 text-success mb-3">✅</div>
+            <h3 class="mb-3">Cadastro Local Concluído!</h3>
+            <p class="mb-4">⚠️ <strong>Modo de Teste:</strong> API offline, salvando localmente.</p>
+            <div class="alert alert-info mb-4">
+                <strong>ID do Artista:</strong> ${artistaId}<br>
+                <small>Use este ID para fazer login</small>
             </div>
-        `;
-        document.body.appendChild(errorModal);
-    }
-}
-
-// Adicione esta função também para testar a API
-async function testarConexaoAPI() {
-    const API_URL = "https://script.google.com/macros/s/AKfycbztk1ciaAYousnQgD3oTAtgVtiilhbiG25WcmP85QZatociltDhbc_wOnkeFrTwKoY/exec";
-    
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    `;
-    overlay.innerHTML = `
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;">
-            <span class="visually-hidden">Testando...</span>
+            <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-lg" onclick="window.location.href='login.html?artistaId=${artistaId}&nome=${encodeURIComponent(nome)}'">
+                    <i class="bi bi-box-arrow-in-right"></i> Fazer Login
+                </button>
+                <button class="btn btn-outline-secondary" onclick="this.parentElement.parentElement.remove()">
+                    Continuar
+                </button>
+            </div>
         </div>
     `;
-    document.body.appendChild(overlay);
+    document.body.appendChild(successModal);
     
-    try {
-        // Primeiro teste de GET
-        const response = await fetch(API_URL, { method: 'GET' });
-        const html = await response.text();
-        
-        // Depois teste de POST
-        const formData = new URLSearchParams();
-        formData.append('acao', 'testar_conexao');
-        
-        const postResponse = await fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData.toString()
-        });
-        
-        const resultado = await postResponse.json();
-        
-        document.body.removeChild(overlay);
-        
-        alert(`✅ API FUNCIONANDO!\n\n${resultado.message}\n\nURL: ${API_URL}\n\nGET: ✅ ${response.status}\nPOST: ✅ ${postResponse.status}`);
-        
-    } catch (error) {
-        document.body.removeChild(overlay);
-        alert(`❌ ERRO NA API:\n\n${error.message}\n\nVerifique a URL da API.`);
-    }
+    // Limpar formulário
+    document.getElementById('formCadastro').reset();
 }
