@@ -13,7 +13,7 @@
             --miv-green: #00ff88; 
             --miv-soft: rgba(0, 255, 136, 0.1);
             --bg-black: #050505; 
-            --glass: rgba(255, 255, 255, 0.03); 
+            --glass: rgba(20, 20, 20, 0.7); 
             --glass-border: rgba(255, 255, 255, 0.08); 
         }
 
@@ -21,85 +21,77 @@
             font-family: 'Outfit', sans-serif; 
             background-color: var(--bg-black); 
             color: #ffffff; 
-            margin: 0; 
-            min-height: 100vh; 
-            overflow-x: hidden;
+            margin: 0; min-height: 100vh; overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Fundo Animado */
+        /* Ambient Glow */
         .bg-glow {
             position: fixed; top: 0; left: 50%; transform: translateX(-50%);
             width: 100vw; height: 100vh;
-            background: radial-gradient(circle at 50% -20%, #003322 0%, transparent 50%);
+            background: radial-gradient(circle at 50% -20%, #003322 0%, transparent 60%);
             z-index: -1; pointer-events: none;
         }
 
-        /* Glassmorphism Refinado */
         .glass { 
-            background: rgba(20, 20, 20, 0.7); 
-            backdrop-filter: blur(20px) saturate(180%); 
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: var(--glass); 
+            backdrop-filter: blur(25px) saturate(180%); 
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid var(--glass-border); 
             border-radius: 28px; 
         }
 
-        /* Auth Screen */
+        /* Auth Section */
         #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-card { width: 100%; max-width: 380px; padding: 40px 30px; text-align: center; }
+        .login-card { width: 100%; max-width: 380px; padding: 45px 30px; text-align: center; }
         .miv-input { 
             background: rgba(255,255,255,0.05) !important; 
             border: 1px solid var(--glass-border) !important; 
-            color: white !important; 
-            border-radius: 16px !important; 
-            padding: 14px 20px !important;
-            margin-bottom: 15px;
-            transition: 0.3s;
+            color: white !important; border-radius: 16px !important; 
+            padding: 14px 20px !important; margin-bottom: 15px; transition: 0.3s;
         }
         .miv-input:focus { border-color: var(--miv-green) !important; box-shadow: 0 0 15px var(--miv-soft); }
 
         /* Dashboard Master */
         #main-app { display: none; padding-bottom: 180px; animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
         .balance-hero { padding: 60px 20px 40px; text-align: center; }
-        .balance-label { font-size: 0.75rem; font-weight: 600; color: #888; letter-spacing: 2px; margin-bottom: 10px; }
+        .balance-label { font-size: 0.7rem; font-weight: 600; color: #888; letter-spacing: 2px; margin-bottom: 8px; }
         .balance-value { font-size: 3.5rem; font-weight: 700; letter-spacing: -2px; line-height: 1; }
         
-        /* Market List Style */
-        .section-title { font-size: 0.9rem; font-weight: 700; padding: 0 10px; margin-bottom: 20px; color: #eee; display: flex; justify-content: space-between; }
+        /* Market Interface */
+        .section-title { font-size: 0.85rem; font-weight: 700; padding: 0 15px; margin-bottom: 18px; color: #888; letter-spacing: 1px; }
         .music-item { 
-            display: flex; align-items: center; padding: 12px; margin-bottom: 12px; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;
-            border: 1px solid transparent;
+            display: flex; align-items: center; padding: 14px; margin-bottom: 12px; 
+            transition: all 0.3s ease; cursor: pointer; border: 1px solid transparent;
         }
-        .music-item:active { transform: scale(0.97); background: rgba(255,255,255,0.08); }
-        .music-img { width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--miv-green); flex-shrink: 0; }
+        .music-item:active { transform: scale(0.96); background: rgba(255,255,255,0.05); }
+        .music-img { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center; color: var(--miv-green); flex-shrink: 0; }
         
-        .buy-badge { 
-            background: var(--miv-green); color: #000; font-weight: 700; font-size: 0.7rem; 
-            padding: 6px 14px; border-radius: 10px; border: none; transition: 0.2s;
+        .buy-btn { 
+            background: var(--miv-green); color: #000; font-weight: 700; font-size: 0.65rem; 
+            padding: 8px 16px; border-radius: 12px; border: none; transition: 0.2s;
         }
 
-        /* Player Bar - O Coração do Design */
+        /* Player Bar Float */
         .miv-player-float { 
-            position: fixed; bottom: 100px; left: 15px; right: 15px; height: 76px; 
+            position: fixed; bottom: 100px; left: 15px; right: 15px; height: 78px; 
             z-index: 1001; padding: 0 15px; display: flex; align-items: center;
         }
         .play-btn-main { 
-            width: 48px; height: 48px; border-radius: 50%; background: var(--miv-green); 
+            width: 46px; height: 46px; border-radius: 50%; background: var(--miv-green); 
             color: #000; display: flex; align-items: center; justify-content: center; 
-            font-size: 1.6rem; margin-right: 15px; box-shadow: 0 8px 20px rgba(0,255,136,0.2);
+            font-size: 1.6rem; margin-right: 15px; box-shadow: 0 8px 20px rgba(0,255,136,0.15);
         }
 
-        /* Tab Bar inferior */
+        /* Navigation Tab */
         .tab-bar { 
-            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 68px; 
+            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; 
             display: flex; justify-content: space-around; align-items: center; z-index: 1000;
         }
-        .tab-item { color: #666; text-decoration: none; text-align: center; transition: 0.3s; }
+        .tab-item { color: #555; text-decoration: none; font-size: 1.6rem; transition: 0.3s; }
         .tab-item.active { color: var(--miv-green); }
-        .tab-item i { font-size: 1.6rem; display: block; }
 
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         #player-yt { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     </style>
 </head>
@@ -110,87 +102,83 @@
 
     <section id="auth-page">
         <div class="glass login-card">
-            <h1 class="fw-bold mb-1" style="letter-spacing: -1px;">MIV <span style="color:var(--miv-green)">PRO</span></h1>
-            <p class="text-secondary small mb-5">Ecosystem Financial Node</p>
+            <h1 class="fw-bold mb-1" style="letter-spacing: -1.5px;">MIV <span style="color:var(--miv-green)">PRO</span></h1>
+            <p class="text-secondary small mb-5" style="letter-spacing: 1px;">FINANCIAL ECOSYSTEM</p>
             
-            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
+            <input type="email" id="l-email" class="form-control miv-input" placeholder="Acesso e-mail">
             <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-            <button class="btn w-100 py-3 mt-3 fw-bold" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:16px;">CONECTAR</button>
+            <button class="btn w-100 py-3 mt-3 fw-bold" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:18px;">CONECTAR NODE</button>
         </div>
     </section>
 
     <main id="main-app">
         <header class="balance-hero">
-            <div class="balance-label">PATRIMÔNIO ATUAL</div>
+            <div class="balance-label">WALLET BALANCE</div>
             <div class="balance-value">R$ <span id="user-saldo">0,00</span></div>
             <div class="mt-3">
-                <span class="badge glass py-2 px-3 text-success fw-bold" id="user-tipo" style="font-size: 0.65rem; border-color: rgba(0,255,136,0.2);">INVESTIDOR</span>
+                <span class="badge glass py-2 px-3 text-success fw-bold" id="user-tipo" style="font-size: 0.6rem; letter-spacing: 1px;">INVESTIDOR</span>
             </div>
         </header>
 
         <div class="container px-4">
             <div id="area-artista" style="display: none;" class="mb-5">
-                <div class="glass p-4 text-center" style="border-style: dashed; background: rgba(0,255,136,0.02);">
-                    <i class="bi bi-stars text-success mb-2" style="font-size: 1.5rem;"></i>
-                    <h6 class="fw-bold mb-3">Lançar Novo Ativo</h6>
-                    <button class="btn btn-sm btn-success px-4 fw-bold" onclick="MivEngine.cadastrarAtivo()" style="border-radius: 12px;">TOKENIZAR MÚSICA</button>
+                <div class="glass p-4 text-center" style="border-style: dashed; border-color: var(--miv-soft);">
+                    <h6 class="fw-bold mb-3 small">TOKENIZAR ATIVO MUSICAL</h6>
+                    <button class="btn btn-sm btn-success px-4 fw-bold" onclick="MivEngine.cadastrarAtivo()" style="border-radius: 12px; font-size: 0.7rem;">NOVO LANÇAMENTO</button>
                 </div>
             </div>
 
-            <div class="section-title">
-                <span>MERCADO DE ATIVOS</span>
-                <i class="bi bi-filter-right"></i>
-            </div>
-
+            <div class="section-title">MARKETPLACE ASSETS</div>
             <div id="market-list">
-                </div>
+                <div class="text-center py-5 opacity-50 small">Sincronizando com a rede...</div>
+            </div>
         </div>
 
         <div class="miv-player-float glass">
             <div class="play-btn-main" onclick="togglePlayback()">
                 <i id="play-icon" class="bi bi-play-fill"></i>
             </div>
-            <div class="flex-grow-1 overflow-hidden me-3">
-                <div id="p-title" class="fw-bold small text-truncate">Explorar Ecossistema</div>
-                <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">MIV Network Active</div>
+            <div class="flex-grow-1 overflow-hidden me-2">
+                <div id="p-title" class="fw-bold small text-truncate">Explorar Ativos</div>
+                <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">MIV Radio Ativa</div>
             </div>
             <div class="text-end">
-                <div class="text-success fw-bold" style="font-size: 0.75rem;">LIVE</div>
-                <div id="p-id" class="text-secondary" style="font-size: 0.5rem; opacity: 0.5;">ID: --</div>
+                <div class="text-success fw-bold" style="font-size: 0.7rem;">LIVE</div>
+                <div id="p-id" class="text-secondary" style="font-size: 0.5rem; opacity: 0.4;">ID: --</div>
             </div>
         </div>
 
         <nav class="tab-bar glass">
-            <a href="#" class="tab-item active"><i class="bi bi-house-door-fill"></i></a>
-            <a href="#" class="tab-item" onclick="alert('Wallet em sincronização...')"><i class="bi bi-wallet2"></i></a>
-            <a href="#" class="tab-item" onclick="sair()"><i class="bi bi-person-circle"></i></a>
+            <a href="#" class="tab-item active"><i class="bi bi-grid-fill"></i></a>
+            <a href="#" class="tab-item" onclick="alert('Histórico em atualização...')"><i class="bi bi-activity"></i></a>
+            <a href="#" class="tab-item" onclick="sair()"><i class="bi bi-power"></i></a>
         </nav>
     </main>
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxovlwyahoFSQmwDBOMLGgQYpdmkKKI8AB_bJhh3WoI1imw_T1JG5kOY3xfWMEcayI/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwDy10nDMPw51ybWAegLVeisC4GRsHs-jyI_wWOevN06-dYH3eQse7nJvgWgayOlsFC/exec';
         let ytPlayer, musicaAtualId = null;
 
         const MivEngine = {
             async cadastrarAtivo() {
-                const url = prompt("Link do YouTube:");
-                const titulo = prompt("Título da Obra:");
-                const valor = prompt("Valor da Cota (R$):", "10.00");
+                const url = prompt("URL do YouTube:");
+                const titulo = prompt("Título:");
+                const valor = prompt("Cota (R$):", "10.00");
                 if(!url || !titulo) return;
-                
                 const user = JSON.parse(localStorage.getItem('miv_session'));
                 const res = await fetch(`${API_URL}?acao=cadastrar_ativo&artistaId=${user.id}&urlYoutube=${encodeURIComponent(url)}&titulo=${encodeURIComponent(titulo)}&valorCota=${valor}`);
                 const data = await res.json();
-                if(data.success) { alert("Ativo Tokenizado com Sucesso!"); carregarMercado(); }
+                if(data.success) { alert("Ativo Listado!"); carregarMercado(); }
             },
 
             async comprarCota(id, valor) {
-                if(confirm(`Confirmar aporte de R$ ${valor} neste ativo?`)) {
+                if(confirm(`Confirmar aporte de R$ ${valor}?`)) {
                     const user = JSON.parse(localStorage.getItem('miv_session'));
-                    const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}&quantidade=1`);
+                    const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}`);
                     const data = await res.json();
-                    if(data.success) { alert("Transação Confirmada!"); location.reload(); }
+                    if(data.success) { alert("Cota Adquirida!"); location.reload(); }
+                    else { alert(data.msg || "Erro na transação"); }
                 }
             }
         };
@@ -205,21 +193,22 @@
 
         async function acaoLogin() {
             const btn = document.getElementById('btn-login');
-            btn.innerText = "VERIFICANDO NODE...";
+            btn.innerText = "AUTHENTICATING...";
             try {
                 const res = await fetch(`${API_URL}?acao=login&usuario=${document.getElementById('l-email').value}&senha=${document.getElementById('l-pass').value}`);
                 const data = await res.json();
                 if(data.success) {
                     localStorage.setItem('miv_session', JSON.stringify(data));
                     renderApp(data);
-                } else { alert("Acesso Inválido"); btn.innerText = "CONECTAR"; }
-            } catch(e) { alert("Erro de Rede"); btn.innerText = "CONECTAR"; }
+                } else { alert("Falha na conexão"); btn.innerText = "CONECTAR NODE"; }
+            } catch(e) { alert("Timeout"); btn.innerText = "CONECTAR NODE"; }
         }
 
         function renderApp(data) {
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-saldo').innerText = Number(data.saldo).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('user-nome').innerText = data.nome;
             document.getElementById('user-tipo').innerText = data.tipo.toUpperCase();
             if(data.tipo.toLowerCase() === 'artista') document.getElementById('area-artista').style.display = 'block';
             carregarMercado();
@@ -235,14 +224,14 @@
                         <div class="music-img"><i class="bi bi-play-fill"></i></div>
                         <div class="flex-grow-1 ms-3 overflow-hidden">
                             <div class="fw-bold text-truncate" style="font-size:0.9rem;">${m.titulo}</div>
-                            <div class="text-secondary" style="font-size:0.7rem;">${m.artista}</div>
+                            <div class="text-secondary" style="font-size:0.7rem; opacity:0.7;">${m.artista}</div>
                         </div>
-                        <div class="text-end ms-2">
-                            <button class="buy-badge" onclick="event.stopPropagation(); MivEngine.comprarCota('${m.id}', ${m.valor})">R$ ${m.valor}</button>
+                        <div class="text-end">
+                            <button class="buy-btn" onclick="event.stopPropagation(); MivEngine.comprarCota('${m.id}', ${m.valor})">R$ ${m.valor}</button>
                         </div>
                     </div>
                 `).join('');
-            } catch(e) { container.innerHTML = "Erro ao sincronizar mercado."; }
+            } catch(e) { container.innerHTML = "Erro de Sincronia."; }
         }
 
         function tocarMusica(vId, tit, art, mId) {
