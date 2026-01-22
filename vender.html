@@ -2,48 +2,24 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vender Ações | SELO MIV</title>
+    <title>Exchange - Vender | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background: #0b0e11; color: white; font-family: sans-serif; }
-        .card-ativo { background: #1e2329; border-radius: 15px; padding: 20px; border: 1px solid #333; margin-bottom: 15px; }
-        .price-up { color: #0ecb81; font-weight: bold; }
-        .btn-sell { background: #f6465d; color: white; font-weight: bold; border: none; border-radius: 8px; padding: 10px 20px; }
-        .btn-sell:hover { background: #d9394d; }
+        body { background: #0b0e11; color: white; }
+        .card-sell { background: #1e2329; border: 1px solid #444; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
+        .btn-confirm-sell { background: #f6465d; color: white; font-weight: bold; width: 100%; border: none; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
-
     <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4><i class="bi bi-graph-up-arrow"></i> Meus Ativos</h4>
-            <button onclick="window.history.back()" class="btn btn-outline-light btn-sm">Voltar</button>
-        </div>
-
-        <p class="text-muted small">Aqui estão as músicas que você possui ações. Você pode vendê-las para realizar seu lucro.</p>
-
-        <div id="listaAtivos">
-            <div class="card-ativo shadow">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="mb-0">Som da Rua</h5>
-                        <small class="text-muted">ID: M01</small>
-                    </div>
-                    <div class="text-end">
-                        <span class="d-block small">Preço Atual</span>
-                        <span class="price-up">R$ 18,50</span>
-                    </div>
+        <h4>Vender Meus Ativos</h4>
+        <div id="meusAtivos" class="mt-4">
+            <div class="card-sell shadow">
+                <div class="d-flex justify-content-between mb-3">
+                    <span><strong>Som da Rua</strong><br><small class="text-muted">Preço Médio: R$ 15,00</small></span>
+                    <span class="text-success fw-bold">R$ 18,50 <small class="text-muted">Venda</small></span>
                 </div>
-                <hr style="border-color: #333;">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="text-muted small">Minha Posse:</span>
-                        <span class="d-block fw-bold">10 Ações</span>
-                    </div>
-                    <button class="btn-sell" onclick="abrirVenda('M01', 10, 18.50)">VENDER TUDO</button>
-                </div>
+                <button class="btn-confirm-sell" onclick="venderAtivo('M01', 18.50)">VENDER TODAS AS AÇÕES</button>
             </div>
         </div>
     </div>
@@ -51,39 +27,24 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
 
-        async function abrirVenda(idMusica, qtd, preco) {
-            const confirmar = confirm(`Você deseja vender ${qtd} ações por R$ ${preco * qtd}? O valor será creditado no seu saldo instantaneamente.`);
-            
-            if (confirmar) {
-                const btn = event.target;
-                btn.disabled = true;
-                btn.innerText = "Processando...";
+        async function venderAtivo(id, preco) {
+            const qtd = prompt("Quantas ações deseja vender?");
+            if(!qtd) return;
 
-                try {
-                    const res = await fetch(API_URL, {
-                        method: "POST",
-                        body: new URLSearchParams({
-                            acao: "negociar_acao",
-                            user_id: localStorage.getItem("userId"),
-                            musica_id: idMusica,
-                            quantidade: qtd,
-                            preco_unitario: preco,
-                            valor: qtd * preco,
-                            tipo_ordem: "VENDA"
-                        })
-                    });
-
-                    const data = await res.json();
-                    if(data.success) {
-                        alert("✅ Venda concluída! O lucro foi para sua carteira.");
-                        window.location.href = "carteira.html";
-                    }
-                } catch (e) {
-                    alert("Erro ao processar venda.");
-                    btn.disabled = false;
-                    btn.innerText = "VENDER TUDO";
-                }
-            }
+            const res = await fetch(API_URL, {
+                method: "POST",
+                body: new URLSearchParams({
+                    acao: "negociar_acao",
+                    user_id: localStorage.getItem("userId"),
+                    musica_id: id,
+                    quantidade: qtd,
+                    preco_unitario: preco,
+                    valor: qtd * preco,
+                    tipo_ordem: "VENDA"
+                })
+            });
+            alert("Venda realizada com sucesso!");
+            window.location.href = "carteira.html";
         }
     </script>
 </body>
