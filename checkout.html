@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | SELO MIV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0b0e11; color: white; display: flex; align-items: center; min-height: 100vh; }
+        .checkout-card { background: #1e2329; border-radius: 20px; padding: 30px; width: 100%; max-width: 400px; margin: auto; border: 1px solid #333; }
+        .item-detail { background: #2b3139; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .btn-confirm { background: #00c6ff; color: black; font-weight: bold; width: 100%; border-radius: 10px; padding: 12px; border: none; }
+    </style>
+</head>
+<body>
+
+    <div class="checkout-card shadow">
+        <h4 class="text-center mb-4">Confirmar Investimento</h4>
+        
+        <div class="item-detail">
+            <small class="text-muted d-block">Música</small>
+            <strong id="nomeMusica">Som da Rua</strong>
+            <hr style="border-color: #444;">
+            <div class="d-flex justify-content-between">
+                <span>Quantidade:</span>
+                <span id="qtdAcoes">0</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span>Preço Unitário:</span>
+                <span>R$ 15,00</span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mb-4 px-2">
+            <span class="h5">Total a Pagar:</span>
+            <span class="h5 text-success" id="totalPagar">R$ 0,00</span>
+        </div>
+
+        <div id="status">
+            <button onclick="confirmarCompra()" id="btnPagar" class="btn-confirm">CONFIRMAR E PAGAR</button>
+        </div>
+        
+        <button onclick="window.history.back()" class="btn btn-link btn-sm w-100 mt-3 text-muted">Cancelar</button>
+    </div>
+
+    <script>
+        // PEGA OS DADOS DA URL (Enviados pelo perfil-artista.html)
+        const params = new URLSearchParams(window.location.search);
+        const musicaId = params.get('musica');
+        const qtd = params.get('qtd');
+        const total = params.get('total');
+
+        document.getElementById('qtdAcoes').innerText = qtd;
+        document.getElementById('totalPagar').innerText = "R$ " + parseFloat(total).toFixed(2);
+
+        const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
+
+        async function confirmarCompra() {
+            const btn = document.getElementById("btnPagar");
+            btn.disabled = true;
+            btn.innerText = "Processando transação...";
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        acao: "negociar_acao",
+                        user_id: localStorage.getItem("userId"),
+                        musica_id: musicaId,
+                        quantidade: qtd,
+                        preco_unitario: 15.00,
+                        valor: total, // Para descontar do saldo
+                        tipo_ordem: "COMPRA"
+                    })
+                });
+                
+                const data = await res.json();
+
+                if(data.success) {
+                    alert("🎉 Parabéns! Você agora é sócio desta música.");
+                    window.location.href = "carteira.html";
+                } else {
+                    alert("❌ Erro: Saldo insuficiente ou falha na conexão.");
+                    btn.disabled = false;
+                    btn.innerText = "TENTAR NOVAMENTE";
+                }
+            } catch (e) {
+                alert("Erro ao conectar com o banco de dados.");
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
