@@ -37,7 +37,6 @@
     </div>
 
     <script>
-        // SEU LINK DO GOOGLE SCRIPT ATUALIZADO
         const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
 
         async function finalizarCompra() {
@@ -53,19 +52,17 @@
             btn.disabled = true;
             btn.innerText = "Processando...";
 
-            // Parâmetros da negociação
             const params = new URLSearchParams({
                 acao: "negociar_acao",
                 user_id: userId,
-                musica_id: "M01",    // ID da música (exemplo)
-                quantidade: 2,       // Quantidade (exemplo)
-                preco_unitario: 15,  // Preço unitário (exemplo)
-                valor: 30,           // Valor total a descontar
+                musica_id: "M01",
+                quantidade: 2,
+                preco_unitario: 15,
+                valor: 30,
                 tipo_ordem: "COMPRA"
             });
 
             try {
-                // Realiza a chamada para o seu script
                 const response = await fetch(API_URL + "?" + params.toString(), { 
                     method: "POST" 
                 });
@@ -76,7 +73,6 @@
                     alert("✅ Sucesso! Ações adicionadas à sua carteira.");
                     window.location.href = "ouvinte-dashboard.html";
                 } else {
-                    // Se o saldo for insuficiente, o script enviará o erro aqui
                     alert("❌ Erro: " + (data.error || "Falha na transação"));
                     btn.disabled = false;
                     btn.innerText = "CONFIRMAR E PAGAR";
