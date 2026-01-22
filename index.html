@@ -27,60 +27,124 @@ body{background:#000;color:#fff;font-family:Arial}
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-const API_URL="COLE_AQUI_URL_DO_SCRIPT";
-let user=null,player=null,mid=null;
+const API_URL = "https://script.google.com/macros/s/AKfycbxovlwyahoFSQmwDBOMLGgQYpdmkKKI8AB_bJhh3WoI1imw_T1JG5kOY3xfWMEcayI/exec";
 
-function login(){
- fetch(`${API_URL}?acao=login&usuario=${email.value}&senha=${senha.value}`)
- .then(r=>r.json()).then(d=>{
-  if(!d.success) return alert("Login inválido");
-  user=d; localStorage.setItem("miv",JSON.stringify(d));
-  login.style.display="none"; app.style.display="block";
-  saldo.innerText=d.saldo.toFixed(2);
-  mercado();
- });
+let user = null;
+let ytPlayer = null;
+let musicaAtualId = null;
+
+/* ===== LOGIN ===== */
+async function acaoLogin() {
+  const email = document.getElementById('l-email').value;
+  const pass = document.getElementById('l-pass').value;
+  const btn = document.getElementById('btn-login');
+
+  btn.innerText = "CONECTANDO...";
+
+  try {
+    const res = await fetch(`${API_URL}?acao=login&usuario=${encodeURIComponent(email)}&senha=${encodeURIComponent(pass)}`);
+    const data = await res.json();
+
+    if (!data.success) {
+      alert("Usuário ou senha inválidos");
+      btn.innerText = "ENTRAR";
+      return;
+    }
+
+    user = data;
+    localStorage.setItem("miv_session", JSON.stringify(data));
+    renderApp(data);
+
+  } catch (err) {
+    alert("Erro de conexão com o servidor");
+    console.error(err);
+    btn.innerText = "ENTRAR";
+  }
 }
 
-function mercado(){
- fetch(`${API_URL}?acao=listar_mercado`).then(r=>r.json()).then(d=>{
-  market.innerHTML=d.musicas.map(m=>`
-   <div class="card" onclick="play('${m.videoId}','${m.id}')">
-    <b>${m.titulo}</b><br>${m.artista}
-    <button class="btn btn-sm btn-miv float-end"
-     onclick="event.stopPropagation();buy('${m.id}',${m.valor})">
-     R$ ${m.valor}
-    </button>
-   </div>`).join("");
- });
+/* ===== RENDER ===== */
+function renderApp(data) {
+  document.getElementById("auth-page").style.display = "none";
+  document.getElementById("main-app").style.display = "block";
+  document.getElementById("user-saldo").innerText =
+    Number(data.saldo).toLocaleString("pt-BR",{minimumFractionDigits:2});
+  document.getElementById("user-nome").innerText = data.nome;
+  document.getElementById("user-tipo").innerText = data.tipo.toUpperCase();
+
+  if (data.tipo === "artista")
+    document.getElementById("area-artista").style.display = "block";
+
+  carregarMercado();
 }
 
-function cadastrar(){
- const u=prompt("Link YouTube"), t=prompt("Título");
- fetch(`${API_URL}?acao=cadastrar_ativo&artistaId=${user.id}&urlYoutube=${encodeURIComponent(u)}&titulo=${t}`)
- .then(r=>r.json()).then(d=>{ if(d.success) mercado(); });
+/* ===== MERCADO ===== */
+async function carregarMercado() {
+  const el = document.getElementById("market-list");
+  el.innerHTML = "Carregando mercado...";
+
+  try {
+    const res = await fetch(`${API_URL}?acao=listar_mercado`);
+    const data = await res.json();
+
+    el.innerHTML = data.musicas.map(m => `
+      <div class="music-card" onclick="tocarMusica('${m.videoId}','${m.titulo}','${m.artista}','${m.id}')">
+        <div class="btn-play-miv"><i class="bi bi-play-fill"></i></div>
+        <div class="flex-grow-1">
+          <div class="fw-bold">${m.titulo}</div>
+          <small class="text-secondary">${m.artista}</small>
+        </div>
+        <button class="btn btn-sm btn-dark text-success"
+          onclick="event.stopPropagation(); comprar('${m.id}',${m.valor})">
+          R$ ${m.valor}
+        </button>
+      </div>
+    `).join("");
+
+  } catch (e) {
+    el.innerHTML = "Erro ao carregar mercado";
+  }
 }
 
-function buy(id,v){
- fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${v}`)
- .then(r=>r.json()).then(d=>alert("Cota adquirida"));
+/* ===== COMPRA ===== */
+function comprar(id, valor) {
+  if (!confirm(`Confirmar compra de R$ ${valor}?`)) return;
+
+  fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}&quantidade=1`)
+    .then(r=>r.json())
+    .then(d=>alert("Cota adquirida"));
 }
 
-function onYouTubeIframeAPIReady(){
- player=new YT.Player('p',{height:'0',width:'0',events:{onStateChange:e=>{
-  if(e.data===1) setTimeout(()=>{
-   if(player.getPlayerState()===1 && mid)
-    fetch(`${API_URL}?acao=registrar_play&userId=${user.id}&musicaId=${mid}`);
-  },30000);
- }}});
+/* ===== PLAYER ===== */
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('player', {
+    height:'0', width:'0',
+    events:{
+      onStateChange:(e)=>{
+        if(e.data===1){
+          setTimeout(()=>{
+            if(ytPlayer.getPlayerState()===1 && musicaAtualId){
+              fetch(`${API_URL}?acao=registrar_play&userId=${user.id}&musicaId=${musicaAtualId}`);
+            }
+          },30000);
+        }
+      }
+    }
+  });
 }
-function play(v,id){ mid=id; player.loadVideoById(v); }
 
+function tocarMusica(v,t,a,id){
+  musicaAtualId=id;
+  document.getElementById("p-title").innerText=t;
+  document.getElementById("p-artist").innerText=a;
+  ytPlayer.loadVideoById(v);
+}
+
+/* ===== AUTOLOGIN ===== */
 window.onload=()=>{
- const s=localStorage.getItem("miv");
- if(s){ user=JSON.parse(s); login.style.display="none"; app.style.display="block"; mercado(); }
-}
+  const s = localStorage.getItem("miv_session");
+  if(s){
+    user = JSON.parse(s);
+    renderApp(user);
+  }
+};
 </script>
-
-<div id="p"></div>
-</body>
-</html>
