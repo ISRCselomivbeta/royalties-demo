@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Ouvinte | SELO MIV</title>
+    <title>Ouvinte Dashboard | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -25,11 +25,11 @@
         <button onclick="logout()" class="btn btn-outline-danger btn-sm">Sair</button>
     </nav>
 
-    <div class="container">
+    <div class="container pb-5">
         <div class="card-saldo shadow">
-            <small>Olá, <span id="nomeUser">Ouvinte</span></small>
+            <small>Bem-vindo, <span id="nomeUser">...</span></small>
             <h2 id="saldoTxt" class="fw-bold">R$ 0,00</h2>
-            <small>Saldo acumulado por ouvir músicas</small>
+            <small>Ganhe ouvindo. Invista em talentos.</small>
         </div>
 
         <div class="menu-grid">
@@ -37,71 +37,39 @@
                 <i class="bi bi-compass"></i>
                 <span>Explorar Artistas</span>
             </a>
+            <a href="vender.html" class="menu-item shadow">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Vender Ações</span>
+            </a>
             <a href="carteira.html" class="menu-item shadow">
                 <i class="bi bi-wallet2"></i>
-                <span>Minha Carteira</span>
+                <span>Carteira</span>
+            </a>
+            <a href="#" class="menu-item shadow">
+                <i class="bi bi-star"></i>
+                <span>Favoritos</span>
             </a>
         </div>
 
-        <h5 class="mt-4 mb-3"><i class="bi bi-music-note-beamed"></i> Ouvir e Ganhar</h5>
+        <h5 class="mt-4 mb-3">Músicas em Alta</h5>
         <div id="listaMusicas">
             <div class="musica-item">
-                <div>
-                    <strong>Som da Rua</strong><br>
-                    <small class="text-muted">Elzo MIV</small>
-                </div>
+                <div><strong>Som da Rua</strong><br><small class="text-muted">Elzo MIV</small></div>
                 <button class="btn-play" onclick="ouvir('M01')"><i class="bi bi-play-fill"></i></button>
-            </div>
-            <div class="musica-item">
-                <div>
-                    <strong>Noite Urbana</strong><br>
-                    <small class="text-muted">MIV Records</small>
-                </div>
-                <button class="btn-play" onclick="ouvir('M02')"><i class="bi bi-play-fill"></i></button>
             </div>
         </div>
     </div>
 
     <script>
-        // LINK DO SCRIPT ATUALIZADO
         const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
+        document.getElementById("nomeUser").innerText = localStorage.getItem("userName");
 
-        // PROTEÇÃO: Só entra se for ouvinte
-        if(localStorage.getItem("userType") !== "ouvinte") {
-            window.location.href = "login.html";
+        async function ouvir(id) {
+            await fetch(API_URL, { method: "POST", body: new URLSearchParams({ acao: "registrar_play", musica_id: id, ouvinte_id: localStorage.getItem("userId") }) });
+            alert("R$ 0,05 creditados!");
         }
 
-        // CARREGAR DADOS LOCAIS
-        document.getElementById("nomeUser").innerText = localStorage.getItem("userName") || "Ouvinte";
-        let saldoLocal = parseFloat(localStorage.getItem("saldo_miv") || "0");
-        document.getElementById("saldoTxt").innerText = "R$ " + saldoLocal.toFixed(2);
-
-        async function ouvir(idMusica) {
-            // 1. Ganho visual imediato
-            saldoLocal += 0.05;
-            localStorage.setItem("saldo_miv", saldoLocal);
-            document.getElementById("saldoTxt").innerText = "R$ " + saldoLocal.toFixed(2);
-
-            // 2. Enviar para a planilha (Abas PLAYS e STREMS)
-            try {
-                await fetch(API_URL, {
-                    method: "POST",
-                    body: new URLSearchParams({
-                        acao: "registrar_play",
-                        musica_id: idMusica,
-                        ouvinte_id: localStorage.getItem("userId")
-                    })
-                });
-                alert("Música finalizada! R$ 0,05 foram creditados.");
-            } catch (e) {
-                console.error("Erro ao registrar play no servidor");
-            }
-        }
-
-        function logout() {
-            localStorage.clear();
-            window.location.href = "login.html";
-        }
+        function logout() { localStorage.clear(); window.location.href = "login.html"; }
     </script>
 </body>
 </html>
