@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV PRO | Ecosystem</title>
+    <title>MIV PRO | Ecosystem Híbrido</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -11,7 +11,8 @@
     <style>
         :root {
             --miv-green: #00ff88;
-            --bg-black: #000000;
+            --miv-blue: #0072ff;
+            --bg-black: #07090c;
             --glass: rgba(255, 255, 255, 0.05);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
@@ -20,188 +21,157 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-black);
             color: #ffffff;
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
+            margin: 0; padding-bottom: 180px;
         }
 
         .glass-card {
             background: rgba(28, 28, 30, 0.85);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
         }
 
-        /* --- AUTH SCREEN --- */
-        #auth-page {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle at top right, #003322, #000);
-            padding: 20px;
-        }
-
-        .miv-input {
-            background: var(--glass) !important;
-            border: 1px solid var(--glass-border) !important;
-            color: white !important;
-            border-radius: 12px !important;
-            padding: 12px !important;
-            margin-bottom: 12px;
-        }
-
-        /* --- DASHBOARD --- */
-        #main-app { display: none; padding-bottom: 180px; }
-        
-        .balance-hero {
-            text-align: center;
+        /* --- PERFIL HEADER (UNIFICADO) --- */
+        .profile-header {
+            background: linear-gradient(180deg, rgba(0,255,136,0.15) 0%, var(--bg-black) 100%);
             padding: 40px 20px;
-            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%);
-        }
-        .balance-amount { font-size: 3rem; font-weight: 700; letter-spacing: -2px; }
-
-        /* --- MARKETPLACE & PLAYER --- */
-        .music-card {
-            background: var(--glass);
-            border-radius: 16px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid transparent;
-            transition: 0.3s;
-        }
-        .music-card:hover { border-color: var(--miv-green); background: rgba(255,255,255,0.08); }
-
-        .btn-play-sm {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: var(--miv-green); color: black;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            text-align: center;
         }
 
-        .btn-follow {
-            font-size: 0.65rem;
-            border: 1px solid var(--miv-green);
-            color: var(--miv-green);
-            padding: 2px 8px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            font-weight: bold;
+        .avatar-main {
+            width: 80px; height: 80px;
+            background: linear-gradient(45deg, var(--miv-green), var(--miv-blue));
+            border-radius: 50%; margin: 0 auto 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 30px; font-weight: bold; color: black;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
-        /* --- PLAYER BAR (APPLE STYLE) --- */
+        /* --- STATUS BAR --- */
+        .stat-box { text-align: center; flex: 1; }
+        .stat-value { font-weight: bold; font-size: 1.1rem; color: var(--miv-green); }
+        .stat-label { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; }
+
+        /* --- PLAYER BAR --- */
         .miv-player-bar {
             position: fixed; bottom: 90px; left: 15px; right: 15px;
-            height: 70px; z-index: 1100; padding: 0 15px;
+            height: 75px; z-index: 1100; padding: 0 15px;
             display: flex; align-items: center; justify-content: space-between;
         }
 
-        /* --- TAB BAR --- */
+        .music-card {
+            background: var(--glass); border-radius: 16px; padding: 12px;
+            margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* --- BOTÕES --- */
+        .btn-miv {
+            background: var(--miv-green); color: black; font-weight: bold;
+            border-radius: 12px; border: none; padding: 10px 20px;
+        }
+
         .tab-bar {
             position: fixed; bottom: 15px; left: 15px; right: 15px;
             height: 65px; display: flex; justify-content: space-around;
             align-items: center; z-index: 1000;
         }
 
-        .tab-item { color: #666; font-size: 1.5rem; transition: 0.3s; }
-        .tab-item.active { color: var(--miv-green); }
-
-        .artist-field { display: none; border-left: 3px solid var(--miv-green); padding-left: 15px; }
+        /* Esconder seções inicialmente */
+        #main-app, #section-market, #section-profile, #auth-page { display: none; }
+        .artist-only { display: none; } /* Só aparece para artistas */
     </style>
 </head>
 <body>
 
-    <section id="auth-page">
-        <div class="glass-card w-100" style="max-width: 400px; padding: 30px;">
+    <section id="auth-page" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
+        <div class="glass-card w-100 m-3" style="max-width: 400px; padding: 30px;">
             <div class="text-center mb-4">
                 <h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2>
             </div>
-            
-            <div class="auth-nav d-flex justify-content-center gap-3 mb-4">
-                <span id="tab-l" class="active fw-bold" onclick="toggleAuth('login')" style="cursor:pointer">Entrar</span>
-                <span id="tab-c" class="text-secondary fw-bold" onclick="toggleAuth('cadastro')" style="cursor:pointer">Criar Conta</span>
-            </div>
-
             <div id="box-login">
-                <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-                <button class="btn btn-success w-100 py-3 fw-bold mt-2" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border:none;">ACESSAR CONTA</button>
-            </div>
-
-            <div id="box-cadastro" style="display:none">
-                <input type="text" id="c-nome" class="form-control miv-input" placeholder="Nome Completo">
-                <div class="row g-2">
-                    <div class="col-6"><input type="text" id="c-cpf" class="form-control miv-input" placeholder="CPF"></div>
-                    <div class="col-6"><input type="text" id="c-tel" class="form-control miv-input" placeholder="WhatsApp"></div>
-                </div>
-                <input type="email" id="c-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="c-pass" class="form-control miv-input" placeholder="Senha">
-                <select id="c-tipo" class="form-control miv-input" onchange="checkTipo(this.value)">
-                    <option value="ouvinte">Sou Investidor</option>
-                    <option value="artista">Sou Artista</option>
-                </select>
-                <div id="campos-artista" class="artist-field mb-3">
-                    <small class="text-success fw-bold">Link do Lançamento (YouTube)</small>
-                    <input type="text" id="c-yt" class="form-control miv-input" placeholder="URL do vídeo">
-                </div>
-                <button class="btn btn-success w-100 py-3 fw-bold" onclick="acaoCadastro()" style="background:var(--miv-green); color:black; border:none;">CRIAR MINHA CONTA</button>
+                <input type="email" id="l-email" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="E-mail">
+                <input type="password" id="l-pass" class="form-control mb-3 bg-dark text-white border-secondary" placeholder="Senha">
+                <button class="btn btn-miv w-100" onclick="acaoLogin()">ENTRAR NO ECOSSISTEMA</button>
             </div>
         </div>
     </section>
 
     <main id="main-app">
-        <header class="balance-hero">
-            <small class="text-secondary fw-bold">SALDO DISPONÍVEL</small>
-            <div class="balance-amount">R$ <span id="user-saldo">0,00</span></div>
-            <div id="user-tipo-badge" class="badge bg-success text-dark">Investidor</div>
-        </header>
-
-        <div class="container py-3">
-            <h6 class="fw-bold mb-3"><i class="bi bi-fire text-danger"></i> Tendências para Investir</h6>
+        
+        <header class="profile-header">
+            <div class="avatar-main" id="u-avatar">--</div>
+            <h4 id="u-nome">Carregando...</h4>
+            <div class="badge bg-dark border border-success text-success mb-3" id="u-tipo">OUVINTE</div>
             
-            <div id="market-list">
-                <div class="music-card">
-                    <div class="btn-play-sm" onclick="playMusic('Vibe do Verão', 'MC Teste', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')">
-                        <i class="bi bi-play-fill"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="fw-bold small">Vibe do Verão</span>
-                            <span class="btn-follow" onclick="alert('Seguindo!')">Seguir</span>
-                        </div>
-                        <div class="text-secondary" style="font-size: 0.75rem;">MC Teste • Cota: R$ 10,00</div>
-                    </div>
-                    <button class="btn btn-sm btn-light rounded-pill fw-bold px-3" onclick="alert('Sistema de compra em breve')">INVESTIR</button>
+            <div class="d-flex justify-content-center gap-2 mb-3">
+                <div class="stat-box">
+                    <div class="stat-value" id="u-saldo">0,00</div>
+                    <div class="stat-label">Saldo R$</div>
+                </div>
+                <div class="stat-box border-start border-end border-secondary">
+                    <div class="stat-value">1.2k</div>
+                    <div class="stat-label">Seguidores</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value">45</div>
+                    <div class="stat-label">Seguindo</div>
                 </div>
             </div>
+        </header>
+
+        <div class="container">
+            
+            <div id="section-market">
+                <h6 class="fw-bold mb-3"><i class="bi bi-play-circle text-success"></i> Ouvir & Investir</h6>
+                <div id="music-list">
+                    <div class="music-card">
+                        <div class="btn-play" onclick="playMusic('Vibe do Verão', 'MC Teste', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')" style="cursor:pointer">
+                            <i class="bi bi-play-fill fs-3 text-success"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold small">Vibe do Verão <span class="badge bg-secondary" style="font-size: 0.5rem;" onclick="alert('Seguindo!')">Seguir</span></div>
+                            <div class="text-secondary small">MC Teste • Cota R$ 10,00</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-success rounded-pill" onclick="alert('Investindo...')">INVESTIR</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-artist" class="artist-only mt-4">
+                <div class="glass-card p-3 mb-3 border-success">
+                    <h6 class="text-success fw-bold"><i class="bi bi-cpu"></i> Tokenizar Nova Obra</h6>
+                    <input type="text" class="form-control bg-transparent text-white border-secondary mb-2" id="yt-link" placeholder="Link do YouTube">
+                    <button class="btn btn-sm btn-success w-100 fw-bold" onclick="alert('Tokenizando música na rede MIV...')">GERAR TOKEN MIV</button>
+                </div>
+            </div>
+
         </div>
 
         <div class="miv-player-bar glass-card">
             <div class="d-flex align-items-center gap-2">
-                <div class="bg-dark rounded d-flex align-items-center justify-content-center" style="width:45px; height:45px;">
+                <div class="bg-dark rounded" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center;">
                     <i class="bi bi-music-note-beamed text-success"></i>
                 </div>
-                <div style="max-width: 130px;">
+                <div style="max-width: 120px;">
                     <div id="p-title" class="fw-bold small text-truncate">Nenhuma tocando</div>
-                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">MIV Ecosystem</div>
+                    <div id="p-artist" class="text-secondary" style="font-size: 0.6rem;">MIV Ecosystem</div>
                 </div>
             </div>
             <div class="d-flex align-items-center gap-3">
                 <i class="bi bi-skip-start-fill fs-4"></i>
-                <i id="p-play-btn" class="bi bi-play-circle-fill" style="font-size: 2.5rem; color:var(--miv-green);" onclick="toggleAudio()"></i>
+                <i id="p-play-btn" class="bi bi-play-circle-fill text-success" style="font-size: 2.5rem;" onclick="toggleAudio()"></i>
                 <i class="bi bi-skip-end-fill fs-4"></i>
             </div>
         </div>
 
         <nav class="tab-bar glass-card">
-            <a href="#" class="tab-item active"><i class="bi bi-house-door-fill"></i></a>
+            <a href="#" class="tab-item active" onclick="showTab('market')"><i class="bi bi-house-door-fill"></i></a>
+            <a href="#" class="tab-item" onclick="showTab('market')"><i class="bi bi-search"></i></a>
             <a href="#" class="tab-item"><i class="bi bi-graph-up-arrow"></i></a>
-            <a href="#" class="tab-item"><i class="bi bi-person-lines-fill"></i></a>
             <a href="#" class="tab-item" onclick="location.reload()"><i class="bi bi-person-circle"></i></a>
         </nav>
+
     </main>
 
     <audio id="main-audio"></audio>
@@ -211,61 +181,40 @@
         const audio = document.getElementById('main-audio');
         let isPlaying = false;
 
-        function toggleAuth(aba) {
-            document.getElementById('box-login').style.display = aba === 'login' ? 'block' : 'none';
-            document.getElementById('box-cadastro').style.display = aba === 'cadastro' ? 'block' : 'none';
-            document.getElementById('tab-l').className = aba === 'login' ? 'active fw-bold' : 'text-secondary fw-bold';
-            document.getElementById('tab-c').className = aba === 'cadastro' ? 'active fw-bold' : 'text-secondary fw-bold';
-        }
-
-        function checkTipo(val) {
-            document.getElementById('campos-artista').style.display = val === 'artista' ? 'block' : 'none';
-        }
-
         async function acaoLogin() {
             const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
-            if(!email || !pass) return alert("Preencha tudo!");
-
+            
             try {
                 const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
                 const data = await res.json();
+                
                 if(data.success) {
                     renderApp(data);
-                } else {
-                    alert("Usuário ou senha inválidos.");
-                }
-            } catch(e) { alert("Erro de conexão com a MIV."); }
-        }
-
-        async function acaoCadastro() {
-            const dados = {
-                acao: 'cadastro',
-                nome: document.getElementById('c-nome').value,
-                cpf: document.getElementById('c-cpf').value,
-                tel: document.getElementById('c-tel').value,
-                email: document.getElementById('c-email').value,
-                senha: document.getElementById('c-pass').value,
-                tipo: document.getElementById('c-tipo').value,
-                yt: document.getElementById('c-yt').value
-            };
-
-            const query = new URLSearchParams(dados).toString();
-            try {
-                const res = await fetch(`${API_URL}?${query}`);
-                const data = await res.json();
-                if(data.success) {
-                    alert("Sucesso! Agora faça login.");
-                    toggleAuth('login');
-                }
-            } catch(e) { alert("Erro ao cadastrar."); }
+                } else { alert("Erro no login!"); }
+            } catch(e) { alert("Erro de conexão."); }
         }
 
         function renderApp(data) {
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-saldo').innerText = data.saldo.toFixed(2).replace('.',',');
-            document.getElementById('user-tipo-badge').innerText = data.tipo.toUpperCase();
+            document.getElementById('section-market').style.display = 'block';
+            
+            document.getElementById('u-nome').innerText = data.nome;
+            document.getElementById('u-avatar').innerText = data.nome.substring(0,2).toUpperCase();
+            document.getElementById('u-saldo').innerText = data.saldo.toFixed(2).replace('.',',');
+            document.getElementById('u-tipo').innerText = data.tipo.toUpperCase();
+
+            // Lógica Híbrida: Se for artista, mostra ferramentas de tokenização
+            if(data.tipo.toLowerCase() === 'artista') {
+                document.querySelectorAll('.artist-only').forEach(el => el.style.display = 'block');
+                document.getElementById('u-avatar').style.background = 'linear-gradient(45deg, #0072ff, #00c6ff)'; // Azul para artista
+            }
+        }
+
+        function showTab(tab) {
+            // Futura lógica de troca de abas
+            alert("Navegando para: " + tab);
         }
 
         function playMusic(title, artist, url) {
@@ -274,17 +223,17 @@
             audio.src = url;
             audio.play();
             isPlaying = true;
-            document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill';
+            document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill text-success';
         }
 
         function toggleAudio() {
             if(!audio.src) return;
             if(isPlaying) {
                 audio.pause();
-                document.getElementById('p-play-btn').className = 'bi bi-play-circle-fill';
+                document.getElementById('p-play-btn').className = 'bi bi-play-circle-fill text-success';
             } else {
                 audio.play();
-                document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill';
+                document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill text-success';
             }
             isPlaying = !isPlaying;
         }
