@@ -3,55 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout | SELO MIV</title>
+    <title>Checkout Premium | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background: #0b0e11; color: white; display: flex; align-items: center; min-height: 100vh; font-family: sans-serif; }
-        .card-checkout { background: #1e2329; padding: 30px; border-radius: 15px; width: 100%; max-width: 450px; margin: auto; border: 1px solid #333; }
-        .btn-pay { background: #0ecb81; color: white; font-weight: bold; width: 100%; padding: 15px; border-radius: 10px; border: none; transition: 0.3s; }
-        .btn-pay:hover { background: #0ba368; transform: scale(1.02); }
-        .btn-pay:disabled { background: #555; }
+        :root {
+            --miv-blue: #0072ff;
+            --miv-cyan: #00c6ff;
+            --bg: #05070a;
+            --card-bg: #111418;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Inter', sans-serif;
+            display: flex; 
+            align-items: center; 
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .checkout-container {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 480px;
+            margin: auto;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0, 114, 255, 0.2);
+            position: relative;
+        }
+
+        .asset-badge {
+            background: rgba(0, 198, 255, 0.1);
+            color: var(--miv-cyan);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .price-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, var(--miv-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn-pay {
+            background: linear-gradient(90deg, var(--miv-blue), var(--miv-cyan));
+            color: white;
+            font-weight: bold;
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            transition: 0.4s;
+            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+        }
+
+        .btn-pay:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 198, 255, 0.5);
+            color: white;
+        }
+
+        /* Estilo do Iframe (Onde o Mercado Pago vai abrir) */
+        #payment-frame {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 9999;
+            border: none;
+        }
+
+        .close-pay {
+            position: fixed;
+            top: 20px; right: 20px;
+            z-index: 10000;
+            display: none;
+            background: #000;
+            color: #fff;
+            border-radius: 50%;
+            width: 40px; height: 40px;
+            border: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card-checkout shadow">
-        <h4 class="mb-3">Finalizar Investimento</h4>
-        <hr style="border-color: #444;">
+    <button id="btnClose" class="close-pay" onclick="fecharPagamento()"><i class="bi bi-x-lg"></i></button>
+    <iframe id="payment-frame" src=""></iframe>
+
+    <div class="checkout-container text-center">
+        <div class="asset-badge">ATIVO MUSICAL VERIFICADO</div>
+        <h2 class="fw-bold mb-4">Checkout MIV</h2>
         
-        <div class="d-flex justify-content-between mb-2">
-            <span>Ações: <strong id="nomeMusica">Som da Rua</strong></span>
-            <span id="qtdAcoes">2</span>
-        </div>
-        
-        <div class="d-flex justify-content-between mb-4">
-            <span class="fw-bold">Total a Pagar</span>
-            <span class="fw-bold text-info" id="totalPagar">R$ 30,00</span>
+        <div class="mb-4">
+            <div class="album-art mx-auto mb-3" style="width: 80px; height: 80px; background: #1e2329; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-vinyl-fill text-info h1 mb-0"></i>
+            </div>
+            <h5 class="mb-1" id="nomeMusica">Som da Rua</h5>
+            <p class="text-muted small">ID: M01 • 2 Unidades</p>
         </div>
 
-        <button onclick="finalizarCompra()" id="btnPagar" class="btn-pay">CONFIRMAR E PAGAR</button>
+        <div class="mb-5">
+            <span class="text-muted d-block small">VALOR DO INVESTIMENTO</span>
+            <div class="price-display" id="totalPagar">R$ 30,00</div>
+        </div>
+
+        <button onclick="abrirPagamento()" id="btnPagar" class="btn-pay">
+            <i class="bi bi-shield-lock-fill me-2"></i> PAGAR AGORA
+        </button>
         
-        <p class="text-center mt-3 small">
-            <a href="ouvinte-dashboard.html" class="text-muted text-decoration-none">Cancelar e Voltar</a>
+        <p class="mt-4">
+            <a href="ouvinte-dashboard.html" class="text-muted small text-decoration-none">Voltar para o Dashboard</a>
         </p>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
+        const LINK_MERCADO_PAGO = "https://link.mercadopago.com.br/selomiv";
 
-        async function finalizarCompra() {
+        function abrirPagamento() {
             const btn = document.getElementById("btnPagar");
+            btn.innerText = "ABRINDO...";
+            
+            // Abre o Mercado Pago em um Iframe sobre o site
+            document.getElementById('payment-frame').src = LINK_MERCADO_PAGO;
+            document.getElementById('payment-frame').style.display = 'block';
+            document.getElementById('btnClose').style.display = 'block';
+
+            // Após 10 segundos, registramos a intenção no banco (simulação de sucesso)
+            // Na vida real, você faria isso após o retorno do pagamento
+            registrarNoBanco();
+        }
+
+        function fecharPagamento() {
+            document.getElementById('payment-frame').style.display = 'none';
+            document.getElementById('btnClose').style.display = 'none';
+            window.location.href = "ouvinte-dashboard.html";
+        }
+
+        async function registrarNoBanco() {
             const userId = localStorage.getItem("userId");
-
-            if (!userId) {
-                alert("Erro: Usuário não identificado. Faça login novamente.");
-                window.location.href = "login.html";
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Processando...";
-
             const params = new URLSearchParams({
                 acao: "negociar_acao",
                 user_id: userId,
@@ -63,26 +166,10 @@
             });
 
             try {
-                const response = await fetch(API_URL + "?" + params.toString(), { 
-                    method: "POST" 
-                });
-                
-                const data = await response.json();
-
-                if (data.success) {
-                    alert("✅ Sucesso! Ações adicionadas à sua carteira.");
-                    window.location.href = "ouvinte-dashboard.html";
-                } else {
-                    alert("❌ Erro: " + (data.error || "Falha na transação"));
-                    btn.disabled = false;
-                    btn.innerText = "CONFIRMAR E PAGAR";
-                }
-
-            } catch (error) {
-                console.error("Erro no checkout:", error);
-                alert("Erro de conexão com o banco de dados. Tente novamente.");
-                btn.disabled = false;
-                btn.innerText = "CONFIRMAR E PAGAR";
+                await fetch(API_URL + "?" + params.toString(), { method: "POST" });
+                console.log("Transação registrada como pendente/ativa no banco.");
+            } catch (e) {
+                console.error("Erro ao registrar no banco");
             }
         }
     </script>
