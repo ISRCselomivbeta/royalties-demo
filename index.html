@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Ecosystem | Pro</title>
+    <title>MIV PRO | Ecosystem</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,6 @@
             overflow-x: hidden;
         }
 
-        /* Efeito de Vidro (Apple Style) */
         .glass-card {
             background: rgba(28, 28, 30, 0.8);
             backdrop-filter: blur(20px);
@@ -34,20 +33,21 @@
             padding: 25px;
         }
 
-        /* --- TELA DE ACESSO (Login/Cadastro) --- */
+        /* --- TELA DE ACESSO --- */
         #auth-page {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle at top right, #003322, #000);
+            padding: 20px;
         }
 
         .auth-nav {
             display: flex;
             justify-content: center;
             gap: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .auth-nav span {
@@ -55,6 +55,7 @@
             color: #888;
             font-weight: 600;
             transition: 0.3s;
+            padding-bottom: 5px;
         }
 
         .auth-nav span.active {
@@ -68,8 +69,10 @@
             color: white !important;
             border-radius: 12px !important;
             padding: 12px !important;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
+
+        .miv-input::placeholder { color: rgba(255,255,255,0.4); }
 
         .btn-miv {
             background: var(--miv-green);
@@ -79,66 +82,31 @@
             border-radius: 12px;
             padding: 14px;
             width: 100%;
+            margin-top: 10px;
             transition: 0.3s;
         }
 
-        .btn-miv:hover { transform: scale(1.02); }
-
-        /* --- DASHBOARD PRINCIPAL --- */
+        /* DASHBOARD */
         #main-app { display: none; }
-
-        .header-balance {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%);
-        }
-
-        .balance-amount {
-            font-size: 3.5rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-        }
+        .balance-hero { text-align: center; padding: 50px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
+        .balance-amount { font-size: 3rem; font-weight: 700; letter-spacing: -1px; }
 
         .tab-bar {
-            position: fixed;
-            bottom: 25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px;
-            z-index: 1000;
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; display: flex; justify-content: space-around;
+            padding: 15px; z-index: 1000;
         }
 
-        .tab-item {
-            color: #888;
-            text-decoration: none;
-            font-size: 1.2rem;
-        }
-
-        .tab-item.active { color: var(--miv-green); }
-
-        /* Card de Música */
-        .music-item {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+        .artist-field { display: none; border-left: 2px solid var(--miv-green); padding-left: 15px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <section id="auth-page">
-        <div class="glass-card" style="width: 100%; max-width: 380px;">
+        <div class="glass-card" style="width: 100%; max-width: 450px;">
             <div class="text-center mb-4">
                 <h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2>
+                <small class="text-secondary">Ecosystem Innovation</small>
             </div>
             
             <div class="auth-nav">
@@ -147,120 +115,116 @@
             </div>
 
             <div id="box-login">
-                <input type="text" id="l-user" class="form-control miv-input" placeholder="E-mail ou Usuário">
-                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-                <button class="btn-miv" onclick="acaoLogin()">Acessar Carteira</button>
+                <input type="email" id="l-email" class="form-control miv-input" placeholder="Seu E-mail">
+                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Sua Senha">
+                <button class="btn-miv" onclick="acaoLogin()">Acessar Ecossistema</button>
             </div>
 
             <div id="box-cadastro" style="display:none">
                 <input type="text" id="c-nome" class="form-control miv-input" placeholder="Nome Completo">
-                <input type="email" id="c-email" class="form-control miv-input" placeholder="Seu E-mail">
+                <div class="row g-2">
+                    <div class="col-6"><input type="text" id="c-cpf" class="form-control miv-input" placeholder="CPF"></div>
+                    <div class="col-6"><input type="text" id="c-tel" class="form-control miv-input" placeholder="Telefone/Zap"></div>
+                </div>
+                <input type="email" id="c-email" class="form-control miv-input" placeholder="E-mail">
                 <input type="password" id="c-pass" class="form-control miv-input" placeholder="Crie uma Senha">
-                <select id="c-tipo" class="form-control miv-input">
-                    <option value="ouvinte">Investidor</option>
-                    <option value="artista">Artista</option>
+                
+                <select id="c-tipo" class="form-control miv-input" onchange="checkTipo(this.value)">
+                    <option value="ouvinte">Sou Investidor</option>
+                    <option value="artista">Sou Artista</option>
                 </select>
-                <button class="btn-miv" onclick="acaoCadastro()">Cadastrar no Selo</button>
+
+                <div id="campos-artista" class="artist-field">
+                    <label class="small text-success mb-2">Link do Último Lançamento (YouTube)</label>
+                    <input type="text" id="c-yt" class="form-control miv-input" placeholder="https://youtube.com/watch?v=...">
+                    <small class="text-secondary d-block mb-3" style="font-size: 0.7rem;">
+                        * Suas ações iniciais serão baseadas nos plays deste link.
+                    </small>
+                </div>
+
+                <button class="btn-miv" onclick="acaoCadastro()">Registrar no Selo</button>
             </div>
         </div>
     </section>
 
     <main id="main-app">
-        <header class="header-balance">
-            <p class="text-secondary small fw-bold mb-0">SALDO EM CONTA</p>
+        <header class="balance-hero">
+            <p class="text-secondary small fw-bold mb-0">TOTAL EM CARTEIRA</p>
             <div class="balance-amount">R$ <span id="user-saldo">0,00</span></div>
-            <p class="small text-success">Olá, <span id="user-nome">...</span></p>
+            <div class="badge bg-success text-dark px-3 py-2 mt-2" id="user-tipo">Investidor</div>
         </header>
 
-        <div class="container pb-5">
-            <h5 class="fw-bold mb-4">Oportunidades MIV</h5>
-            
-            <div class="music-item">
-                <div class="d-flex align-items-center">
-                    <div style="width:50px; height:50px; background:var(--miv-green); border-radius:12px;" class="me-3"></div>
-                    <div>
-                        <div class="fw-bold">Vibe do Verão</div>
-                        <small class="text-secondary">Ação: R$ 10,00</small>
-                    </div>
+        <div class="container py-4">
+            <h6 class="fw-bold mb-3"><i class="bi bi-lightning-charge-fill text-warning"></i> Ativos Sugeridos</h6>
+            <div id="lista-musicas">
                 </div>
-                <button class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="alert('Funcionalidade de compra em integração...')">Comprar</button>
-            </div>
-
-            <div class="music-item">
-                <div class="d-flex align-items-center">
-                    <div style="width:50px; height:50px; background:#333; border-radius:12px;" class="me-3"></div>
-                    <div>
-                        <div class="fw-bold">Noite Paulista</div>
-                        <small class="text-secondary">Ação: R$ 15,00</small>
-                    </div>
-                </div>
-                <button class="btn btn-sm btn-outline-success rounded-pill px-3">Comprar</button>
-            </div>
         </div>
 
         <nav class="tab-bar glass-card">
-            <a href="#" class="tab-item active"><i class="bi bi-house-door-fill"></i></a>
-            <a href="#" class="tab-item"><i class="bi bi-graph-up-arrow"></i></a>
-            <a href="#" class="tab-item" onclick="location.reload()"><i class="bi bi-person-fill"></i></a>
+            <a href="#" class="tab-item active"><i class="bi bi-house-door"></i></a>
+            <a href="#" class="tab-item"><i class="bi bi-search"></i></a>
+            <a href="#" class="tab-item" onclick="location.reload()"><i class="bi bi-person-circle"></i></a>
         </nav>
     </main>
 
     <script>
-        // COLOQUE SEU LINK DO GOOGLE ABAIXO
-        const MINHA_URL_GOOGLE = 'https://script.google.com/macros/s/AKfycbyQ1UtXofZc8TGNU7WFhWmHWmJI7yZuv8cOTTTouMdJUheS7IX45rL2nKmgBbiaZ0Gr/exec';
+        // URL DA SUA IMPLANTAÇÃO GOOGLE
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyQ1UtXofZc8TGNU7WFhWmHWmJI7yZuv8cOTTTouMdJUheS7IX45rL2nKmgBbiaZ0Gr/exec';
 
         function toggleAuth(aba) {
-            if(aba === 'login') {
-                document.getElementById('box-login').style.display = 'block';
-                document.getElementById('box-cadastro').style.display = 'none';
-                document.getElementById('tab-l').classList.add('active');
-                document.getElementById('tab-c').classList.remove('active');
-            } else {
-                document.getElementById('box-login').style.display = 'none';
-                document.getElementById('box-cadastro').style.display = 'block';
-                document.getElementById('tab-l').classList.remove('active');
-                document.getElementById('tab-c').classList.add('active');
-            }
+            document.getElementById('box-login').style.display = aba === 'login' ? 'block' : 'none';
+            document.getElementById('box-cadastro').style.display = aba === 'cadastro' ? 'block' : 'none';
+            document.getElementById('tab-l').className = aba === 'login' ? 'active' : '';
+            document.getElementById('tab-c').className = aba === 'cadastro' ? 'active' : '';
+        }
+
+        function checkTipo(valor) {
+            document.getElementById('campos-artista').style.display = valor === 'artista' ? 'block' : 'none';
         }
 
         async function acaoLogin() {
-            const user = document.getElementById('l-user').value;
+            const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
-            
+            if(!email || !pass) return alert("Preencha e-mail e senha.");
+
             try {
-                const res = await fetch(`${MINHA_URL_GOOGLE}?acao=login&usuario=${user}&senha=${pass}`);
+                const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
                 const data = await res.json();
-                
-                if(data.success) {
-                    abrirApp(data);
-                } else {
-                    alert("Usuário ou senha incorretos.");
-                }
-            } catch(e) { alert("Erro ao conectar com a planilha."); }
+                if(data.success) renderApp(data);
+                else alert("Acesso negado.");
+            } catch(e) { alert("Erro de conexão."); }
         }
 
         async function acaoCadastro() {
-            const nome = document.getElementById('c-nome').value;
-            const email = document.getElementById('c-email').value;
-            const senha = document.getElementById('c-pass').value;
-            const tipo = document.getElementById('c-tipo').value;
+            const dados = {
+                nome: document.getElementById('c-nome').value,
+                cpf: document.getElementById('c-cpf').value,
+                tel: document.getElementById('c-tel').value,
+                email: document.getElementById('c-email').value,
+                senha: document.getElementById('c-pass').value,
+                tipo: document.getElementById('c-tipo').value,
+                youtube: document.getElementById('c-yt').value
+            };
+
+            if(!dados.email || !dados.senha || !dados.nome) return alert("Nome, E-mail e Senha são obrigatórios.");
 
             try {
-                const res = await fetch(`${MINHA_URL_GOOGLE}?acao=cadastro&nome=${nome}&email=${email}&senha=${senha}&tipo=${tipo}`);
+                // Enviamos todos os novos campos para o Script do Google
+                const res = await fetch(`${API_URL}?acao=cadastro&nome=${dados.nome}&email=${dados.email}&senha=${dados.senha}&tipo=${dados.tipo}&cpf=${dados.cpf}&tel=${dados.tel}&yt=${dados.youtube}`);
                 const data = await res.json();
-                
                 if(data.success) {
-                    alert("Cadastrado com sucesso! Faça login.");
+                    alert("Cadastro Realizado! Entre com seu e-mail.");
                     toggleAuth('login');
                 }
-            } catch(e) { alert("Erro no cadastro."); }
+            } catch(e) { alert("Erro ao processar cadastro."); }
         }
 
-        function abrirApp(dados) {
+        function renderApp(dados) {
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-nome').innerText = dados.nome;
-            document.getElementById('user-saldo').innerText = dados.saldo.toFixed(2).replace('.', ',');
+            document.getElementById('user-saldo').innerText = dados.saldo.toFixed(2);
+            document.getElementById('user-tipo').innerText = dados.tipo.toUpperCase();
         }
     </script>
 </body>
