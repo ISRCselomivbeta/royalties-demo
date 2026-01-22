@@ -1,174 +1,102 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV PRO | Ecosystem</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root { --miv-green: #00ff88; --bg-black: #000000; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
-        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; overflow-x: hidden; }
+// ===============================
+// Funções de Integração com o Ecossistema MIV
+// ===============================
+const MivEngine = {
 
-        /* Estilo Vidro Apple */
-        .glass-card { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; }
-        
-        /* Auth Screen */
-        #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); padding: 20px; }
-        .miv-input { background: var(--glass) !important; border: 1px solid var(--glass-border) !important; color: white !important; border-radius: 12px !important; padding: 12px !important; margin-bottom: 12px; }
+    /* =========================
+       1. CADASTRO DE ATIVO
+    ========================= */
+    async cadastrarAtivo() {
+        const url = prompt("Cole o link do seu último lançamento no YouTube:");
+        const titulo = prompt("Título da Obra:");
+        const valorCota = prompt("Valor da cota (R$):", "10");
 
-        /* Dashboard */
-        #main-app { display: none; padding-bottom: 180px; animation: fadeIn 0.5s ease; }
-        .balance-hero { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
+        if (!url || !titulo) return;
 
-        /* Player Bar */
-        .miv-player { position: fixed; bottom: 90px; left: 15px; right: 15px; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1001; }
-        .music-card { background: var(--glass); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid transparent; transition: 0.3s; cursor: pointer; }
-        .music-card:hover { border-color: var(--miv-green); background: rgba(255,255,255,0.08); }
+        const user = JSON.parse(localStorage.getItem('miv_session'));
 
-        .btn-play-miv { width: 40px; height: 40px; border-radius: 50%; background: var(--miv-green); color: black; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
-        
-        /* Tab Bar */
-        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        
-        #yt-player-container { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
-</head>
-<body>
+        const res = await fetch(
+            `${API_URL}?acao=cadastrar_ativo` +
+            `&artistaId=${user.id}` +
+            `&urlYoutube=${encodeURIComponent(url)}` +
+            `&titulo=${encodeURIComponent(titulo)}` +
+            `&valorCota=${valorCota}`
+        );
 
-    <div id="yt-player-container"><div id="player"></div></div>
+        const data = await res.json();
 
-    <section id="auth-page">
-        <div class="glass-card w-100" style="max-width: 400px; padding: 30px;">
-            <h2 class="text-center fw-bold mb-4">MIV <span style="color:var(--miv-green)">PRO</span></h2>
-            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
-            <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-            <button class="btn w-100 fw-bold py-3" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:12px;">ENTRAR</button>
-        </div>
-    </section>
-
-    <main id="main-app">
-        <header class="balance-hero">
-            <small class="text-secondary fw-bold">SALDO DISPONÍVEL</small>
-            <div class="display-5 fw-bold">R$ <span id="user-saldo">0,00</span></div>
-            <div id="user-nome" class="small text-success mt-1">Carregando...</div>
-        </header>
-
-        <div class="container">
-            <h6 class="fw-bold mb-3 mt-4">Mercado de Ativos (Novas)</h6>
-            <div id="market-list">
-                <div class="text-center text-secondary small">Buscando oportunidades na rede...</div>
-            </div>
-        </div>
-
-        <div class="miv-player glass-card">
-            <div class="d-flex align-items-center gap-3">
-                <div class="btn-play-miv" onclick="togglePlayback()"><i id="play-icon" class="bi bi-play-fill"></i></div>
-                <div>
-                    <div id="p-title" class="fw-bold small">MIV Playlist</div>
-                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">Curadoria Oficial</div>
-                </div>
-            </div>
-            <i class="bi bi-broadcast text-success"></i>
-        </div>
-
-        <nav class="tab-bar glass-card">
-            <i class="bi bi-house-door-fill text-success"></i>
-            <i class="bi bi-search text-secondary"></i>
-            <i class="bi bi-person-circle text-secondary" onclick="sair()"></i>
-        </nav>
-    </main>
-
-    <script src="https://www.youtube.com/iframe_api"></script>
-    <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzJ9Yazbw_xHgLUZ_I_X0b8xm0GLlBcUOEz_CPTmm5fXj7EOFYn964F5lM-YKoRb4tN/exec';
-        let ytPlayer;
-
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '0', width: '0',
-                playerVars: { 'listType': 'playlist', 'list': 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN' },
-                events: { 'onStateChange': onPlayerStateChange }
-            });
-        }
-
-        async function acaoLogin() {
-            const email = document.getElementById('l-email').value;
-            const pass = document.getElementById('l-pass').value;
-            const btn = document.getElementById('btn-login');
-            
-            btn.innerText = "AUTENTICANDO...";
-            
-            try {
-                const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
-                const data = await res.json();
-                
-                if(data.success) {
-                    localStorage.setItem('miv_session', JSON.stringify(data));
-                    renderApp(data);
-                } else { 
-                    alert("Dados incorretos!"); 
-                    btn.innerText = "ENTRAR";
-                }
-            } catch(e) {
-                alert("Erro de conexão.");
-                btn.innerText = "ENTRAR";
-            }
-        }
-
-        function renderApp(data) {
-            document.getElementById('auth-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-saldo').innerText = data.saldo.toFixed(2);
-            document.getElementById('user-nome').innerText = data.nome;
+        if (data.success) {
+            alert("🎵 Música tokenizada e listada no Market!");
             carregarMercado();
+        } else {
+            alert(data.msg || "Erro ao cadastrar ativo");
         }
+    },
 
-        async function carregarMercado() {
-            const res = await fetch(`${API_URL}?acao=listar_mercado`);
-            const data = await res.json();
-            const container = document.getElementById('market-list');
-            
-            container.innerHTML = data.musicas.map(m => `
-                <div class="music-card" onclick="tocarMusica('${m.videoId}', '${m.titulo}', '${m.artista}')">
-                    <div class="btn-play-miv" style="width:30px; height:30px; font-size:0.8rem;"><i class="bi bi-play-fill"></i></div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold" style="font-size:0.9rem;">${m.titulo}</div>
-                        <small class="text-secondary" style="font-size:0.75rem;">${m.artista} • Cota R$ ${m.valor}</small>
-                    </div>
-                    <i class="bi bi-chevron-right text-secondary"></i>
-                </div>
-            `).join('');
-        }
+    /* =========================
+       2. COMPRA DE COTAS
+    ========================= */
+    async comprarCota(musicaId, valor) {
+        if (!confirm(`Confirmar investimento de R$ ${valor} neste ativo?`)) return;
 
-        function tocarMusica(videoId, titulo, artista) {
-            document.getElementById('p-title').innerText = titulo;
-            document.getElementById('p-artist').innerText = artista;
-            ytPlayer.loadVideoById(videoId);
-        }
+        const user = JSON.parse(localStorage.getItem('miv_session'));
 
-        function togglePlayback() {
-            const state = ytPlayer.getPlayerState();
-            if (state === 1) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
-        }
+        const res = await fetch(
+            `${API_URL}?acao=comprar_cota` +
+            `&userId=${user.id}` +
+            `&musicaId=${musicaId}` +
+            `&valor=${valor}` +
+            `&qtd=1`
+        );
 
-        function onPlayerStateChange(event) {
-            const icon = document.getElementById('play-icon');
-            icon.className = (event.data == YT.PlayerState.PLAYING) ? "bi bi-pause-fill" : "bi bi-play-fill";
-        }
+        const data = await res.json();
 
-        function sair() {
-            localStorage.removeItem('miv_session');
+        if (data.success) {
+            alert("📈 Investimento realizado! Cota adicionada à sua carteira.");
             location.reload();
+        } else {
+            alert(data.msg || "Erro ao comprar cota");
         }
+    },
 
-        window.onload = () => {
-            const session = localStorage.getItem('miv_session');
-            if(session) renderApp(JSON.parse(session));
-        }
-    </script>
-</body>
-</html>
+    /* =========================
+       3. REGISTRAR STREAM FINANCEIRO
+    ========================= */
+    notificarStream(musicaId) {
+        const user = JSON.parse(localStorage.getItem('miv_session'));
+
+        fetch(
+            `${API_URL}?acao=registrar_play` +
+            `&userId=${user.id}` +
+            `&musicaId=${musicaId}`
+        );
+    }
+};
+
+// ===============================
+// PLAYER YOUTUBE → PLAY FINANCEIRO
+// ===============================
+let musicaAtual = null;
+
+function tocarMusica(videoId, titulo, artista, musicaId) {
+    musicaAtual = musicaId;
+
+    document.getElementById('p-title').innerText = titulo;
+    document.getElementById('p-artist').innerText = artista;
+
+    ytPlayer.loadVideoById(videoId);
+}
+
+function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.PLAYING && musicaAtual) {
+
+        // Evita múltiplos registros do mesmo play
+        clearTimeout(window.mivPlayTimer);
+
+        window.mivPlayTimer = setTimeout(() => {
+            if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                MivEngine.notificarStream(musicaAtual);
+            }
+        }, 30000); // 30 segundos = play válido
+    }
+}
