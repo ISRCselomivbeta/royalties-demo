@@ -2,85 +2,133 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil Artista | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background: #0b0e11; color: white; }
-        .profile-header { background: linear-gradient(to bottom, #0072ff, #0b0e11); padding: 60px 20px; text-align: center; }
-        .btn-follow { border-radius: 20px; padding: 10px 30px; font-weight: bold; }
-        .card-musica { background: #1e2329; border: none; border-radius: 12px; transition: 0.3s; }
-        .card-musica:hover { background: #2b3139; }
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; }
+        .banner { 
+            height: 200px; 
+            background: linear-gradient(135deg, #0072ff, #00c6ff); 
+            display: flex; 
+            align-items: flex-end; 
+            padding: 20px;
+        }
+        .foto-perfil {
+            width: 100px; height: 100px;
+            background: #2b3139;
+            border: 4px solid #0b0e11;
+            border-radius: 50%;
+            margin-top: -50px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.5rem;
+        }
+        .card-acao {
+            background: #1e2329;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+        .btn-miv { background: #00c6ff; color: black; font-weight: bold; border-radius: 20px; border: none; }
+        .btn-follow { border-radius: 20px; padding: 5px 20px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="profile-header">
-        <h1 id="nomeArtista">Carregando...</h1>
-        <p id="bioArtista" class="text-light">Biografia do artista...</p>
-        <button onclick="seguir()" id="btnSeguir" class="btn btn-primary btn-follow">SEGUIR</button>
-        <button onclick="compartilhar()" class="btn btn-outline-light btn-follow"><i class="bi bi-share"></i> COMPARTILHAR</button>
+    <div class="banner">
+        <h2 class="fw-bold">Elzo MIV</h2>
     </div>
-
-    <div class="container py-5">
-        <h4>Ações Musicais (Investimento)</h4>
-        <div id="listaAcoes" class="row mt-4">
+    
+    <div class="container mb-4">
+        <div class="d-flex justify-content-between align-items-start">
+            <div class="foto-perfil">
+                <i class="bi bi-person-fill"></i>
             </div>
+            <div class="mt-2">
+                <button onclick="seguir()" id="btnSeguir" class="btn btn-primary btn-follow">SEGUIR</button>
+                <button onclick="compartilhar()" class="btn btn-outline-light btn-follow"><i class="bi bi-share"></i></button>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <h4>Elzo MIV <i class="bi bi-patch-check-fill text-primary" style="font-size: 1rem;"></i></h4>
+            <p class="text-muted small">Música de rua, essência urbana. Transformando realidade em ativos digitais.</p>
+        </div>
+
+        <hr style="border-color: #333;">
+
+        <h5 class="mb-3">Investir em Músicas (Ações)</h5>
+        
+        <div id="listaAcoes">
+            <div class="card-acao shadow">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="mb-0">Som da Rua</h6>
+                        <small class="text-success">Cotação: R$ 15,00</small>
+                    </div>
+                    <div class="text-end">
+                        <small class="d-block text-muted" style="font-size: 10px;">DISPONÍVEL</small>
+                        <span class="badge bg-dark text-info">49% à venda</span>
+                    </div>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button class="btn btn-miv btn-sm w-100" onclick="comprarAcao('M01', 15.00)">COMPRAR AÇÕES</button>
+                    <button class="btn btn-outline-light btn-sm w-100" onclick="alert('Gráfico de valorização em breve!')">VER GRÁFICO</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
-        
-        // Simulação de carregamento (No futuro busca por ID na URL)
-        document.getElementById("nomeArtista").innerText = "Elzo MIV";
 
+        // 1. FUNÇÃO SEGUIR
         async function seguir() {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                body: new URLSearchParams({
-                    acao: 'seguir_artista',
-                    ouvinte_id: localStorage.getItem("userId"),
-                    artista_id: "ART001" // Exemplo
-                })
-            });
-            document.getElementById("btnSeguir").innerText = "SEGUINDO";
-            alert("Agora você segue este artista!");
-        }
+            const btn = document.getElementById("btnSeguir");
+            btn.disabled = true;
+            btn.innerText = "Seguindo...";
 
-        function compartilhar() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Perfil Artista - Selo MIV',
-                    text: 'Confira as ações musicais deste artista no Selo MIV!',
-                    url: window.location.href
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        acao: "seguir_artista",
+                        ouvinte_id: localStorage.getItem("userId"),
+                        artista_id: "ART_ELZO_01"
+                    })
                 });
+                alert("Você agora é um seguidor oficial!");
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerText = "SEGUIR";
             }
         }
 
-        // Simulação de Marketplace
-        const acoes = [
-            { id: "M01", nome: "Som da Rua", preco: 15.00, disponivel: 49 },
-        ];
-
-        function renderAcoes() {
-            const div = document.getElementById("listaAcoes");
-            acoes.forEach(a => {
-                div.innerHTML += `
-                <div class="col-md-4">
-                    <div class="card card-musica p-3 text-center">
-                        <h5>${a.nome}</h5>
-                        <p class="text-success fw-bold">R$ ${a.preco.toFixed(2)} / ação</p>
-                        <small class="text-muted">${a.disponivel}% disponível para compra</small>
-                        <button class="btn btn-sm btn-light mt-3" onclick="abrirCompra('${a.id}')">COMPRAR AÇÕES</button>
-                    </div>
-                </div>`;
-            });
+        // 2. FUNÇÃO COMPARTILHAR
+        function compartilhar() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Selo MIV - Perfil de Elzo',
+                    text: 'Dê uma olhada nas ações musicais do Elzo no Selo MIV!',
+                    url: window.location.href
+                });
+            } else {
+                alert("Link copiado: " + window.location.href);
+            }
         }
-        renderAcoes();
 
-        function abrirCompra(id) {
-            const qtd = prompt("Quantas ações deseja comprar?");
-            if(qtd) window.location.href = `checkout.html?id=${id}&qtd=${qtd}`;
+        // 3. FUNÇÃO COMPRAR (Redireciona para o futuro Checkout)
+        function comprarAcao(idMusica, preco) {
+            const qtd = prompt("Quantas ações de 'Som da Rua' você deseja comprar?");
+            if(qtd && !isNaN(qtd)) {
+                const total = qtd * preco;
+                if(confirm(`Total: R$ ${total.toFixed(2)}. Deseja prosseguir para o pagamento?`)) {
+                    // Aqui enviaremos para a página de Checkout que faremos a seguir
+                    window.location.href = `checkout.html?musica=${idMusica}&qtd=${qtd}&total=${total}`;
+                }
+            }
         }
     </script>
 </body>
