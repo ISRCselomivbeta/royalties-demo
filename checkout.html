@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout Premium | SELO MIV</title>
+    <title>Checkout Seguro | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
@@ -27,32 +27,19 @@
         .checkout-container {
             background: var(--card-bg);
             padding: 40px;
-            border-radius: 24px;
+            border-radius: 28px;
             width: 100%;
-            max-width: 480px;
+            max-width: 450px;
             margin: auto;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 20px 50px rgba(0, 114, 255, 0.2);
-            position: relative;
+            border: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
         }
 
-        .asset-badge {
-            background: rgba(0, 198, 255, 0.1);
-            color: var(--miv-cyan);
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .price-display {
-            font-size: 2.5rem;
+        .price-tag {
+            font-size: 3rem;
             font-weight: 800;
-            background: linear-gradient(to right, #fff, var(--miv-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--miv-cyan);
+            margin: 20px 0;
         }
 
         .btn-pay {
@@ -60,73 +47,61 @@
             color: white;
             font-weight: bold;
             width: 100%;
-            padding: 18px;
-            border-radius: 16px;
+            padding: 20px;
+            border-radius: 18px;
             border: none;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            transition: 0.4s;
-            box-shadow: 0 10px 20px rgba(0, 114, 255, 0.3);
+            font-size: 1.2rem;
+            transition: 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 114, 255, 0.4);
         }
 
         .btn-pay:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0, 198, 255, 0.5);
-            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 198, 255, 0.6);
         }
 
-        /* Estilo do Iframe (Onde o Mercado Pago vai abrir) */
-        #payment-frame {
+        /* Status de Processamento */
+        #statusProcessando {
             display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: white;
-            z-index: 9999;
-            border: none;
+            margin-top: 20px;
         }
 
-        .close-pay {
-            position: fixed;
-            top: 20px; right: 20px;
-            z-index: 10000;
-            display: none;
-            background: #000;
-            color: #fff;
+        .loader {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: var(--miv-cyan);
             border-radius: 50%;
-            width: 40px; height: 40px;
-            border: none;
+            display: inline-block;
+            animation: spin 1s linear infinite;
         }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <button id="btnClose" class="close-pay" onclick="fecharPagamento()"><i class="bi bi-x-lg"></i></button>
-    <iframe id="payment-frame" src=""></iframe>
-
-    <div class="checkout-container text-center">
-        <div class="asset-badge">ATIVO MUSICAL VERIFICADO</div>
-        <h2 class="fw-bold mb-4">Checkout MIV</h2>
-        
+    <div class="checkout-container shadow-lg">
         <div class="mb-4">
-            <div class="album-art mx-auto mb-3" style="width: 80px; height: 80px; background: #1e2329; border-radius: 20px; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-vinyl-fill text-info h1 mb-0"></i>
-            </div>
-            <h5 class="mb-1" id="nomeMusica">Som da Rua</h5>
-            <p class="text-muted small">ID: M01 • 2 Unidades</p>
+            <i class="bi bi-patch-check-fill text-info h1"></i>
+            <h3 class="fw-bold mt-2">Quase lá!</h3>
+            <p class="text-muted small">Você está adquirindo 2 cotas de <strong>Som da Rua</strong></p>
         </div>
 
-        <div class="mb-5">
-            <span class="text-muted d-block small">VALOR DO INVESTIMENTO</span>
-            <div class="price-display" id="totalPagar">R$ 30,00</div>
-        </div>
+        <div class="price-tag">R$ 30,00</div>
 
         <button onclick="abrirPagamento()" id="btnPagar" class="btn-pay">
-            <i class="bi bi-shield-lock-fill me-2"></i> PAGAR AGORA
+            PAGAR COM MERCADO PAGO
         </button>
+
+        <div id="statusProcessando">
+            <div class="loader me-2"></div>
+            <span class="small text-info">Aguardando confirmação na nova janela...</span>
+        </div>
         
-        <p class="mt-4">
-            <a href="ouvinte-dashboard.html" class="text-muted small text-decoration-none">Voltar para o Dashboard</a>
-        </p>
+        <div class="mt-4">
+            <a href="ouvinte-dashboard.html" class="text-muted small text-decoration-none">
+                <i class="bi bi-arrow-left"></i> Voltar e cancelar
+            </a>
+        </div>
     </div>
 
     <script>
@@ -135,22 +110,28 @@
 
         function abrirPagamento() {
             const btn = document.getElementById("btnPagar");
-            btn.innerText = "ABRINDO...";
-            
-            // Abre o Mercado Pago em um Iframe sobre o site
-            document.getElementById('payment-frame').src = LINK_MERCADO_PAGO;
-            document.getElementById('payment-frame').style.display = 'block';
-            document.getElementById('btnClose').style.display = 'block';
+            const status = document.getElementById("statusProcessando");
 
-            // Após 10 segundos, registramos a intenção no banco (simulação de sucesso)
-            // Na vida real, você faria isso após o retorno do pagamento
+            // 1. Abre o Mercado Pago em uma nova aba/janela
+            const paymentWindow = window.open(LINK_MERCADO_PAGO, '_blank');
+
+            // 2. Muda o visual do site original
+            btn.disabled = true;
+            btn.innerText = "PAGAMENTO EM ABERTO";
+            btn.style.opacity = "0.5";
+            status.style.display = "block";
+
+            // 3. Registra a intenção de compra no banco de dados imediatamente
             registrarNoBanco();
-        }
 
-        function fecharPagamento() {
-            document.getElementById('payment-frame').style.display = 'none';
-            document.getElementById('btnClose').style.display = 'none';
-            window.location.href = "ouvinte-dashboard.html";
+            // 4. Verifica se a janela de pagamento foi fechada
+            const checkWindow = setInterval(() => {
+                if (paymentWindow.closed) {
+                    clearInterval(checkWindow);
+                    alert("⚠️ Se você finalizou o pagamento, suas ações aparecerão no saldo em instantes!");
+                    window.location.href = "ouvinte-dashboard.html";
+                }
+            }, 1000);
         }
 
         async function registrarNoBanco() {
@@ -166,10 +147,10 @@
             });
 
             try {
+                // Notifica o Google Sheets que uma compra foi iniciada
                 await fetch(API_URL + "?" + params.toString(), { method: "POST" });
-                console.log("Transação registrada como pendente/ativa no banco.");
             } catch (e) {
-                console.error("Erro ao registrar no banco");
+                console.error("Erro ao registrar");
             }
         }
     </script>
