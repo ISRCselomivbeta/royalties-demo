@@ -3,171 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selo MIV | Ativos Musicais do Futuro</title>
+    <title>Selo MIV | Music Investment & Vault</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --miv-blue: #0072ff;
-            --miv-cyan: #00c6ff;
-            --bg-dark: #05070a;
-            --glass: rgba(255, 255, 255, 0.03);
+            --miv-primary: #0072ff;
+            --miv-accent: #00f2ff;
+            --miv-dark: #020408;
+            --miv-card: rgba(10, 15, 30, 0.7);
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
         }
 
         body {
-            background: var(--bg-dark);
-            color: white;
-            font-family: 'Inter', sans-serif;
+            background-color: var(--miv-dark);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
         }
 
-        /* Hero Section - O impacto inicial */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            background: radial-gradient(circle at 50% 50%, rgba(0, 114, 255, 0.15) 0%, transparent 70%);
-            position: relative;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            opacity: 0.2;
-        }
-
-        .hero-content { position: relative; z-index: 2; text-align: center; width: 100%; }
-
-        .btn-miv-main {
-            background: linear-gradient(90deg, var(--miv-blue), var(--miv-cyan));
-            color: white; font-weight: bold; border: none;
-            padding: 18px 45px; border-radius: 50px;
-            font-size: 1.2rem; transition: 0.3s;
-            box-shadow: 0 10px 30px rgba(0, 114, 255, 0.4);
-        }
-
-        .btn-miv-main:hover {
-            transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(0, 198, 255, 0.6);
-            color: white;
-        }
-
-        /* Showcase de Ativos - Simulando o Marketplace */
-        .asset-showcase {
-            background: var(--glass);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            max-width: 600px;
-            margin: 40px auto;
-        }
-
-        /* Menu Flutuante */
+        /* Navbar Evoluída */
         .navbar-miv {
-            position: fixed; top: 0; width: 100%;
-            padding: 20px 50px; z-index: 1000;
-            background: rgba(5, 7, 10, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            background: rgba(2, 4, 8, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px 0;
+            position: sticky; top: 0; z-index: 1000;
         }
 
-        .nav-link { color: rgba(255,255,255,0.7); transition: 0.3s; font-weight: 500; }
-        .nav-link:hover { color: var(--miv-cyan); }
+        .nav-link {
+            color: var(--text-muted);
+            font-size: 0.9rem; font-weight: 500;
+            padding: 10px 15px !important;
+            transition: all 0.3s;
+        }
+        .nav-link:hover { color: var(--miv-accent); }
+        .nav-link.active-miv { color: var(--miv-accent); border-bottom: 2px solid var(--miv-accent); }
 
-        .feature-card {
-            background: var(--glass);
-            border-radius: 20px;
+        /* Hero com Tipografia de Alta Qualidade */
+        .hero-section {
+            padding: 100px 0 60px;
+            background: radial-gradient(circle at 10% 20%, rgba(0, 114, 255, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 90% 80%, rgba(0, 242, 255, 0.05) 0%, transparent 40%);
+        }
+
+        .hero-title {
+            font-size: 4rem; font-weight: 800; line-height: 1.1;
+            background: linear-gradient(180deg, #FFFFFF 0%, #94a3b8 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* Card do Artista / Navegação Rápida */
+        .quick-nav {
+            background: var(--miv-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
             padding: 30px;
-            border: 1px solid rgba(255,255,255,0.05);
-            height: 100%;
-            transition: 0.3s;
+            margin-top: -50px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
-        .feature-card:hover { border-color: var(--miv-cyan); transform: translateY(-10px); }
 
-        .price-up { color: #00ff88; font-weight: bold; }
+        .nav-option-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid transparent;
+            transition: 0.3s;
+            text-decoration: none;
+            display: block;
+            height: 100%;
+        }
+        .nav-option-card:hover {
+            border-color: var(--miv-accent);
+            background: rgba(0, 242, 255, 0.05);
+            transform: translateY(-5px);
+        }
+
+        .icon-circle {
+            width: 50px; height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--miv-primary), var(--miv-accent));
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px;
+            color: #000; font-size: 1.5rem;
+        }
+
+        .badge-new {
+            background: var(--miv-accent);
+            color: #000; font-size: 0.6rem; font-weight: 800;
+            padding: 2px 8px; border-radius: 10px;
+            vertical-align: middle; margin-left: 5px;
+        }
+
+        .btn-miv-glow {
+            background: var(--miv-accent);
+            color: #000; font-weight: 700;
+            border-radius: 12px; padding: 15px 35px;
+            border: none; transition: 0.3s;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+        }
+        .btn-miv-glow:hover { transform: scale(1.05); box-shadow: 0 0 35px rgba(0, 242, 255, 0.5); }
+
     </style>
 </head>
 <body>
 
-    <nav class="navbar-miv d-flex justify-content-between align-items-center">
-        <h4 class="fw-bold mb-0" style="letter-spacing: 2px;">SELO MIV</h4>
-        <div class="d-none d-md-flex gap-4">
-            <a href="marketplace.html" class="nav-link text-decoration-none">Marketplace</a>
-            <a href="investidor-dashboard.html" class="nav-link text-decoration-none">Investidores</a>
-            <a href="login.html" class="nav-link text-decoration-none">Minha Conta</a>
+    <nav class="navbar-miv">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/512/1055/1055683.png" width="35" class="me-2" style="filter: invert(1);">
+                <span class="fw-bold h4 mb-0" style="letter-spacing: -1px;">SELO MIV</span>
+            </div>
+            
+            <div class="d-none d-lg-flex gap-2">
+                <a href="index.html" class="nav-link active-miv">Início</a>
+                <a href="marketplace.html" class="nav-link">Marketplace</a>
+                <a href="portfolio.html" class="nav-link">Meu Portfólio</a>
+                <a href="central-artista.html" class="nav-link text-info fw-bold">Central do Artista</a>
+            </div>
+
+            <div class="d-flex gap-3 align-items-center">
+                <a href="login.html" class="text-white text-decoration-none small fw-bold">Entrar</a>
+                <a href="cadastro.html" class="btn btn-sm btn-outline-info rounded-pill px-4">Começar</a>
+            </div>
         </div>
-        <a href="cadastro.html" class="btn btn-outline-info btn-sm rounded-pill px-4">Cadastrar</a>
     </nav>
 
-    <section class="hero">
-        <div class="container hero-content">
-            <h1 class="display-2 fw-bold mb-3">Ouvir música nunca foi tão <span class="text-info">lucrativo</span>.</h1>
-            <p class="lead mb-5 opacity-75">Transforme seus plays em ativos digitais e invista em hits mundiais com o Selo MIV.</p>
-            
-            <div class="asset-showcase shadow-lg">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="d-flex align-items-center text-start">
-                        <div style="width: 50px; height: 50px; background: #111; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                            <i class="bi bi-vinyl-fill text-info h3 mb-0"></i>
-                        </div>
-                        <div>
-                            <h5 class="mb-0 fw-bold">Som da Rua</h5>
-                            <span class="badge bg-success bg-opacity-10 text-success" style="font-size: 0.7rem;">+12.4% VALORIZAÇÃO</span>
-                        </div>
-                    </div>
-                    <div class="text-end">
-                        <h5 class="mb-0 fw-bold">R$ 15,00</h5>
-                        <small class="text-muted">Preço da Cota</small>
-                    </div>
-                </div>
-                <a href="login.html" class="btn btn-miv-main w-100">QUERO INVESTIR AGORA</a>
-            </div>
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="hero-title">Invista no som,<br>lucre no <span style="color: var(--miv-accent);">Digital</span>.</h1>
+            <p class="text-muted mt-4 mb-5 mx-auto" style="max-width: 600px; font-size: 1.1rem;">
+                A primeira plataforma que une artistas e investidores através da mineração musical e royalties em tempo real.
+            </p>
+            <button class="btn btn-miv-glow mb-5">EXPLORAR ATIVOS</button>
+        </div>
+    </header>
 
-            <div class="mt-4 d-flex justify-content-center gap-3">
-                <div class="text-center px-4">
-                    <h4 class="fw-bold mb-0">+12k</h4>
-                    <small class="text-muted">Investidores</small>
+    <div class="container">
+        <div class="quick-nav">
+            <h6 class="text-uppercase mb-4 text-muted fw-bold" style="letter-spacing: 2px; font-size: 0.7rem;">O que você deseja fazer hoje?</h6>
+            <div class="row g-4">
+                
+                <div class="col-md-4">
+                    <a href="upload-music.html" class="nav-option-card">
+                        <div class="icon-circle"><i class="bi bi-cloud-arrow-up"></i></div>
+                        <h5 class="fw-bold text-white">Lançar Ativo <span class="badge-new">ARTISTA</span></h5>
+                        <p class="text-muted small mb-0">Envie sua música e transforme-a em um ativo negociável para milhares de investidores.</p>
+                    </a>
                 </div>
-                <div class="text-center px-4">
-                    <h4 class="fw-bold mb-0">R$ 2.4M</h4>
-                    <small class="text-muted">Minerados</small>
+
+                <div class="col-md-4">
+                    <a href="marketplace.html" class="nav-option-card">
+                        <div class="icon-circle" style="background: linear-gradient(135deg, #8b5cf6, #d946ef);"><i class="bi bi-graph-up-arrow"></i></div>
+                        <h5 class="fw-bold text-white">Comprar Cotas</h5>
+                        <p class="text-muted small mb-0">Adquira partes de hits e receba lucros conforme a música ganha mais plays na rede.</p>
+                    </a>
                 </div>
+
+                <div class="col-md-4">
+                    <a href="ouvinte-dashboard.html" class="nav-option-card">
+                        <div class="icon-circle" style="background: linear-gradient(135deg, #10b981, #34d399);"><i class="bi bi-headphones"></i></div>
+                        <h5 class="fw-bold text-white">Minerar Grátis</h5>
+                        <p class="text-muted small mb-0">Apenas dê o play nas músicas da comunidade e veja seu saldo aumentar em tempo real.</p>
+                    </a>
+                </div>
+
             </div>
         </div>
-    </section>
+    </div>
 
-    <section class="container py-5">
-        <div class="row g-4 text-center">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="bi bi-person-plus text-info display-4 mb-3"></i>
-                    <h5 class="fw-bold">Crie sua Conta</h5>
-                    <p class="text-muted small">Acesse nossa plataforma e receba seu primeiro ativo para começar.</p>
-                </div>
+    <div class="container py-5 mt-5">
+        <div class="row text-center border-top border-white border-opacity-10 pt-5">
+            <div class="col-4">
+                <h3 class="fw-bold mb-0">R$ 0.0000001</h3>
+                <small class="text-micro text-info">POR PLAY GERADO</small>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="bi bi-play-circle text-info display-4 mb-3"></i>
-                    <h5 class="fw-bold">Ouça e Ganhe</h5>
-                    <p class="text-muted small">Cada segundo ouvido gera micro-frações de royalties na sua carteira.</p>
-                </div>
+            <div class="col-4">
+                <h3 class="fw-bold mb-0">+500</h3>
+                <small class="text-micro text-info">ARTISTAS ATIVOS</small>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <i class="bi bi-graph-up-arrow text-info display-4 mb-3"></i>
-                    <h5 class="fw-bold">Evolua seu Portfólio</h5>
-                    <p class="text-muted small">Reinvista seus ganhos em novos artistas e maximize seu lucro.</p>
-                </div>
+            <div class="col-4">
+                <h3 class="fw-bold mb-0">100%</h3>
+                <small class="text-micro text-info">TRANSPARÊNCIA</small>
             </div>
         </div>
-    </section>
-
-    <footer class="text-center py-5 opacity-50">
-        <small>© 2026 SELO MIV - Tecnologia Blockchain para Música</small>
-    </section>
+    </div>
 
 </body>
 </html>
