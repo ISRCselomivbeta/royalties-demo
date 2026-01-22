@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Exchange - Vender | SELO MIV</title>
+    <title>Vender Ações | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #0b0e11; color: white; }
@@ -12,39 +12,39 @@
 </head>
 <body>
     <div class="container py-4">
-        <h4>Vender Meus Ativos</h4>
-        <div id="meusAtivos" class="mt-4">
-            <div class="card-sell shadow">
-                <div class="d-flex justify-content-between mb-3">
-                    <span><strong>Som da Rua</strong><br><small class="text-muted">Preço Médio: R$ 15,00</small></span>
-                    <span class="text-success fw-bold">R$ 18,50 <small class="text-muted">Venda</small></span>
+        <h4><i class="bi bi-graph-up-arrow text-danger"></i> Minha Exchange</h4>
+        <p class="text-muted">Venda suas ações para realizar lucros.</p>
+
+        <div class="card-sell shadow mt-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Som da Rua (M01)</strong><br>
+                    <small>Preço Atual: <span class="text-success">R$ 18,50</span></small>
                 </div>
-                <button class="btn-confirm-sell" onclick="venderAtivo('M01', 18.50)">VENDER TODAS AS AÇÕES</button>
+                <button class="btn-confirm-sell" style="width: auto;" onclick="vender()">VENDER TODAS</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
 
-        async function venderAtivo(id, preco) {
-            const qtd = prompt("Quantas ações deseja vender?");
-            if(!qtd) return;
+        async function vender() {
+            if(!confirm("Deseja vender suas ações pelo preço de mercado?")) return;
 
-            const res = await fetch(API_URL, {
-                method: "POST",
-                body: new URLSearchParams({
-                    acao: "negociar_acao",
-                    user_id: localStorage.getItem("userId"),
-                    musica_id: id,
-                    quantidade: qtd,
-                    preco_unitario: preco,
-                    valor: qtd * preco,
-                    tipo_ordem: "VENDA"
-                })
+            const params = new URLSearchParams({
+                acao: "negociar_acao",
+                user_id: localStorage.getItem("userId"),
+                musica_id: "M01",
+                quantidade: 2,
+                preco_unitario: 18.50,
+                valor: 37, // Exemplo de valor com lucro
+                tipo_ordem: "VENDA"
             });
-            alert("Venda realizada com sucesso!");
-            window.location.href = "carteira.html";
+
+            await fetch(API_URL + "?" + params, { method: "POST", mode: "no-cors" });
+            alert("Ações vendidas! O saldo foi atualizado.");
+            window.location.href = "ouvinte-dashboard.html";
         }
     </script>
 </body>
