@@ -1,269 +1,183 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MIV PRO | Ecosystem</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selo MIV - Fintech Musical</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { 
-            --miv-green: #00ff88; 
-            --miv-soft: rgba(0, 255, 136, 0.1);
-            --bg-black: #050505; 
-            --glass: rgba(20, 20, 20, 0.7); 
-            --glass-border: rgba(255, 255, 255, 0.08); 
-        }
-
-        body { 
-            font-family: 'Outfit', sans-serif; 
-            background-color: var(--bg-black); 
-            color: #ffffff; 
-            margin: 0; min-height: 100vh; overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Ambient Glow */
-        .bg-glow {
-            position: fixed; top: 0; left: 50%; transform: translateX(-50%);
-            width: 100vw; height: 100vh;
-            background: radial-gradient(circle at 50% -20%, #003322 0%, transparent 60%);
-            z-index: -1; pointer-events: none;
-        }
-
-        .glass { 
-            background: var(--glass); 
-            backdrop-filter: blur(25px) saturate(180%); 
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border: 1px solid var(--glass-border); 
-            border-radius: 28px; 
-        }
-
-        /* Auth Section */
-        #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .login-card { width: 100%; max-width: 380px; padding: 45px 30px; text-align: center; }
-        .miv-input { 
-            background: rgba(255,255,255,0.05) !important; 
-            border: 1px solid var(--glass-border) !important; 
-            color: white !important; border-radius: 16px !important; 
-            padding: 14px 20px !important; margin-bottom: 15px; transition: 0.3s;
-        }
-        .miv-input:focus { border-color: var(--miv-green) !important; box-shadow: 0 0 15px var(--miv-soft); }
-
-        /* Dashboard Master */
-        #main-app { display: none; padding-bottom: 180px; animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-        .balance-hero { padding: 60px 20px 40px; text-align: center; }
-        .balance-label { font-size: 0.7rem; font-weight: 600; color: #888; letter-spacing: 2px; margin-bottom: 8px; }
-        .balance-value { font-size: 3.5rem; font-weight: 700; letter-spacing: -2px; line-height: 1; }
-        
-        /* Market Interface */
-        .section-title { font-size: 0.85rem; font-weight: 700; padding: 0 15px; margin-bottom: 18px; color: #888; letter-spacing: 1px; }
-        .music-item { 
-            display: flex; align-items: center; padding: 14px; margin-bottom: 12px; 
-            transition: all 0.3s ease; cursor: pointer; border: 1px solid transparent;
-        }
-        .music-item:active { transform: scale(0.96); background: rgba(255,255,255,0.05); }
-        .music-img { width: 50px; height: 50px; border-radius: 15px; background: linear-gradient(45deg, #111, #222); display: flex; align-items: center; justify-content: center; color: var(--miv-green); flex-shrink: 0; }
-        
-        .buy-btn { 
-            background: var(--miv-green); color: #000; font-weight: 700; font-size: 0.65rem; 
-            padding: 8px 16px; border-radius: 12px; border: none; transition: 0.2s;
-        }
-
-        /* Player Bar Float */
-        .miv-player-float { 
-            position: fixed; bottom: 100px; left: 15px; right: 15px; height: 78px; 
-            z-index: 1001; padding: 0 15px; display: flex; align-items: center;
-        }
-        .play-btn-main { 
-            width: 46px; height: 46px; border-radius: 50%; background: var(--miv-green); 
-            color: #000; display: flex; align-items: center; justify-content: center; 
-            font-size: 1.6rem; margin-right: 15px; box-shadow: 0 8px 20px rgba(0,255,136,0.15);
-        }
-
-        /* Navigation Tab */
-        .tab-bar { 
-            position: fixed; bottom: 20px; left: 15px; right: 15px; height: 70px; 
-            display: flex; justify-content: space-around; align-items: center; z-index: 1000;
-        }
-        .tab-item { color: #555; text-decoration: none; font-size: 1.6rem; transition: 0.3s; }
-        .tab-item.active { color: var(--miv-green); }
-
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        #player-yt { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .miv-gradient { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .card-musica:hover { transform: translateY(-5px); transition: all 0.3s ease; border-color: #22c55e; }
     </style>
 </head>
-<body>
+<body class="pb-24">
 
-    <div class="bg-glow"></div>
-    <div id="player-yt"><div id="player"></div></div>
-
-    <section id="auth-page">
-        <div class="glass login-card">
-            <h1 class="fw-bold mb-1" style="letter-spacing: -1.5px;">MIV <span style="color:var(--miv-green)">PRO</span></h1>
-            <p class="text-secondary small mb-5" style="letter-spacing: 1px;">FINANCIAL ECOSYSTEM</p>
-            
-            <input type="email" id="l-email" class="form-control miv-input" placeholder="Acesso e-mail">
-            <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-            <button class="btn w-100 py-3 mt-3 fw-bold" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:18px;">CONECTAR NODE</button>
-        </div>
-    </section>
-
-    <main id="main-app">
-        <header class="balance-hero">
-            <div class="balance-label">WALLET BALANCE</div>
-            <div class="balance-value">R$ <span id="user-saldo">0,00</span></div>
-            <div class="mt-3">
-                <span class="badge glass py-2 px-3 text-success fw-bold" id="user-tipo" style="font-size: 0.6rem; letter-spacing: 1px;">INVESTIDOR</span>
+    <nav class="glass sticky top-0 z-50 p-4 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 miv-gradient rounded-lg flex items-center justify-center font-black text-white italic">MIV</div>
+                <h1 class="text-xl font-bold tracking-tighter">SELO <span class="text-green-500">MIV</span></h1>
             </div>
-        </header>
-
-        <div class="container px-4">
-            <div id="area-artista" style="display: none;" class="mb-5">
-                <div class="glass p-4 text-center" style="border-style: dashed; border-color: var(--miv-soft);">
-                    <h6 class="fw-bold mb-3 small">TOKENIZAR ATIVO MUSICAL</h6>
-                    <button class="btn btn-sm btn-success px-4 fw-bold" onclick="MivEngine.cadastrarAtivo()" style="border-radius: 12px; font-size: 0.7rem;">NOVO LANÇAMENTO</button>
+            
+            <div id="status-wallet" class="flex items-center gap-4">
+                <div class="text-right">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold">Saldo em Carteira</p>
+                    <p id="saldo-valor" class="text-green-400 font-black">R$ 0,00</p>
+                </div>
+                <div class="h-10 w-10 rounded-full bg-slate-700 border border-slate-600 flex items-center justify-center">
+                    <i class="fas fa-user text-sm"></i>
                 </div>
             </div>
-
-            <div class="section-title">MARKETPLACE ASSETS</div>
-            <div id="market-list">
-                <div class="text-center py-5 opacity-50 small">Sincronizando com a rede...</div>
-            </div>
         </div>
+    </nav>
 
-        <div class="miv-player-float glass">
-            <div class="play-btn-main" onclick="togglePlayback()">
-                <i id="play-icon" class="bi bi-play-fill"></i>
+    <main class="max-w-7xl mx-auto p-4 space-y-8">
+        
+        <section class="rounded-3xl p-8 miv-gradient flex flex-col md:flex-row justify-between items-center shadow-2xl shadow-green-500/20">
+            <div>
+                <h2 class="text-3xl font-black mb-2 italic uppercase">Sua Wallet Musical</h2>
+                <p class="text-green-100 opacity-90">Deposite via Mercado Pago e transforme saldo em ativos.</p>
             </div>
-            <div class="flex-grow-1 overflow-hidden me-2">
-                <div id="p-title" class="fw-bold small text-truncate">Explorar Ativos</div>
-                <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">MIV Radio Ativa</div>
-            </div>
-            <div class="text-end">
-                <div class="text-success fw-bold" style="font-size: 0.7rem;">LIVE</div>
-                <div id="p-id" class="text-secondary" style="font-size: 0.5rem; opacity: 0.4;">ID: --</div>
-            </div>
-        </div>
+            <a href="https://link.mercadopago.com.br/selomiv" target="_blank" class="mt-6 md:mt-0 bg-white text-green-700 px-8 py-4 rounded-full font-black hover:bg-slate-100 transition shadow-lg flex items-center gap-3">
+                <i class="fas fa-wallet"></i> DEPOSITAR AGORA
+            </a>
+        </section>
 
-        <nav class="tab-bar glass">
-            <a href="#" class="tab-item active"><i class="bi bi-grid-fill"></i></a>
-            <a href="#" class="tab-item" onclick="alert('Histórico em atualização...')"><i class="bi bi-activity"></i></a>
-            <a href="#" class="tab-item" onclick="sair()"><i class="bi bi-power"></i></a>
-        </nav>
+        <section>
+            <div class="flex justify-between items-end mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold uppercase tracking-widest text-green-500">Mercado de Ativos</h2>
+                    <p class="text-slate-400">Invista em cotas de músicas e receba royalties.</p>
+                </div>
+                <button onclick="carregarMercado()" class="text-slate-500 hover:text-white transition"><i class="fas fa-sync"></i></button>
+            </div>
+
+            <div id="lista-musicas" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+        </section>
+
     </main>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <div id="player-container" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-700 p-4 hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <img id="player-img" src="" class="w-12 h-12 rounded bg-slate-800">
+                <div>
+                    <h4 id="player-titulo" class="font-bold text-sm">Nenhuma música</h4>
+                    <p class="text-xs text-green-500">Minerando Royalties...</p>
+                </div>
+            </div>
+            
+            <div class="flex-1 max-w-md mx-8">
+                <div class="h-1 bg-slate-700 rounded-full">
+                    <div id="player-progress" class="h-1 bg-green-500 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+                <p class="text-[10px] text-center mt-2 text-slate-500">Mantenha o player ativo por 30s para validar o ganho.</p>
+            </div>
+
+            <button onclick="fecharPlayer()" class="text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+        </div>
+    </div>
+
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwDy10nDMPw51ybWAegLVeisC4GRsHs-jyI_wWOevN06-dYH3eQse7nJvgWgayOlsFC/exec';
-        let ytPlayer, musicaAtualId = null;
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzsdua_xCQDm8pe7Ly9SXhXlFXmucAX1z02qFfi4H8dBGVyLHVnXhAv_tb-y1uYK35/exec";
+        
+        // Simulação de usuário logado (Em produção, viria do Login)
+        let currentUser = { id: "U1769060182614", nome: "Visitante MIV", tipo: "ouvinte" };
 
-        const MivEngine = {
-            async cadastrarAtivo() {
-                const url = prompt("URL do YouTube:");
-                const titulo = prompt("Título:");
-                const valor = prompt("Cota (R$):", "10.00");
-                if(!url || !titulo) return;
-                const user = JSON.parse(localStorage.getItem('miv_session'));
-                const res = await fetch(`${API_URL}?acao=cadastrar_ativo&artistaId=${user.id}&urlYoutube=${encodeURIComponent(url)}&titulo=${encodeURIComponent(titulo)}&valorCota=${valor}`);
-                const data = await res.json();
-                if(data.success) { alert("Ativo Listado!"); carregarMercado(); }
-            },
-
-            async comprarCota(id, valor) {
-                if(confirm(`Confirmar aporte de R$ ${valor}?`)) {
-                    const user = JSON.parse(localStorage.getItem('miv_session'));
-                    const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}`);
-                    const data = await res.json();
-                    if(data.success) { alert("Cota Adquirida!"); location.reload(); }
-                    else { alert(data.msg || "Erro na transação"); }
-                }
-            }
-        };
-
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '0', width: '0',
-                playerVars: { 'listType': 'playlist', 'list': 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN' },
-                events: { 'onStateChange': onPlayerStateChange }
-            });
-        }
-
-        async function acaoLogin() {
-            const btn = document.getElementById('btn-login');
-            btn.innerText = "AUTHENTICATING...";
-            try {
-                const res = await fetch(`${API_URL}?acao=login&usuario=${document.getElementById('l-email').value}&senha=${document.getElementById('l-pass').value}`);
-                const data = await res.json();
-                if(data.success) {
-                    localStorage.setItem('miv_session', JSON.stringify(data));
-                    renderApp(data);
-                } else { alert("Falha na conexão"); btn.innerText = "CONECTAR NODE"; }
-            } catch(e) { alert("Timeout"); btn.innerText = "CONECTAR NODE"; }
-        }
-
-        function renderApp(data) {
-            document.getElementById('auth-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-saldo').innerText = Number(data.saldo).toLocaleString('pt-BR', {minimumFractionDigits: 2});
-            document.getElementById('user-nome').innerText = data.nome;
-            document.getElementById('user-tipo').innerText = data.tipo.toUpperCase();
-            if(data.tipo.toLowerCase() === 'artista') document.getElementById('area-artista').style.display = 'block';
-            carregarMercado();
-        }
-
+        // 1. CARREGAR MÚSICAS DA PLANILHA
         async function carregarMercado() {
-            const container = document.getElementById('market-list');
+            const container = document.getElementById('lista-musicas');
+            container.innerHTML = "<p class='col-span-full text-center py-20 text-slate-500'>Sincronizando com o Ledger...</p>";
+
             try {
-                const res = await fetch(`${API_URL}?acao=listar_mercado`);
-                const data = await res.json();
-                container.innerHTML = data.musicas.map(m => `
-                    <div class="glass music-item" onclick="tocarMusica('${m.videoId}', '${m.titulo}', '${m.artista}', '${m.id}')">
-                        <div class="music-img"><i class="bi bi-play-fill"></i></div>
-                        <div class="flex-grow-1 ms-3 overflow-hidden">
-                            <div class="fw-bold text-truncate" style="font-size:0.9rem;">${m.titulo}</div>
-                            <div class="text-secondary" style="font-size:0.7rem; opacity:0.7;">${m.artista}</div>
+                const res = await fetch(`${SCRIPT_URL}?acao=listar_mercado`);
+                const musicas = await res.json();
+                
+                container.innerHTML = "";
+                musicas.forEach(musica => {
+                    container.innerHTML += `
+                        <div class="card-musica glass p-4 rounded-2xl">
+                            <img src="${musica.LINK_CAPA || 'https://via.placeholder.com/300'}" class="w-full h-40 object-cover rounded-xl mb-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg leading-tight">${musica.TITULO}</h3>
+                                <span class="bg-slate-800 text-green-400 text-[10px] px-2 py-1 rounded font-bold">${musica.GÊNERO}</span>
+                            </div>
+                            <p class="text-slate-500 text-xs mb-4">ISRC: ${musica.ISRC}</p>
+                            
+                            <div class="flex items-center justify-between border-t border-slate-700 pt-4">
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase italic">Valor Cota</p>
+                                    <p class="text-green-400 font-black">R$ ${parseFloat(musica['VALOR AÇÃO']).toFixed(2)}</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button onclick="ativarPlayer('${musica.ID}', '${musica.TITULO}', '${musica.LINK_CAPA}')" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-green-500 hover:text-white transition">
+                                        <i class="fas fa-play"></i>
+                                    </button>
+                                    <button onclick="investir('${musica.ID}')" class="bg-green-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-green-500">INVESTIR</button>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-end">
-                            <button class="buy-btn" onclick="event.stopPropagation(); MivEngine.comprarCota('${m.id}', ${m.valor})">R$ ${m.valor}</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch(e) { container.innerHTML = "Erro de Sincronia."; }
-        }
-
-        function tocarMusica(vId, tit, art, mId) {
-            musicaAtualId = mId;
-            document.getElementById('p-title').innerText = tit;
-            document.getElementById('p-artist').innerText = art;
-            document.getElementById('p-id').innerText = "ID: " + mId;
-            ytPlayer.loadVideoById(vId);
-        }
-
-        function onPlayerStateChange(event) {
-            document.getElementById('play-icon').className = (event.data == 1) ? "bi bi-pause-fill" : "bi bi-play-fill";
-            if(event.data == 1) {
-                setTimeout(() => {
-                    if(ytPlayer.getPlayerState() === 1 && musicaAtualId) {
-                        const user = JSON.parse(localStorage.getItem('miv_session'));
-                        fetch(`${API_URL}?acao=registrar_play&userId=${user.id}&musicaId=${musicaAtualId}`);
-                    }
-                }, 30000);
+                    `;
+                });
+            } catch (e) {
+                container.innerHTML = "<p class='text-red-500'>Erro ao conectar com o backend financeiro.</p>";
             }
         }
 
-        function togglePlayback() {
-            if(ytPlayer.getPlayerState() === 1) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
+        // 2. LÓGICA DO PLAY FINANCEIRO (ECONOMIA DA ATENÇÃO)
+        let playInterval;
+        function ativarPlayer(id, titulo, capa) {
+            const player = document.getElementById('player-container');
+            player.classList.remove('hidden');
+            document.getElementById('player-titulo').innerText = titulo;
+            document.getElementById('player-img').src = capa || '';
+            
+            let progresso = 0;
+            const bar = document.getElementById('player-progress');
+            
+            clearInterval(playInterval);
+            playInterval = setInterval(async () => {
+                progresso += 3.33; // 30 segundos aprox
+                bar.style.width = progresso + "%";
+                
+                if (progresso >= 100) {
+                    clearInterval(playInterval);
+                    await registrarPlayFinanceiro(id);
+                    progresso = 0;
+                    bar.style.width = "0%";
+                    alert("Play válido! Royalties distribuídos em sua Wallet.");
+                }
+            }, 1000);
         }
 
-        function sair() { localStorage.removeItem('miv_session'); location.reload(); }
-
-        window.onload = () => {
-            const s = localStorage.getItem('miv_session');
-            if(s) renderApp(JSON.parse(s));
+        async function registrarPlayFinanceiro(musicaId) {
+            // O frontend apenas envia o comando "registre um play"
+            // O backend que decide o valor para ouvinte e para investidor
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    acao: 'registrar_play',
+                    ouvinteId: currentUser.id,
+                    musicaId: musicaId
+                })
+            });
+            atualizarSaldoInterface();
         }
+
+        function investir(id) {
+            alert("Redirecionando para interface de compra de cotas... Saldo interno será utilizado.");
+        }
+
+        function fecharPlayer() {
+            document.getElementById('player-container').classList.add('hidden');
+            clearInterval(playInterval);
+        }
+
+        window.onload = carregarMercado;
     </script>
 </body>
 </html>
