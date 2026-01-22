@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SELO MIV PRO | Fintech Musical</title>
+    <title>SELO MIV PRO | Ecosystem</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -11,26 +11,22 @@
     <style>
         :root { --miv-green: #00ff88; --bg-black: #000000; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; overflow-x: hidden; }
-
         .glass-card { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; }
         
-        /* Auth Screen */
+        /* Auth */
         #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); }
         .miv-input { background: var(--glass) !important; border: 1px solid var(--glass-border) !important; color: white !important; border-radius: 12px !important; padding: 12px !important; margin-bottom: 12px; }
 
-        /* App State Management */
+        /* App */
         #main-app { display: none; padding-bottom: 180px; }
         .balance-hero { text-align: center; padding: 50px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
 
-        /* Market UI */
         .music-card { background: var(--glass); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid transparent; transition: 0.3s; cursor: pointer; }
         .music-card:hover { border-color: var(--miv-green); background: rgba(255,255,255,0.08); }
         
-        /* Player Fixo (Apple Style) */
         .miv-player { position: fixed; bottom: 95px; left: 15px; right: 15px; height: 85px; z-index: 1001; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border: 1px solid var(--glass-border); }
         .btn-play-miv { width: 45px; height: 45px; border-radius: 50%; background: var(--miv-green); color: black; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
 
-        /* Nav Bar */
         .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 70px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .tab-item { color: #8e8e93; text-decoration: none; text-align: center; font-size: 0.7rem; }
         .tab-item.active { color: var(--miv-green); }
@@ -47,60 +43,52 @@
         <div class="glass-card w-100 mx-3" style="max-width: 400px; padding: 35px;">
             <div class="text-center mb-4">
                 <h2 class="fw-bold m-0">MIV <span style="color:var(--miv-green)">PRO</span></h2>
-                <small class="text-secondary text-uppercase" style="letter-spacing: 2px; font-size: 0.6rem;">Ecosystem Gateway</small>
+                <small class="text-secondary">Ecosystem Gateway</small>
             </div>
-            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail de acesso">
+            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
             <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-            <button class="btn w-100 fw-bold py-3 mt-2 btn-login" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:12px;">ENTRAR NO SISTEMA</button>
+            <button class="btn w-100 fw-bold py-3 mt-2" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:12px;">ENTRAR</button>
         </div>
     </section>
 
     <main id="main-app">
         <header class="balance-hero">
-            <small class="text-secondary fw-bold text-uppercase" style="letter-spacing: 1px;">Saldo em Carteira</small>
+            <small class="text-secondary fw-bold text-uppercase">Patrimônio</small>
             <div class="display-4 fw-bold">R$ <span id="user-saldo">0,00</span></div>
             <div class="d-flex justify-content-center gap-2 mt-2">
-                <span class="badge rounded-pill bg-dark text-success border border-success" id="user-tipo">Membro</span>
-                <span class="badge rounded-pill bg-dark text-secondary border border-secondary" id="user-nome">Usuário</span>
+                <span class="badge rounded-pill bg-dark text-success border border-success" id="user-tipo">...</span>
+                <span class="badge rounded-pill bg-dark text-secondary border border-secondary" id="user-nome">...</span>
             </div>
         </header>
 
         <div class="container mt-4">
             <div id="area-artista" class="mb-4" style="display: none;">
-                <button class="btn btn-outline-success w-100 py-3 border-dashed" onclick="MivEngine.cadastrarAtivo()" style="border-style: dashed; border-radius: 15px; background: rgba(0,255,136,0.05);">
-                    <i class="bi bi-cloud-arrow-up me-2"></i>TOKENIZAR NOVO LANÇAMENTO
+                <button class="btn btn-outline-success w-100 py-3 border-dashed" onclick="MivEngine.cadastrarAtivo()" style="border-style: dashed; border-radius: 15px;">
+                    <i class="bi bi-cloud-arrow-up me-2"></i>TOKENIZAR LANÇAMENTO
                 </button>
             </div>
 
-            <h6 class="fw-bold mb-3 d-flex justify-content-between align-items-center">
-                MERCADO DE COTAS
-                <span class="text-secondary" style="font-size: 0.7rem;">LISTAGEM ATIVA</span>
-            </h6>
-            
-            <div id="market-list">
-                <div class="text-center py-5 text-secondary small">Sincronizando ativos...</div>
-            </div>
+            <h6 class="fw-bold mb-3 px-2">MERCADO DE ATIVOS</h6>
+            <div id="market-list" class="px-1"></div>
         </div>
 
         <div class="miv-player glass-card">
-            <div class="d-flex align-items-center gap-3 overflow-hidden">
-                <div class="btn-play-miv" onclick="togglePlayback()">
-                    <i id="play-icon" class="bi bi-play-fill"></i>
-                </div>
-                <div class="overflow-hidden">
-                    <div id="p-title" class="fw-bold small text-truncate" style="max-width: 140px;">MIV Radio</div>
-                    <div id="p-artist" class="text-secondary text-truncate" style="font-size: 0.7rem;">Curadoria Oficial</div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="btn-play-miv" onclick="togglePlayback()"><i id="play-icon" class="bi bi-play-fill"></i></div>
+                <div>
+                    <div id="p-title" class="fw-bold small">MIV Radio</div>
+                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">Play para minerar</div>
                 </div>
             </div>
-            <div class="text-end" style="min-width: 80px;">
-                <div class="text-success fw-bold" style="font-size: 0.7rem;" id="stream-status">STREAMING</div>
-                <div class="text-secondary" style="font-size: 0.55rem;">MINE: 0,0000001/s</div>
+            <div class="text-end">
+                <div class="text-success fw-bold" style="font-size: 0.7rem;">LIVE</div>
+                <div class="text-secondary" style="font-size: 0.55rem;">0.0000001 / play</div>
             </div>
         </div>
 
         <nav class="tab-bar glass-card">
             <a href="#" class="tab-item active"><i class="bi bi-compass"></i>Explorar</a>
-            <a href="#" class="tab-item" onclick="alert('Módulo de Carteira em breve')"><i class="bi bi-grid-1x2"></i>Ativos</a>
+            <a href="#" class="tab-item" onclick="alert('Em breve')"><i class="bi bi-grid-1x2"></i>Carteira</a>
             <a href="#" class="tab-item" onclick="sair()"><i class="bi bi-box-arrow-right"></i>Sair</a>
         </nav>
     </main>
@@ -111,33 +99,27 @@
         let ytPlayer;
         let musicaAtualId = null;
 
-        // Motor de Negócios MIV
         const MivEngine = {
             async cadastrarAtivo() {
                 const url = prompt("Link do YouTube:");
                 const titulo = prompt("Título da Música:");
+                const valor = prompt("Valor da Cota (R$):", "10");
                 if(!url || !titulo) return;
                 
                 const user = JSON.parse(localStorage.getItem('miv_session'));
-                const res = await fetch(`${API_URL}?acao=cadastrar_ativo&artistaId=${user.id}&urlYoutube=${encodeURIComponent(url)}&titulo=${encodeURIComponent(titulo)}`);
+                const res = await fetch(`${API_URL}?acao=cadastrar_ativo&artistaId=${user.id}&urlYoutube=${encodeURIComponent(url)}&titulo=${encodeURIComponent(titulo)}&valorCota=${valor}`);
                 const data = await res.json();
-                if(data.success) { alert("Lançamento listado com sucesso!"); carregarMercado(); }
+                if(data.success) { alert("Ativo listado!"); carregarMercado(); }
             },
 
             async comprarCota(id, valor) {
-                if(confirm(`Confirmar investimento de R$ ${valor}?`)) {
+                if(confirm(`Investir R$ ${valor} neste ativo?`)) {
                     const user = JSON.parse(localStorage.getItem('miv_session'));
-                    const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}&tipo_ordem=COMPRA&quantidade=1&preco_unitario=${valor}`);
+                    // Sincronizado com p.user_id, p.musica_id e p.valor_total do seu Script
+                    const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${user.id}&musica_id=${id}&valor_total=${valor}&quantidade=1`);
                     const data = await res.json();
-                    if(data.success) { alert("Cota adquirida com sucesso!"); location.reload(); }
+                    if(data.success) { alert("Sucesso! Cota adicionada."); location.reload(); }
                 }
-            },
-
-            notificarStream(mId) {
-                const user = JSON.parse(localStorage.getItem('miv_session'));
-                fetch(`${API_URL}?acao=registrar_play&userId=${user.id}&musicaId=${mId}`)
-                .then(r => r.json())
-                .then(d => { if(d.success) console.log("Recompensa de Stream processada."); });
             }
         };
 
@@ -153,7 +135,7 @@
             const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
             const btn = document.getElementById('btn-login');
-            btn.innerText = "AUTENTICANDO...";
+            btn.innerText = "ENTRANDO...";
             
             try {
                 const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
@@ -161,18 +143,17 @@
                 if(data.success) {
                     localStorage.setItem('miv_session', JSON.stringify(data));
                     renderApp(data);
-                } else { alert("Acesso negado."); btn.innerText = "ENTRAR NO SISTEMA"; }
-            } catch(e) { alert("Erro de conexão com servidor."); btn.innerText = "ENTRAR NO SISTEMA"; }
+                } else { alert("Login incorreto."); btn.innerText = "ENTRAR"; }
+            } catch(e) { alert("Erro de conexão."); btn.innerText = "ENTRAR"; }
         }
 
         function renderApp(data) {
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-saldo').innerText = data.saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('user-saldo').innerText = Number(data.saldo).toLocaleString('pt-BR', {minimumFractionDigits: 2});
             document.getElementById('user-nome').innerText = data.nome;
             document.getElementById('user-tipo').innerText = data.tipo.toUpperCase();
-            
-            if(data.tipo === 'artista') document.getElementById('area-artista').style.display = 'block';
+            if(data.tipo.toLowerCase() === 'artista') document.getElementById('area-artista').style.display = 'block';
             carregarMercado();
         }
 
@@ -189,11 +170,11 @@
                             <small class="text-secondary">${m.artista}</small>
                         </div>
                         <div class="text-end">
-                            <button class="btn btn-sm btn-dark text-success fw-bold p-1 px-3" onclick="event.stopPropagation(); MivEngine.comprarCota('${m.id}', ${m.valor})" style="font-size:0.65rem; border: 1px solid #111;">COTA R$ ${m.valor}</button>
+                            <button class="btn btn-sm btn-dark text-success fw-bold p-1 px-3" onclick="event.stopPropagation(); MivEngine.comprarCota('${m.id}', ${m.valor})" style="font-size:0.65rem; border: 1px solid #333;">COTA R$ ${m.valor}</button>
                         </div>
                     </div>
                 `).join('');
-            } catch(e) { container.innerHTML = "Falha ao carregar ativos."; }
+            } catch(e) { container.innerHTML = "Erro ao carregar mercado."; }
         }
 
         function tocarMusica(vId, tit, art, mId) {
@@ -201,21 +182,23 @@
             document.getElementById('p-title').innerText = tit;
             document.getElementById('p-artist').innerText = art;
             ytPlayer.loadVideoById(vId);
-            document.getElementById('play-icon').className = "bi bi-pause-fill";
-        }
-
-        function togglePlayback() {
-            const s = ytPlayer.getPlayerState();
-            if(s === 1) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
         }
 
         function onPlayerStateChange(event) {
-            document.getElementById('play-icon').className = (event.data == 1) ? "bi bi-pause-fill" : "bi bi-play-fill";
+            const icon = document.getElementById('play-icon');
+            icon.className = (event.data == 1) ? "bi bi-pause-fill" : "bi bi-play-fill";
             if(event.data == 1) {
                 setTimeout(() => {
-                    if(ytPlayer.getPlayerState() === 1 && musicaAtualId) MivEngine.notificarStream(musicaAtualId);
+                    if(ytPlayer.getPlayerState() === 1 && musicaAtualId) {
+                        const user = JSON.parse(localStorage.getItem('miv_session'));
+                        fetch(`${API_URL}?acao=registrar_play&userId=${user.id}&musicaId=${musicaAtualId}`);
+                    }
                 }, 30000);
             }
+        }
+
+        function togglePlayback() {
+            if(ytPlayer.getPlayerState() === 1) ytPlayer.pauseVideo(); else ytPlayer.playVideo();
         }
 
         function sair() { localStorage.removeItem('miv_session'); location.reload(); }
