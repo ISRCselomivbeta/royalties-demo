@@ -12,27 +12,29 @@
         :root { --miv-green: #00ff88; --bg-black: #000000; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; overflow-x: hidden; }
 
+        /* Estilo Vidro Apple */
         .glass-card { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; }
         
         /* Auth Screen */
-        #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); padding: 20px; z-index: 2000; position: relative; }
+        #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); padding: 20px; }
         .miv-input { background: var(--glass) !important; border: 1px solid var(--glass-border) !important; color: white !important; border-radius: 12px !important; padding: 12px !important; margin-bottom: 12px; }
 
         /* Dashboard */
-        #main-app { display: none; padding-bottom: 180px; }
+        #main-app { display: none; padding-bottom: 180px; animation: fadeIn 0.5s ease; }
         .balance-hero { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
 
-        /* MIV Player Estilo Apple Music */
+        /* Player Bar */
         .miv-player { position: fixed; bottom: 90px; left: 15px; right: 15px; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1001; }
-        
         .music-card { background: var(--glass); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid transparent; transition: 0.3s; cursor: pointer; }
         .music-card:hover { border-color: var(--miv-green); background: rgba(255,255,255,0.08); }
 
-        /* YT Player Oculto */
-        #yt-player-container { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-
-        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
         .btn-play-miv { width: 40px; height: 40px; border-radius: 50%; background: var(--miv-green); color: black; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
+        
+        /* Tab Bar */
+        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        
+        #yt-player-container { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -41,28 +43,10 @@
 
     <section id="auth-page">
         <div class="glass-card w-100" style="max-width: 400px; padding: 30px;">
-            <div class="text-center mb-4">
-                <h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2>
-            </div>
-            
-            <div id="box-login">
-                <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-                <button class="btn btn-success w-100 fw-bold rounded-3 py-3" onclick="acaoLogin()" style="background: var(--miv-green); color:black; border:none;">ENTRAR</button>
-                <p class="text-center mt-3 small text-secondary">Não tem conta? <a href="#" onclick="toggleAuth(true)" class="text-success">Cadastre-se</a></p>
-            </div>
-
-            <div id="box-cadastro" style="display:none;">
-                <input type="text" id="c-nome" class="form-control miv-input" placeholder="Nome Completo">
-                <input type="email" id="c-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="c-pass" class="form-control miv-input" placeholder="Senha">
-                <select id="c-tipo" class="form-control miv-input">
-                    <option value="ouvinte">Investidor / Ouvinte</option>
-                    <option value="artista">Artista / Produtor</option>
-                </select>
-                <button class="btn btn-outline-light w-100 fw-bold rounded-3 py-3" onclick="acaoCadastro()">CRIAR CONTA</button>
-                <p class="text-center mt-3 small text-secondary">Já tem conta? <a href="#" onclick="toggleAuth(false)" class="text-success">Fazer Login</a></p>
-            </div>
+            <h2 class="text-center fw-bold mb-4">MIV <span style="color:var(--miv-green)">PRO</span></h2>
+            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
+            <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
+            <button class="btn w-100 fw-bold py-3" id="btn-login" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:12px;">ENTRAR</button>
         </div>
     </section>
 
@@ -70,13 +54,14 @@
         <header class="balance-hero">
             <small class="text-secondary fw-bold">SALDO DISPONÍVEL</small>
             <div class="display-5 fw-bold">R$ <span id="user-saldo">0,00</span></div>
-            <div id="user-nome" class="small text-success mt-1">Investidor</div>
+            <div id="user-nome" class="small text-success mt-1">Carregando...</div>
         </header>
 
         <div class="container">
-            <h6 class="fw-bold mb-3 mt-4">Mercado de Ativos (Novidades)</h6>
+            <h6 class="fw-bold mb-3 mt-4">Mercado de Ativos (Novas)</h6>
             <div id="market-list">
-                </div>
+                <div class="text-center text-secondary small">Buscando oportunidades na rede...</div>
+            </div>
         </div>
 
         <div class="miv-player glass-card">
@@ -84,7 +69,7 @@
                 <div class="btn-play-miv" onclick="togglePlayback()"><i id="play-icon" class="bi bi-play-fill"></i></div>
                 <div>
                     <div id="p-title" class="fw-bold small">MIV Playlist</div>
-                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">Selecione uma faixa</div>
+                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">Curadoria Oficial</div>
                 </div>
             </div>
             <i class="bi bi-broadcast text-success"></i>
@@ -99,11 +84,9 @@
 
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        // --- CONFIGURAÇÃO ---
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwbhgddJ6g1PuDSWqS8IiBI-6GfP7W2I3OSbuw3e-d1-tt5206EzEkg3H6ny-anbcZm/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzJ9Yazbw_xHgLUZ_I_X0b8xm0GLlBcUOEz_CPTmm5fXj7EOFYn964F5lM-YKoRb4tN/exec';
         let ytPlayer;
 
-        // --- PLAYER YOUTUBE ---
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('player', {
                 height: '0', width: '0',
@@ -112,42 +95,31 @@
             });
         }
 
-        // --- AUTH LOGIC ---
-        function toggleAuth(showCad) {
-            document.getElementById('box-login').style.display = showCad ? 'none' : 'block';
-            document.getElementById('box-cadastro').style.display = showCad ? 'block' : 'none';
-        }
-
         async function acaoLogin() {
             const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
-            const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
-            const data = await res.json();
+            const btn = document.getElementById('btn-login');
             
-            if(data.success) {
-                entrarNoApp(data);
-            } else { alert(data.msg || "Erro no login."); }
-        }
-
-        async function acaoCadastro() {
-            const n = document.getElementById('c-nome').value;
-            const e = document.getElementById('c-email').value;
-            const s = document.getElementById('c-pass').value;
-            const t = document.getElementById('c-tipo').value;
-            const urlBase = window.location.href.split('?')[0];
-
-            alert("Cadastrando... Verifique seu e-mail para ativar a conta após a confirmação.");
-            const res = await fetch(`${API_URL}?acao=cadastro&nome=${n}&email=${e}&senha=${s}&tipo=${t}&url_base=${urlBase}`);
-            const data = await res.json();
+            btn.innerText = "AUTENTICANDO...";
             
-            if(data.success) {
-                alert("Cadastro realizado! Enviamos um link de ativação para o seu e-mail.");
-                toggleAuth(false);
+            try {
+                const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
+                const data = await res.json();
+                
+                if(data.success) {
+                    localStorage.setItem('miv_session', JSON.stringify(data));
+                    renderApp(data);
+                } else { 
+                    alert("Dados incorretos!"); 
+                    btn.innerText = "ENTRAR";
+                }
+            } catch(e) {
+                alert("Erro de conexão.");
+                btn.innerText = "ENTRAR";
             }
         }
 
-        function entrarNoApp(data) {
-            localStorage.setItem("miv_session", JSON.stringify(data));
+        function renderApp(data) {
             document.getElementById('auth-page').style.display = 'none';
             document.getElementById('main-app').style.display = 'block';
             document.getElementById('user-saldo').innerText = data.saldo.toFixed(2);
@@ -155,11 +127,11 @@
             carregarMercado();
         }
 
-        // --- MARKET LOGIC ---
         async function carregarMercado() {
             const res = await fetch(`${API_URL}?acao=listar_mercado`);
             const data = await res.json();
             const container = document.getElementById('market-list');
+            
             container.innerHTML = data.musicas.map(m => `
                 <div class="music-card" onclick="tocarMusica('${m.videoId}', '${m.titulo}', '${m.artista}')">
                     <div class="btn-play-miv" style="width:30px; height:30px; font-size:0.8rem;"><i class="bi bi-play-fill"></i></div>
@@ -172,7 +144,6 @@
             `).join('');
         }
 
-        // --- PLAYER CONTROLS ---
         function tocarMusica(videoId, titulo, artista) {
             document.getElementById('p-title').innerText = titulo;
             document.getElementById('p-artist').innerText = artista;
@@ -190,13 +161,13 @@
         }
 
         function sair() {
-            localStorage.removeItem("miv_session");
+            localStorage.removeItem('miv_session');
             location.reload();
         }
 
         window.onload = () => {
-            const sess = localStorage.getItem("miv_session");
-            if(sess) entrarNoApp(JSON.parse(sess));
+            const session = localStorage.getItem('miv_session');
+            if(session) renderApp(JSON.parse(session));
         }
     </script>
 </body>
