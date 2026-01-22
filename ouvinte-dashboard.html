@@ -3,202 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Music | Premium Streaming</title>
+    <title>MIV Music Pro | Premium Streaming</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
             --sp-green: #1DB954;
-            --sp-black: #000000;
-            --sp-dark: #121212;
-            --sp-gray: #282828;
-            --glass: rgba(255, 255, 255, 0.1);
+            --sp-black: #090909;
+            --sp-dark-gray: #121212;
+            --sp-card: #181818;
+            --sp-light-gray: #282828;
         }
 
         body {
             background-color: var(--sp-black);
-            color: white;
+            color: #fff;
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
             padding-bottom: 110px;
+            overflow-x: hidden;
+            margin: 0;
         }
 
-        /* PERFIL & HEADER */
-        .profile-section {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: linear-gradient(to bottom, #222, var(--sp-black));
+        /* HEADER & PERFIL */
+        .header-miv {
+            background: linear-gradient(180deg, rgba(29,185,84,0.2) 0%, var(--sp-black) 100%);
+            padding: 30px 20px;
         }
-        .user-avatar-wrapper {
-            position: relative;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
+        .user-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            border: 2px solid var(--sp-green); object-fit: cover; cursor: pointer;
         }
-        #user-photo {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--sp-green);
-        }
-        .upload-hint {
-            position: absolute;
-            bottom: -5px;
-            right: -5px;
-            background: var(--sp-green);
-            border-radius: 50%;
-            padding: 2px;
-            font-size: 10px;
-        }
+        .balance-val { font-size: 2.5rem; font-weight: 900; color: #fff; }
 
-        /* DASHBOARD */
-        .balance-card { padding: 0 20px 20px; }
-        .balance-amount { font-size: 2.5rem; font-weight: 900; color: white; }
-
-        /* GRID */
-        .song-grid { padding: 0 15px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
-        @media (min-width: 768px) { .song-grid { grid-template-columns: repeat(4, 1fr); } }
-        
-        .miv-card {
-            background: var(--sp-dark);
-            border-radius: 8px;
-            padding: 12px;
-            transition: 0.3s;
-            position: relative;
+        /* NAVEGAÇÃO */
+        .nav-miv {
+            display: flex; gap: 12px; padding: 10px 20px;
+            background: var(--sp-black); position: sticky; top: 0; z-index: 100;
         }
-        .miv-card img { width: 100%; aspect-ratio: 1; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .miv-card:hover { background: var(--sp-gray); }
+        .btn-tab {
+            background: var(--sp-light-gray); color: #fff; border: none;
+            padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 0.8rem;
+        }
+        .btn-tab.active { background: var(--sp-green); color: #000; }
 
-        /* PLAYER FIXO */
-        .player-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(18, 18, 18, 0.98);
-            backdrop-filter: blur(10px);
-            border-top: 1px solid #333;
-            padding: 10px 15px;
-            z-index: 2000;
-            display: none;
+        /* CARDS */
+        .song-card {
+            background: var(--sp-card); border-radius: 12px; padding: 15px;
+            transition: 0.3s; cursor: pointer; height: 100%;
+        }
+        .song-card:hover { background: var(--sp-light-gray); }
+        .song-img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; margin-bottom: 10px; }
+
+        /* PLAYER BAR & EXPANSION */
+        .sp-player {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(18, 18, 18, 0.98); backdrop-filter: blur(15px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 20px; z-index: 1000;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .sp-player.expanded { height: 100vh; background: #000; display: flex; flex-direction: column; justify-content: center; }
 
-        /* MODO EXPANDIDO (TELA CHEIA) */
-        .player-bar.expanded {
-            height: 100vh;
-            bottom: 0;
-            background: var(--sp-black);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .video-container {
+            display: none; width: 100%; max-width: 700px; 
+            margin: 0 auto 30px; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;
         }
-
-        .expanded-video-container {
-            display: none;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .player-bar.expanded .expanded-video-container { display: block; }
-        .player-bar.expanded .mini-thumb { display: none; }
-        .player-bar.expanded .controls-main { gap: 40px; }
+        .sp-player.expanded .video-container { display: block; }
+        .sp-player.expanded .mini-info { position: absolute; bottom: 150px; left: 20px; }
 
         /* CONTROLES */
-        .mini-thumb { width: 45px; height: 45px; border-radius: 4px; cursor: pointer; transition: 0.3s; }
-        .mini-thumb:hover { transform: scale(1.1); }
-        .progress-container { height: 4px; background: #444; border-radius: 2px; width: 100%; margin: 10px 0; cursor: pointer; }
-        #progress-bar { height: 100%; background: var(--sp-green); width: 0%; border-radius: 2px; }
+        .progress-miv { height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; width: 100%; margin: 10px 0; }
+        .progress-bar-miv { height: 100%; background: var(--sp-green); width: 0%; transition: width 0.2s; }
         .control-btn { background: none; border: none; color: white; font-size: 1.5rem; transition: 0.2s; }
         .control-btn:hover { color: var(--sp-green); }
-        .play-pause-btn { font-size: 2.5rem; }
 
+        #yt-engine { width: 100%; height: 100%; }
         input[type="file"] { display: none; }
     </style>
 </head>
 <body>
 
-    <header class="profile-section">
-        <div class="d-flex align-items-center gap-3">
-            <label for="avatar-input" class="user-avatar-wrapper">
-                <img src="https://via.placeholder.com/150" id="user-photo" alt="Perfil">
-                <div class="upload-hint"><i class="bi bi-camera-fill"></i></div>
-            </label>
+    <header class="header-miv">
+        <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <small class="text-secondary d-block">Bom dia,</small>
-                <span class="fw-bold">Ouvinte MIV</span>
+                <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 1px;">Meu Saldo</small>
+                <div class="balance-val" id="saldoTxt">R$ 0,00</div>
             </div>
+            <label for="input-foto">
+                <img src="https://via.placeholder.com/150" id="foto-perfil" class="user-avatar">
+            </label>
+            <input type="file" id="input-foto" accept="image/*" onchange="uploadFoto(this)">
         </div>
-        <button class="btn btn-outline-light btn-sm rounded-pill" onclick="switchTab('exchange')">Exchange</button>
     </header>
 
-    <input type="file" id="avatar-input" accept="image/*" onchange="updatePhoto(this)">
+    <nav class="nav-miv">
+        <button class="btn-tab active" onclick="switchTab('market', this)">Descobrir</button>
+        <button class="btn-tab" onclick="switchTab('exchange', this)">Exchange</button>
+        <button class="btn-tab" onclick="switchTab('banca', this)">Histórico</button>
+    </nav>
 
-    <div class="balance-card">
-        <span class="text-secondary small">SALDO ATUAL</span>
-        <div class="balance-amount" id="saldoTxt">R$ 0,00</div>
-    </div>
-
-    <div class="px-3 mb-4 d-flex gap-2">
-        <button class="btn btn-sm btn-light rounded-pill px-3" onclick="switchTab('market')">Músicas</button>
-        <button class="btn btn-sm btn-dark rounded-pill px-3" onclick="switchTab('banca')">Biblioteca</button>
-    </div>
-
-    <main id="main-content">
+    <main class="container mt-4">
         <section id="sec-market" class="page-section">
-            <div class="song-grid" id="lista-market"></div>
+            <div class="row g-3" id="lista-market"></div>
         </section>
 
         <section id="sec-exchange" class="page-section d-none">
-            <div class="px-3" id="lista-venda"></div>
+            <div class="row g-3" id="lista-venda"></div>
         </section>
 
         <section id="sec-banca" class="page-section d-none">
-            <div class="px-3" id="lista-historico"></div>
+            <div id="lista-historico" class="d-flex flex-column gap-2"></div>
         </section>
     </main>
 
-    <div class="player-bar" id="playerBar">
-        <div class="container h-100 d-flex flex-column justify-content-center">
-            
-            <button class="btn text-white position-absolute top-0 end-0 m-3 d-none" id="closeExpand" onclick="toggleExpand()">
-                <i class="bi bi-chevron-down h3"></i>
+    <div class="sp-player" id="playerArea">
+        <div class="container">
+            <button class="btn text-white position-absolute top-0 end-0 m-4 d-none" id="btnClose" onclick="toggleExpand()">
+                <i class="bi bi-chevron-down h2"></i>
             </button>
 
-            <div class="expanded-video-container" id="videoContainer">
+            <div class="video-container">
                 <div id="yt-engine"></div>
             </div>
 
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <img src="" class="mini-thumb" id="playerThumb" onclick="toggleExpand()">
-                    <div class="overflow-hidden">
-                        <div class="fw-bold text-truncate" id="playerTitle" style="max-width: 150px;">Selecione uma música</div>
-                        <div class="text-secondary small" id="playerStatus">Ouvindo agora</div>
+            <div class="row align-items-center mini-info">
+                <div class="col-8 col-md-4 d-flex align-items-center">
+                    <img src="" id="playerThumb" style="width: 50px; height: 50px; border-radius: 6px; cursor: pointer;" onclick="toggleExpand()">
+                    <div class="ms-3 overflow-hidden">
+                        <div class="fw-bold text-truncate" id="playerTitle" style="font-size: 0.9rem;">Título</div>
+                        <div id="playerStatus" class="text-secondary small">MIV Streaming</div>
                     </div>
                 </div>
-
-                <div class="flex-grow-1 d-flex flex-column align-items-center px-4">
-                    <div class="d-flex align-items-center gap-3 controls-main">
+                
+                <div class="col-md-4 d-none d-md-block text-center">
+                    <div class="d-flex justify-content-center gap-4">
                         <button class="control-btn" onclick="playPrev()"><i class="bi bi-skip-start-fill"></i></button>
-                        <button class="control-btn play-pause-btn" onclick="togglePlay()"><i class="bi bi-play-circle-fill" id="playIcon"></i></button>
+                        <button class="control-btn" onclick="togglePlay()"><i class="bi bi-play-circle-fill h2" id="btnPlayPause"></i></button>
                         <button class="control-btn" onclick="playNext()"><i class="bi bi-skip-end-fill"></i></button>
                     </div>
-                    <div class="progress-container" onclick="seek(event)">
-                        <div id="progress-bar"></div>
-                    </div>
+                    <div class="progress-miv" onclick="seek(event)"><div class="progress-bar-miv" id="barraProgresso"></div></div>
                 </div>
 
-                <div class="text-end d-none d-md-block" style="min-width: 80px;">
-                    <span id="currentTime">0:00</span>
+                <div class="col-4 col-md-4 text-end">
+                    <span id="timerTxt" class="badge bg-success">0:00</span>
+                </div>
+            </div>
+
+            <div class="d-md-none">
+                <div class="progress-miv" onclick="seek(event)"><div class="progress-bar-miv" id="barraProgressoMob"></div></div>
+                <div class="d-flex justify-content-center gap-5 mt-2">
+                    <i class="bi bi-skip-start-fill h3" onclick="playPrev()"></i>
+                    <i class="bi bi-play-circle-fill h1" id="btnPlayPauseMob" onclick="togglePlay()"></i>
+                    <i class="bi bi-skip-end-fill h3" onclick="playNext()"></i>
                 </div>
             </div>
         </div>
@@ -209,137 +166,73 @@
         const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
         const APP_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
         
-        let ytPlayer, progressInterval, fila = [], indexAtual = 0;
+        let ytPlayer, timerInterval, fila = [], indexAtual = 0;
 
-        // Inicialização do Player
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-engine', {
-                height: '100%', width: '100%',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'disablekb': 1 },
                 events: { 
-                    'onStateChange': onStateChange,
-                    'onReady': () => { console.log("MIV Engine Ready"); carregarDados(); }
+                    'onStateChange': onPlayerStateChange,
+                    'onReady': () => carregarTudo()
                 }
             });
         }
 
-        function onStateChange(event) {
-            const icon = document.getElementById('playIcon');
-            if (event.data === YT.PlayerState.PLAYING) {
-                icon.className = 'bi bi-pause-circle-fill';
-                startProgress();
+        function onPlayerStateChange(e) {
+            const btns = [document.getElementById('btnPlayPause'), document.getElementById('btnPlayPauseMob')];
+            if(e.data === YT.PlayerState.PLAYING) {
+                btns.forEach(b => b.className = 'bi bi-pause-circle-fill');
+                iniciarProgresso();
             } else {
-                icon.className = 'bi bi-play-circle-fill';
-                clearInterval(progressInterval);
-                if(event.data === YT.PlayerState.ENDED) finalizarMusica();
+                btns.forEach(b => b.className = 'bi bi-play-circle-fill');
+                if(e.data === YT.PlayerState.ENDED) finalizarMusica();
             }
         }
 
-        // Gestão de Interface
         function toggleExpand() {
-            const bar = document.getElementById('playerBar');
-            const closeBtn = document.getElementById('closeExpand');
-            bar.classList.toggle('expanded');
-            closeBtn.classList.toggle('d-none');
+            document.getElementById('playerArea').classList.toggle('expanded');
+            document.getElementById('btnClose').classList.toggle('d-none');
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.add('d-none'));
-            document.getElementById('sec-' + tab).classList.remove('d-none');
-        }
+        async function carregarTudo() {
+            const foto = localStorage.getItem('miv-foto');
+            if(foto) document.getElementById('foto-perfil').src = foto;
 
-        function updatePhoto(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('user-photo').src = e.target.result;
-                    localStorage.setItem('miv-user-photo', e.target.result);
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        // Lógica de Streaming
-        async function carregarDados() {
-            // Foto salva
-            const savedPhoto = localStorage.getItem('miv-user-photo');
-            if(savedPhoto) document.getElementById('user-photo').src = savedPhoto;
-
-            // Músicas
             const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
             const data = await res.json();
-            fila = data.items.map(i => ({
-                id: i.snippet.resourceId.videoId,
-                tit: i.snippet.title,
-                thumb: i.snippet.thumbnails.high.url
-            }));
-
+            fila = data.items.map(i => ({ id: i.snippet.resourceId.videoId, tit: i.snippet.title, thumb: i.snippet.thumbnails.high.url }));
+            
             const market = document.getElementById('lista-market');
             fila.forEach((m, i) => {
                 market.innerHTML += `
-                    <div class="miv-card" onclick="playAtIndex(${i})">
-                        <img src="${m.thumb}">
+                <div class="col-6 col-md-3">
+                    <div class="song-card" onclick="iniciarPlay(${i})">
+                        <img src="${m.thumb}" class="song-img">
                         <div class="fw-bold text-truncate small">${m.tit}</div>
-                        <div class="text-secondary" style="font-size: 10px;">MIV ORIGINAL</div>
-                    </div>`;
+                    </div>
+                </div>`;
             });
-            carregarSaldo();
+            carregarDadosServidor();
         }
 
-        function playAtIndex(index) {
-            indexAtual = index;
-            const m = fila[index];
-            document.getElementById('playerBar').style.display = 'block';
+        function iniciarPlay(idx) {
+            indexAtual = idx;
+            const m = fila[idx];
+            document.getElementById('playerArea').style.display = 'block';
             document.getElementById('playerTitle').innerText = m.tit;
             document.getElementById('playerThumb').src = m.thumb;
-            
             ytPlayer.loadVideoById(m.id);
             ytPlayer.playVideo();
         }
 
         function togglePlay() {
-            const state = ytPlayer.getPlayerState();
-            state === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+            ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
         }
 
-        function playNext() { if(indexAtual < fila.length - 1) playAtIndex(indexAtual + 1); }
-        function playPrev() { if(indexAtual > 0) playAtIndex(indexAtual - 1); }
-
-        function startProgress() {
-            clearInterval(progressInterval);
-            progressInterval = setInterval(() => {
+        function iniciarProgresso() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
                 const cur = ytPlayer.getCurrentTime();
                 const dur = ytPlayer.getDuration();
                 const pct = (cur / dur) * 100;
-                document.getElementById('progress-bar').style.width = pct + '%';
-                
-                const min = Math.floor(cur / 60);
-                const sec = Math.floor(cur % 60);
-                document.getElementById('currentTime').innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-            }, 1000);
-        }
-
-        function seek(e) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const pct = x / rect.width;
-            ytPlayer.seekTo(ytPlayer.getDuration() * pct);
-        }
-
-        async function finalizarMusica() {
-            // Crédito por ouvir a música completa
-            const userId = localStorage.getItem('userId');
-            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${fila[indexAtual].id}`);
-            carregarSaldo();
-            playNext();
-        }
-
-        async function carregarSaldo() {
-            const userId = localStorage.getItem('userId');
-            const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${userId}`);
-            const data = await res.json();
-            if(data.success) document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
-        }
-    </script>
-</body>
-</html>
+                document.getElementById('barraProgresso').style.width = pct + '%';
+                document
