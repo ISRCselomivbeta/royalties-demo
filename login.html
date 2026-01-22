@@ -8,7 +8,7 @@
     <style>
         body { background: #0f2027; color: white; display: flex; align-items: center; height: 100vh; font-family: sans-serif; }
         .login-card { background: white; color: #333; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; margin: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        .btn-miv { background: linear-gradient(135deg, #0072ff, #00c6ff); border: none; color: white; fw-bold; }
+        .btn-miv { background: linear-gradient(135deg, #0072ff, #00c6ff); border: none; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyessSRsTQZ1ESv56tc44nggP0Ohi6od29YjM4lGAT17Y2KaD1qvnGSsdK6syD-0Z8C/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbybVbmeFPeJj95a4RgWCq5ihR_47ZIumJIAdnxDHedYvjfOkgu2fIppsi0Ma_8_DnjZ/exec";
 
         async function entrar() {
             const u = document.getElementById('usuario').value;
@@ -38,7 +38,7 @@
             if(!u || !s) return alert("Preencha e-mail e senha");
 
             btn.disabled = true;
-            btn.innerText = "Verificando...";
+            btn.innerText = "Autenticando...";
             erroDiv.classList.add('d-none');
 
             try {
@@ -51,18 +51,16 @@
                 if (data.success) {
                     localStorage.setItem("userId", data.id);
                     localStorage.setItem("userType", data.tipo);
-                    localStorage.setItem("userName", data.nome || u);
-                    
-                    // Redireciona conforme o tipo na planilha
+                    localStorage.setItem("userName", data.nome);
                     window.location.href = data.tipo + "-dashboard.html";
                 } else {
-                    erroDiv.innerText = "Usuário ou senha incorretos.";
+                    erroDiv.innerText = "Acesso Negado: Usuário ou senha incorretos.";
                     erroDiv.classList.remove('d-none');
                     btn.disabled = false;
                     btn.innerText = "ENTRAR";
                 }
             } catch (e) {
-                alert("Erro ao conectar com o servidor. Verifique sua internet.");
+                alert("Erro de conexão. Verifique se o Script foi publicado como 'Qualquer Pessoa'.");
                 btn.disabled = false;
             }
         }
