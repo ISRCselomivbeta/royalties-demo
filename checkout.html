@@ -2,64 +2,91 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #0b0e11; color: white; display: flex; align-items: center; min-height: 100vh; }
+        body { background: #0b0e11; color: white; display: flex; align-items: center; min-height: 100vh; font-family: sans-serif; }
         .card-checkout { background: #1e2329; padding: 30px; border-radius: 15px; width: 100%; max-width: 450px; margin: auto; border: 1px solid #333; }
-        .btn-pay { background: #0ecb81; color: white; font-weight: bold; width: 100%; padding: 15px; border-radius: 10px; border: none; }
+        .btn-pay { background: #0ecb81; color: white; font-weight: bold; width: 100%; padding: 15px; border-radius: 10px; border: none; transition: 0.3s; }
+        .btn-pay:hover { background: #0ba368; transform: scale(1.02); }
+        .btn-pay:disabled { background: #555; }
     </style>
 </head>
 <body>
+
     <div class="card-checkout shadow">
-        <h4>Finalizar Investimento</h4>
-        <hr>
+        <h4 class="mb-3">Finalizar Investimento</h4>
+        <hr style="border-color: #444;">
+        
         <div class="d-flex justify-content-between mb-2">
-            <span>Ações: Som da Rua</span>
+            <span>Ações: <strong id="nomeMusica">Som da Rua</strong></span>
             <span id="qtdAcoes">2</span>
         </div>
+        
         <div class="d-flex justify-content-between mb-4">
             <span class="fw-bold">Total a Pagar</span>
-            <span class="fw-bold text-info">R$ 30,00</span>
+            <span class="fw-bold text-info" id="totalPagar">R$ 30,00</span>
         </div>
 
         <button onclick="finalizarCompra()" id="btnPagar" class="btn-pay">CONFIRMAR E PAGAR</button>
-        <p class="text-center mt-3 small"><a href="ouvinte-dashboard.html" class="text-muted">Cancelar</a></p>
+        
+        <p class="text-center mt-3 small">
+            <a href="ouvinte-dashboard.html" class="text-muted text-decoration-none">Cancelar e Voltar</a>
+        </p>
     </div>
 
     <script>
+        // SEU LINK DO GOOGLE SCRIPT ATUALIZADO
         const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
 
         async function finalizarCompra() {
             const btn = document.getElementById("btnPagar");
+            const userId = localStorage.getItem("userId");
+
+            if (!userId) {
+                alert("Erro: Usuário não identificado. Faça login novamente.");
+                window.location.href = "login.html";
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Processando...";
 
+            // Parâmetros da negociação
             const params = new URLSearchParams({
                 acao: "negociar_acao",
-                user_id: localStorage.getItem("userId"),
-                musica_id: "M01",
-                quantidade: 2,
-                preco_unitario: 15,
-                valor: 30,
+                user_id: userId,
+                musica_id: "M01",    // ID da música (exemplo)
+                quantidade: 2,       // Quantidade (exemplo)
+                preco_unitario: 15,  // Preço unitário (exemplo)
+                valor: 30,           // Valor total a descontar
                 tipo_ordem: "COMPRA"
             });
 
             try {
-                const res = await fetch(API_URL + "?" + params, { method: "POST" });
-                const data = await res.json();
+                // Realiza a chamada para o seu script
+                const response = await fetch(API_URL + "?" + params.toString(), { 
+                    method: "POST" 
+                });
+                
+                const data = await response.json();
 
-                if(data.success) {
+                if (data.success) {
                     alert("✅ Sucesso! Ações adicionadas à sua carteira.");
                     window.location.href = "ouvinte-dashboard.html";
                 } else {
-                    alert("❌ Erro: " + data.error);
+                    // Se o saldo for insuficiente, o script enviará o erro aqui
+                    alert("❌ Erro: " + (data.error || "Falha na transação"));
                     btn.disabled = false;
                     btn.innerText = "CONFIRMAR E PAGAR";
                 }
-            } catch (e) {
-                alert("Erro de conexão com o banco de dados.");
+
+            } catch (error) {
+                console.error("Erro no checkout:", error);
+                alert("Erro de conexão com o banco de dados. Tente novamente.");
                 btn.disabled = false;
+                btn.innerText = "CONFIRMAR E PAGAR";
             }
         }
     </script>
