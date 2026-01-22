@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Music Pro | Sistema Unificado</title>
+    <title>MIV Music Pro | Dashboard Unificada</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
@@ -23,192 +23,166 @@
             background-color: var(--bg-dark);
             color: #ffffff;
             margin: 0;
-            padding-bottom: 180px; /* Espaço para o player e nav */
+            padding-bottom: 110px;
+            overflow-x: hidden;
         }
+
+        /* --- Menu Lateral (Sidebar) --- */
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 2000;
+            top: 0; left: 0; background-color: #000; overflow-x: hidden;
+            transition: 0.5s; padding-top: 60px; border-right: 1px solid var(--border);
+        }
+        .sidebar a {
+            padding: 15px 32px; text-decoration: none; font-size: 1.2rem;
+            color: #818181; display: block; transition: 0.3s;
+        }
+        .sidebar a:hover { color: var(--neon-green); }
+        .sidebar .closebtn { position: absolute; top: 10px; right: 25px; font-size: 36px; }
 
         /* --- Header --- */
         .miv-header {
             background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--bg-dark) 100%);
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
+            padding: 20px; border-bottom: 1px solid var(--border);
         }
 
-        /* --- Cards de Música --- */
-        .music-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 12px;
-            transition: 0.3s;
-        }
-        .music-card:hover { border-color: var(--neon-green); }
-
-        /* --- Player Fixo (Estilo Spotify/TikTok) --- */
+        /* --- Player Fixo --- */
         .miv-player {
-            position: fixed;
-            bottom: 70px;
-            left: 0; width: 100%;
-            background: rgba(17, 20, 24, 0.95);
-            backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border);
-            padding: 15px;
-            z-index: 1000;
-            display: none; /* Aparece ao dar play */
+            position: fixed; bottom: 75px; left: 0; width: 100%;
+            background: rgba(17, 20, 24, 0.98); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border); padding: 12px; z-index: 1500;
+            transition: all 0.5s ease;
         }
 
-        .miv-player.expanded {
-            height: 100vh;
-            bottom: 0;
-            padding-top: 50px;
+        /* Expansão sem erro de conexão */
+        .miv-player.expanded { height: 100vh; bottom: 0; padding-top: 40px; }
+        
+        .video-container {
+            width: 100%; aspect-ratio: 16/9; background: #000;
+            border-radius: 15px; overflow: hidden; 
+            display: none; /* Só aparece quando expandido */
+            margin-bottom: 20px;
         }
+        .expanded .video-container { display: block; }
 
-        /* --- Barra de Progresso --- */
         .progress-container {
-            height: 4px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            cursor: pointer;
-            margin-bottom: 10px;
+            height: 6px; background: rgba(255,255,255,0.1);
+            border-radius: 10px; cursor: pointer; margin: 10px 0;
         }
-        .progress-bar {
-            height: 100%;
-            background: var(--neon-green);
-            width: 0%;
-            transition: width 0.1s linear;
-        }
+        .progress-bar { height: 100%; background: var(--neon-green); width: 0%; border-radius: 10px; }
 
-        /* --- Navegação --- */
+        /* --- Cards e Nav --- */
+        .music-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; padding: 12px; transition: 0.3s; }
         .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: #000;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 0;
-            border-top: 1px solid var(--border);
-            z-index: 1001;
+            position: fixed; bottom: 0; width: 100%; background: #000;
+            display: flex; justify-content: space-around; padding: 12px 0;
+            border-top: 1px solid var(--border); z-index: 1600;
         }
-        .nav-item { color: #888; text-decoration: none; font-size: 0.7rem; text-align: center; border: none; background: none; }
+        .nav-item { color: #888; border: none; background: none; font-size: 0.75rem; }
         .nav-item.active { color: var(--neon-green); }
-        .nav-item i { font-size: 1.4rem; display: block; }
-
         .section-page { display: none; }
         .section-page.active { display: block; }
-
-        .btn-miv {
-            background: var(--neon-green);
-            color: #000;
-            font-weight: 700;
-            border: none;
-            border-radius: 8px;
-            padding: 6px 12px;
-        }
+        .btn-miv { background: var(--neon-green); color: #000; font-weight: 700; border: none; border-radius: 8px; padding: 5px 12px; }
     </style>
 </head>
 <body>
 
-    <div id="yt-placeholder" style="display:none"></div>
+    <div id="mySidebar" class="sidebar">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <h4 class="text-white px-4 mb-4">MIV Navigation</h4>
+        <a href="#" onclick="changePage('explorar')"><i class="bi bi-house me-2"></i> Início</a>
+        <a href="#" onclick="changePage('carteira')"><i class="bi bi-graph-up me-2"></i> Investimentos</a>
+        <a href="#" onclick="changePage('perfil')"><i class="bi bi-person me-2"></i> Perfil Artista</a>
+        <a href="#"><i class="bi bi-shield-check me-2"></i> Segurança</a>
+        <hr class="border-secondary">
+        <a href="#" class="text-danger"><i class="bi bi-box-arrow-right me-2"></i> Sair</a>
+    </div>
 
-    <header class="miv-header">
-        <div class="container d-flex justify-content-between align-items-center">
+    <header class="miv-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <button class="btn text-white fs-3 me-2" onclick="openNav()"><i class="bi bi-list"></i></button>
             <div>
-                <small class="text-secondary">SALDO DISPONÍVEL</small>
-                <h3 class="fw-bold mb-0" id="saldo-display">R$ 1.000,00</h3>
-            </div>
-            <div id="status-badge">
-                <span class="badge rounded-pill bg-dark border border-success text-success">CONECTADO</span>
+                <small class="text-secondary">SALDO</small>
+                <h4 class="fw-bold mb-0" id="saldo-display">R$ 1.000,00</h4>
             </div>
         </div>
+        <img src="https://via.placeholder.com/40" class="rounded-circle border border-success">
     </header>
 
     <div class="container mt-4">
         <section id="explorar" class="section-page active">
-            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow text-success"></i> Mercado de Royalties</h5>
-            <div id="lista-musicas" class="row g-3">
-                </div>
+            <h5 class="fw-bold mb-3">🔥 Oportunidades MIV</h5>
+            <div id="lista-musicas" class="row g-3"></div>
         </section>
 
         <section id="carteira" class="section-page">
             <div class="card bg-dark border-secondary p-4 text-center mb-4">
-                <h6 class="text-secondary">VALOR EM ATIVOS</h6>
-                <h1 id="valor-ativos">R$ 0,00</h1>
+                <h6 class="text-secondary">PATRIMÔNIO ATUAL</h6>
+                <h2 id="valor-ativos">R$ 0,00</h2>
             </div>
-            <h6 class="fw-bold mb-3">Minhas Frações</h6>
-            <div id="meus-ativos">
-                <p class="text-center text-muted">Você ainda não possui ações musicais.</p>
-            </div>
+            <div id="meus-ativos"></div>
         </section>
 
-        <section id="perfil" class="section-page">
-            <div class="text-center py-4">
-                <div class="bg-primary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem;">👤</div>
-                <h4 id="nome-perfil">@Investidor_MIV</h4>
-                <p class="text-muted small">ID: 55089</p>
-                <hr class="border-secondary">
-                <div class="card bg-dark border-secondary p-3 text-start">
-                    <h6>Tokenizar Música</h6>
-                    <input type="text" id="url-token" class="form-control bg-black text-white border-secondary mb-2" placeholder="Link do YouTube">
-                    <button class="btn btn-primary w-100" onclick="alert('Funcionalidade Beta: Música enviada para análise!')">GERAR TOKEN MIV</button>
-                </div>
+        <section id="perfil" class="section-page text-center">
+            <div class="bg-primary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem;">👤</div>
+            <h4>@Artista_MIV</h4>
+            <div class="card bg-dark border-secondary p-3 mt-4 text-start">
+                <label class="small text-secondary">ID DO ARTISTA</label>
+                <code class="text-info d-block mb-3">MIV-998234-X</code>
+                <button class="btn btn-miv w-100">EDITAR PERFIL</button>
             </div>
         </section>
     </div>
 
-    <div id="player-bar" class="miv-player">
+    <div id="player-bar" class="miv-player" style="display: none;">
         <div class="container">
-            <div id="video-canvas" class="mb-3 d-none" style="width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden"></div>
+            <div class="video-container" id="video-box">
+                <div id="yt-placeholder"></div>
+            </div>
             
-            <div class="row align-items-center">
-                <div class="col-8 d-flex align-items-center" onclick="expandirPlayer()" style="cursor:pointer">
+            <div class="row align-items-center" onclick="handlePlayerClick(event)">
+                <div class="col-8 d-flex align-items-center" style="cursor: pointer;">
                     <img src="" id="track-img" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                     <div class="ms-3 overflow-hidden">
-                        <div class="fw-bold text-truncate" id="track-title" style="font-size: 0.9rem;">Nome da Música</div>
-                        <div class="text-success small fw-bold" id="track-price">Cota: R$ 15,00</div>
+                        <div class="fw-bold text-truncate" id="track-title" style="font-size: 0.9rem;">---</div>
+                        <div class="text-success small fw-bold" id="track-price">Cota: R$ 0,00</div>
                     </div>
                 </div>
                 <div class="col-4 text-end">
                     <button class="btn-miv" id="btn-invest-player">INVESTIR</button>
+                    <i class="bi bi-chevron-up ms-2 text-secondary" id="expand-icon"></i>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <div class="progress-container" onclick="seekTrack(event)">
-                    <div class="progress-bar" id="p-bar"></div>
-                </div>
-                <div class="d-flex justify-content-center gap-4 mt-2">
-                    <i class="bi bi-skip-start-fill h2" onclick="playNext(-1)"></i>
-                    <i class="bi bi-play-circle-fill h1" id="btn-play-pause" onclick="togglePlay()"></i>
-                    <i class="bi bi-skip-end-fill h2" onclick="playNext(1)"></i>
-                </div>
+            <div class="progress-container" onclick="seekTrack(event)">
+                <div class="progress-bar" id="p-bar"></div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-4 mt-2">
+                <i class="bi bi-skip-start-fill h2" onclick="playNext(-1)"></i>
+                <i class="bi bi-play-circle-fill h1" id="btn-play-pause" onclick="togglePlay()"></i>
+                <i class="bi bi-skip-end-fill h2" onclick="playNext(1)"></i>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="changePage('explorar', this)">
-            <i class="bi bi-search"></i>Explorar
-        </button>
-        <button class="nav-item" onclick="changePage('carteira', this)">
-            <i class="bi bi-briefcase"></i>Carteira
-        </button>
-        <button class="nav-item" onclick="changePage('perfil', this)">
-            <i class="bi bi-person-circle"></i>Perfil
-        </button>
+        <button class="nav-item active" onclick="changePage('explorar', this)"><i class="bi bi-search d-block fs-4"></i>Explorar</button>
+        <button class="nav-item" onclick="changePage('carteira', this)"><i class="bi bi-briefcase d-block fs-4"></i>Carteira</button>
+        <button class="nav-item" onclick="changePage('perfil', this)"><i class="bi bi-person-circle d-block fs-4"></i>Perfil</button>
     </nav>
 
     <script>
-        // CONFIGURAÇÕES
         const API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
         const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
         
         let player, playlist = [], currentIndex = 0, saldo = 1000.00;
-        let carteiraAtivos = [];
+        let carteiraAtivos = [], valorizou30s = false;
 
-        // 1. Inicializar API do YouTube
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('yt-placeholder', {
-                height: '0', width: '0',
+                height: '100%', width: '100%',
+                playerVars: { 'controls': 0, 'modestbranding': 1, 'rel': 0 },
                 events: {
                     'onReady': carregarPlaylist,
                     'onStateChange': onPlayerStateChange
@@ -217,83 +191,72 @@
         }
 
         async function carregarPlaylist() {
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=15&playlistId=${PLAYLIST_ID}&key=${API_KEY}`);
-                const data = await res.json();
-                
-                playlist = data.items.map(item => ({
-                    id: item.snippet.resourceId.videoId,
-                    title: item.snippet.title,
-                    thumb: item.snippet.thumbnails.high.url,
-                    price: 15.00 + (Math.random() * 2) // Simulação de preço flutuante
-                }));
-
-                renderizarMercado();
-            } catch (e) { console.error("Erro ao carregar playlist"); }
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=15&playlistId=${PLAYLIST_ID}&key=${API_KEY}`);
+            const data = await res.json();
+            playlist = data.items.map(item => ({
+                id: item.snippet.resourceId.videoId,
+                title: item.snippet.title,
+                thumb: item.snippet.thumbnails.high.url,
+                price: 15.00 + (Math.random() * 5)
+            }));
+            renderizarMercado();
         }
 
         function renderizarMercado() {
             const container = document.getElementById('lista-musicas');
-            container.innerHTML = '';
-            playlist.forEach((track, index) => {
-                container.innerHTML += `
-                    <div class="col-12 col-md-6">
-                        <div class="music-card d-flex align-items-center">
-                            <img src="${track.thumb}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
-                            <div class="flex-grow-1 overflow-hidden">
-                                <h6 class="text-truncate mb-0">${track.title}</h6>
-                                <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
-                            </div>
-                            <button class="btn-miv ms-2" onclick="investir(${index})">INVESTIR</button>
+            container.innerHTML = playlist.map((track, index) => `
+                <div class="col-12 col-md-6">
+                    <div class="music-card d-flex align-items-center">
+                        <img src="${track.thumb}" class="rounded me-3" style="width: 65px; height: 65px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h6 class="text-truncate mb-0">${track.title}</h6>
+                            <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
                         </div>
-                    </div>`;
-            });
+                        <button class="btn-miv" onclick="investir(${index})">INVESTIR</button>
+                    </div>
+                </div>`).join('');
         }
 
         function tocarMusica(index) {
             currentIndex = index;
+            valorizou30s = false; // Reseta o marcador de 30s
             const track = playlist[index];
-            
-            // Atualizar UI do Player
             document.getElementById('player-bar').style.display = 'block';
             document.getElementById('track-title').innerText = track.title;
             document.getElementById('track-img').src = track.thumb;
             document.getElementById('track-price').innerText = `Cota: R$ ${track.price.toFixed(2)}`;
+            document.getElementById('btn-invest-player').onclick = (e) => { e.stopPropagation(); investir(index); };
             
-            // Lógica do Botão de Investimento no Player
-            document.getElementById('btn-invest-player').onclick = () => investir(index);
-
             player.loadVideoById(track.id);
-            player.playVideo();
         }
 
         function onPlayerStateChange(event) {
             const btn = document.getElementById('btn-play-pause');
             if (event.data === YT.PlayerState.PLAYING) {
                 btn.className = "bi bi-pause-circle-fill h1";
-                updateProgressBar();
+                updateUI();
             } else {
                 btn.className = "bi bi-play-circle-fill h1";
-                if(event.data === YT.PlayerState.ENDED) valorizarAtivo();
             }
         }
 
-        function updateProgressBar() {
+        function updateUI() {
             if(player && player.getCurrentTime) {
-                const pct = (player.getCurrentTime() / player.getDuration()) * 100;
+                const cur = player.getCurrentTime();
+                const dur = player.getDuration();
+                const pct = (cur / dur) * 100;
                 document.getElementById('p-bar').style.width = pct + '%';
-                if(player.getPlayerState() === YT.PlayerState.PLAYING) {
-                    setTimeout(updateProgressBar, 1000);
-                }
-            }
-        }
 
-        function valorizarAtivo() {
-            // Toda vez que termina de ouvir, o preço da música sobe (Simulando Royalty)
-            playlist[currentIndex].price += 0.05;
-            renderizarMercado();
-            alert("Ação Valorizada! O número de plays gerou rendimentos.");
-            playNext(1);
+                // Lógica de Valorização aos 30 segundos
+                if (cur >= 30 && !valorizou30s) {
+                    valorizou30s = true;
+                    playlist[currentIndex].price += 0.05;
+                    renderizarMercado();
+                    console.log("Música Valorizada em 30 segundos!");
+                }
+
+                if(player.getPlayerState() === 1) setTimeout(updateUI, 1000);
+            }
         }
 
         function investir(index) {
@@ -301,66 +264,50 @@
             if(saldo >= track.price) {
                 saldo -= track.price;
                 carteiraAtivos.push(track);
-                atualizarFinancas();
-                alert(`🚀 Sucesso! Você comprou uma fração de: ${track.title}`);
-            } else {
-                alert("Saldo Insuficiente para esta operação.");
+                document.getElementById('saldo-display').innerText = `R$ ${saldo.toFixed(2)}`;
+                alert(`🚀 Investimento realizado em ${track.title}`);
+                atualizarCarteiraUI();
             }
         }
 
-        function atualizarFinancas() {
-            document.getElementById('saldo-display').innerText = `R$ ${saldo.toFixed(2)}`;
-            const valorTotalAtivos = carteiraAtivos.reduce((acc, item) => acc + item.price, 0);
-            document.getElementById('valor-ativos').innerText = `R$ ${valorTotalAtivos.toFixed(2)}`;
-            
-            const lista = document.getElementById('meus-ativos');
-            lista.innerHTML = carteiraAtivos.map(item => `
+        function atualizarCarteiraUI() {
+            const vAtivos = carteiraAtivos.reduce((a, b) => a + b.price, 0);
+            document.getElementById('valor-ativos').innerText = `R$ ${vAtivos.toFixed(2)}`;
+            document.getElementById('meus-ativos').innerHTML = carteiraAtivos.map(item => `
                 <div class="card bg-dark border-secondary p-2 mb-2 d-flex flex-row align-items-center">
-                    <img src="${item.thumb}" style="width:40px; border-radius:4px" class="me-3">
-                    <small class="flex-grow-1">${item.title}</small>
+                    <img src="${item.thumb}" style="width:45px; border-radius:5px" class="me-3">
+                    <small class="flex-grow-1 text-truncate">${item.title}</small>
                     <span class="text-success fw-bold">R$ ${item.price.toFixed(2)}</span>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
+
+        // Funções de Navegação e UI
+        function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
         function changePage(pageId, btn) {
             document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-            btn.classList.add('active');
+            if(btn) btn.classList.add('active');
+            closeNav();
         }
 
-        function togglePlay() {
-            const state = player.getPlayerState();
-            if(state === 1) player.pauseVideo();
-            else player.playVideo();
+        function handlePlayerClick(e) {
+            if(e.target.closest('#btn-invest-player')) return;
+            const p = document.getElementById('player-bar');
+            const icon = document.getElementById('expand-icon');
+            p.classList.toggle('expanded');
+            icon.className = p.classList.contains('expanded') ? "bi bi-chevron-down ms-2 text-secondary" : "bi bi-chevron-up ms-2 text-secondary";
         }
 
-        function playNext(dir) {
-            currentIndex += dir;
-            if(currentIndex >= playlist.length) currentIndex = 0;
-            if(currentIndex < 0) currentIndex = playlist.length - 1;
+        function togglePlay() { player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo(); }
+        function playNext(dir) { 
+            currentIndex = (currentIndex + dir + playlist.length) % playlist.length;
             tocarMusica(currentIndex);
         }
-
-        function expandirPlayer() {
-            const p = document.getElementById('player-bar');
-            const canvas = document.getElementById('video-canvas');
-            p.classList.toggle('expanded');
-            canvas.classList.toggle('d-none');
-            
-            if(p.classList.contains('expanded')) {
-                // Ao expandir, movemos o iframe para o canvas
-                canvas.appendChild(document.getElementById('yt-placeholder'));
-                document.getElementById('yt-placeholder').style.display = 'block';
-                document.getElementById('yt-placeholder').style.width = '100%';
-                document.getElementById('yt-placeholder').style.height = '100%';
-            }
-        }
-
         function seekTrack(e) {
-            const container = e.currentTarget;
-            const pct = e.offsetX / container.offsetWidth;
+            const pct = e.offsetX / e.currentTarget.offsetWidth;
             player.seekTo(player.getDuration() * pct);
         }
     </script>
