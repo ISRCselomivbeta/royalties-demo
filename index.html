@@ -1,236 +1,329 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selo MIV - Dashboard Oficial</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>MIV Music Pro | Fintech Musical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap');
-        body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .miv-gradient { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .wallet-card { background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; }
-        .btn-miv { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .btn-miv:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.4); }
+        :root { --neon-green: #00ff88; --miv-blue: #0072ff; --bg-dark: #07090c; --bg-card: #111418; --border: #1e2329; }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-dark); color: #ffffff; margin: 0; padding-bottom: 110px; overflow-x: hidden; }
+        
+        /* Telas de Acesso */
+        #auth-screen { position: fixed; inset: 0; z-index: 3000; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; p: 20px; }
+        .glass-card { background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; }
+
+        /* Sidebar e Layout */
+        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #000; overflow-x: hidden; transition: 0.5s; padding-top: 60px; border-right: 1px solid var(--border); }
+        .sidebar a { padding: 15px 32px; text-decoration: none; font-size: 1.2rem; color: #818181; display: block; transition: 0.3s; }
+        .sidebar .closebtn { position: absolute; top: 10px; right: 25px; font-size: 36px; }
+
+        .miv-header { background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--bg-dark) 100%); padding: 20px; border-bottom: 1px solid var(--border); }
+        .miv-player { position: fixed; bottom: 75px; left: 0; width: 100%; background: rgba(17, 20, 24, 0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 12px; z-index: 1500; }
+        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-bottom: 20px; }
+        .expanded .video-container { display: block; }
+        .miv-player.expanded { height: 100vh; bottom: 0; padding-top: 40px; }
+
+        .progress-container { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; margin: 10px 0; }
+        .progress-bar { height: 100%; background: var(--neon-green); width: 0%; border-radius: 10px; }
+        
+        .music-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; padding: 12px; transition: 0.3s; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 1600; }
+        .nav-item { color: #888; border: none; background: none; font-size: 0.75rem; }
+        .nav-item.active { color: var(--neon-green); }
+        .section-page { display: none; }
+        .section-page.active { display: block; }
+        .btn-miv { background: var(--neon-green); color: #000; font-weight: 700; border: none; border-radius: 8px; padding: 8px 16px; }
     </style>
 </head>
-<body class="pb-20">
+<body>
 
-    <nav class="glass sticky top-0 z-50 p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 miv-gradient rounded-xl flex items-center justify-center font-black italic shadow-lg shadow-green-500/20 text-white">MIV</div>
-                <span class="text-xl font-black tracking-tighter uppercase italic">Selo <span class="text-green-500 font-black">MIV</span></span>
+    <div id="auth-screen">
+        <div class="glass-card">
+            <div class="text-center mb-4">
+                <div class="d-inline-block p-3 rounded-4 bg-success mb-3" style="--bs-bg-opacity: .2;">
+                    <i class="bi bi-shield-lock text-success fs-1"></i>
+                </div>
+                <h3 class="fw-bold">MIV LEDGER</h3>
+                <p class="text-secondary small">Autenticação de Segurança Obrigatória</p>
             </div>
             
-            <div class="flex items-center gap-6">
-                <div class="hidden md:block text-right">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest leading-none mb-1">Saldo Interno (Ledger)</p>
-                    <p id="saldo-global" class="text-green-400 font-black text-lg italic">R$ 0,00</p>
+            <div id="auth-forms">
+                <div id="login-fields">
+                    <input type="email" id="email" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Seu E-mail">
+                    <input type="password" id="pass" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Sua Senha">
+                    <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
+                    <p class="text-center small text-secondary">Novo aqui? <a href="#" class="text-success" onclick="toggleReg(true)">Criar Conta MIV</a></p>
                 </div>
-                <div class="h-10 w-10 rounded-full border-2 border-green-500 p-0.5">
-                    <img src="https://ui-avatars.com/api/?name=User&background=0f172a&color=22c55e" class="rounded-full">
+
+                <div id="reg-fields" style="display: none;">
+                    <input type="text" id="reg-nome" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Nome Completo">
+                    <input type="email" id="reg-email" class="form-control bg-dark text-white border-secondary mb-2" placeholder="E-mail">
+                    <input type="password" id="reg-pass" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Senha">
+                    <select id="reg-tipo" class="form-select bg-dark text-white border-secondary mb-2" onchange="checkArtist()">
+                        <option value="ouvinte">Perfil: Ouvinte</option>
+                        <option value="artista">Perfil: Artista</option>
+                    </select>
+                    <input type="url" id="reg-link" class="form-control bg-dark text-info border-info mb-3" style="display:none;" placeholder="Link do seu último trabalho (Obrigatório)">
+                    
+                    <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleRegister()">SOLICITAR ACESSO</button>
+                    <p class="text-center small text-secondary">Já tem conta? <a href="#" class="text-success" onclick="toggleReg(false)">Fazer Login</a></p>
                 </div>
             </div>
-        </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto p-4 space-y-10">
-
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6">
-            <div class="lg:col-span-2 wallet-card p-8 rounded-3xl relative overflow-hidden group">
-                <div class="relative z-10">
-                    <h2 class="text-sm font-bold text-green-500 uppercase tracking-widest mb-2 italic">Atenção e Investimento</h2>
-                    <h1 class="text-4xl font-black mb-6 italic leading-tight uppercase">Transforme sua<br>Audição em Ativos.</h1>
-                    <div class="flex flex-wrap gap-4">
-                        <a href="https://link.mercadopago.com.br/selomiv" target="_blank" class="btn-miv bg-white text-black px-8 py-3 rounded-full font-black text-sm flex items-center gap-2">
-                            <i class="fas fa-plus-circle"></i> ADICIONAR CRÉDITO
-                        </a>
-                        <button onclick="verRegras()" class="btn-miv bg-slate-800 text-slate-300 px-8 py-3 rounded-full font-bold text-sm border border-slate-700">
-                            REGRAS DO SISTEMA
-                        </button>
-                    </div>
-                </div>
-                <i class="fas fa-coins absolute -right-10 -bottom-10 text-[200px] text-white/5 -rotate-12"></i>
-            </div>
-
-            <div class="glass p-8 rounded-3xl flex flex-col justify-between border-green-500/20">
-                <div>
-                    <span class="bg-green-500/10 text-green-500 text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-tighter">Status: Ouvinte</span>
-                    <h3 id="user-nome-card" class="text-2xl font-black mt-4 italic uppercase">Elzo Lima</h3>
-                    <p class="text-slate-500 text-xs mt-1">E-mail: elzo.lima.mota@gmail.com</p>
-                </div>
-                <div class="mt-8 pt-6 border-t border-slate-800">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold mb-3">Validação de Artista</p>
-                    <button class="w-full py-2 rounded-lg bg-slate-800 text-xs font-bold hover:bg-slate-700 transition">SOLICITAR VERIFICAÇÃO</button>
-                </div>
-            </div>
-        </section>
-
-        <section>
-            <div class="flex items-center justify-between mb-8">
-                <h2 class="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-3">
-                    <i class="fas fa-bolt text-green-500"></i> Marketplace de Royalties
-                </h2>
-                <span class="text-[10px] text-slate-500 uppercase font-bold">Totalmente Auditado</span>
-            </div>
-
-            <div id="lista-musicas" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                </div>
-        </section>
-    </main>
-
-    <div id="player-miv" class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800 p-4 translate-y-full transition-transform duration-500 z-[100]">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div id="player-capa" class="w-14 h-14 rounded-xl bg-slate-800 bg-cover bg-center shadow-lg border border-white/10"></div>
-                <div>
-                    <h4 id="player-titulo" class="font-black text-sm italic uppercase tracking-tighter">Nenhuma Música</h4>
-                    <p class="text-[10px] text-green-500 font-bold uppercase tracking-widest animate-pulse">Sincronizando com o Ledger...</p>
-                </div>
-            </div>
-            
-            <div class="flex-1 max-w-xl mx-10">
-                <div class="h-1.5 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-                    <div id="player-progress" class="h-full miv-gradient transition-all duration-1000 shadow-[0_0_15px_rgba(34,197,94,0.5)]" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between mt-2">
-                    <span class="text-[8px] text-slate-500 font-bold uppercase tracking-widest italic">Validação de Atenção Requerida</span>
-                    <span id="player-timer" class="text-[10px] text-green-500 font-black italic italic">0%</span>
-                </div>
-            </div>
-
-            <button onclick="cancelarSessao()" class="w-10 h-10 rounded-full bg-slate-800 text-slate-500 hover:text-white transition">
-                <i class="fas fa-times text-xs"></i>
-            </button>
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTDfv9m7yRwJauGdPnvtbpMq9KTq9lmf8XWVKe9NT4OoaHTBPY2eamuHMfo1OJxSE-/exec";
-        
-        // Simulação de Usuário conforme sua aba "Usuarios"
-        const USER_SESSION = { id: "U1769060182614", nome: "Elzo Lima Mota" };
+    <div id="main-app" style="display: none;">
+        <div id="mySidebar" class="sidebar">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <h4 class="text-white px-4 mb-4 font-black italic">MIV PRO</h4>
+            <a href="#" onclick="changePage('explorar')"><i class="bi bi-house me-2"></i> Início</a>
+            <a href="#" onclick="changePage('carteira')"><i class="bi bi-graph-up me-2"></i> Investimentos</a>
+            <a href="#" onclick="changePage('extrato')"><i class="bi bi-receipt me-2"></i> Extrato Ledger</a>
+            <hr class="border-secondary">
+            <a href="https://link.mercadopago.com.br/selomiv" target="_blank" class="text-success"><i class="bi bi-plus-circle me-2"></i> Adicionar Saldo</a>
+            <a href="#" onclick="location.reload()" class="text-danger"><i class="bi bi-box-arrow-right me-2"></i> Sair</a>
+        </div>
 
-        async function init() {
-            document.getElementById('user-nome-card').innerText = USER_SESSION.nome;
-            await carregarMercado();
-        }
+        <header class="miv-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <button class="btn text-white fs-3 me-2" onclick="openNav()"><i class="bi bi-list"></i></button>
+                <div>
+                    <small class="text-secondary uppercase fw-bold" style="font-size: 0.6rem;">CRÉDITO INTERNO</small>
+                    <h4 class="fw-bold mb-0 text-success" id="saldo-display">R$ 0,00</h4>
+                </div>
+            </div>
+            <div class="text-end">
+                <span id="badge-tipo" class="badge rounded-pill bg-secondary text-uppercase" style="font-size: 0.5rem;">Ouvinte</span>
+            </div>
+        </header>
 
-        async function carregarMercado() {
-            const container = document.getElementById('lista-musicas');
-            container.innerHTML = "<p class='col-span-full text-center py-20 text-slate-500 animate-pulse uppercase text-xs font-bold tracking-widest'>Acessando Ledger Contábil...</p>";
+        <div class="container mt-4">
+            <section id="explorar" class="section-page active">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 italic">MARKETPLACE</h5>
+                    <span class="text-secondary small">Regra: 0% Taxa Compra</span>
+                </div>
+                <div id="lista-musicas" class="row g-3"></div>
+            </section>
 
-            try {
-                const response = await fetch(`${SCRIPT_URL}?acao=listar_mercado`);
-                const musicas = await response.json();
-                
-                container.innerHTML = "";
-                musicas.forEach(m => {
-                    const valorAcao = parseFloat(m['VALOR AÇÃO'] || 10).toFixed(2);
-                    container.innerHTML += `
-                        <div class="glass p-5 rounded-3xl border border-slate-800 hover:border-green-500/50 transition-all duration-500 group shadow-lg">
-                            <div class="relative overflow-hidden rounded-2xl mb-5 aspect-square">
-                                <img src="${m.LINK_CAPA || 'https://via.placeholder.com/300'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-60"></div>
-                                <span class="absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-widest border border-white/10 italic">
-                                    ${m.GÊNERO || 'POP'}
-                                </span>
-                            </div>
-                            
-                            <h3 class="font-black text-xl italic uppercase tracking-tighter truncate leading-none mb-1">${m.TITULO || m.NOME}</h3>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-6">ISRC: ${m.ISRC}</p>
-                            
-                            <div class="flex items-end justify-between border-t border-slate-800/50 pt-5">
-                                <div>
-                                    <p class="text-[8px] text-slate-500 font-bold uppercase tracking-widest mb-1 italic">Preço Cota</p>
-                                    <p class="text-green-400 font-black text-lg italic tracking-tight leading-none">R$ ${valorAcao}</p>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button onclick="ativarMineracao('${m.ID}', '${m.TITULO || m.NOME}', '${m.LINK_CAPA}')" class="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-green-500 hover:text-white transition shadow-xl">
-                                        <i class="fas fa-play text-xs"></i>
-                                    </button>
-                                    <button onclick="investir('${m.ID}')" class="bg-slate-800 hover:bg-green-600 px-4 py-2 rounded-xl text-[10px] font-black italic transition uppercase tracking-tighter border border-slate-700">Investir</button>
-                                </div>
-                            </div>
+            <section id="carteira" class="section-page">
+                <div class="card bg-dark border-secondary p-4 text-center mb-4">
+                    <h6 class="text-secondary">PATRIMÔNIO CUSTODIADO</h6>
+                    <h2 id="valor-ativos" class="text-success">R$ 0,00</h2>
+                </div>
+                <div id="meus-ativos"></div>
+            </section>
+
+            <section id="extrato" class="section-page">
+                <h5 class="fw-bold mb-4 italic text-uppercase">Log de Auditoria</h5>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover small">
+                        <thead><tr class="text-secondary"><th>DATA</th><th>EVENTO</th><th class="text-end">VALOR</th></tr></thead>
+                        <tbody id="ledger-list"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div id="player-bar" class="miv-player" style="display: none;">
+            <div class="container">
+                <div class="video-container" id="video-box"><div id="yt-placeholder"></div></div>
+                <div class="row align-items-center" onclick="handlePlayerClick(event)">
+                    <div class="col-8 d-flex align-items-center" style="cursor: pointer;">
+                        <img src="" id="track-img" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                        <div class="ms-3 overflow-hidden">
+                            <div class="fw-bold text-truncate" id="track-title" style="font-size: 0.9rem;">---</div>
+                            <div class="text-success small fw-bold" id="track-price">Cota: R$ 0,00</div>
                         </div>
-                    `;
-                });
-            } catch (error) {
-                container.innerHTML = "<p class='text-red-500 font-bold text-center col-span-full'>Erro na conexão com o Ledger.</p>";
-            }
-        }
+                    </div>
+                    <div class="col-4 text-end">
+                        <button class="btn-miv btn-sm" id="btn-invest-player">INVESTIR</button>
+                        <i class="bi bi-chevron-up ms-2 text-secondary" id="expand-icon"></i>
+                    </div>
+                </div>
+                <div class="progress-container" onclick="seekTrack(event)"><div class="progress-bar" id="p-bar"></div></div>
+                <div class="d-flex justify-content-center gap-4 mt-2">
+                    <i class="bi bi-skip-start-fill h2" onclick="playNext(-1)"></i>
+                    <i class="bi bi-play-circle-fill h1" id="btn-play-pause" onclick="togglePlay()"></i>
+                    <i class="bi bi-skip-end-fill h2" onclick="playNext(1)"></i>
+                </div>
+            </div>
+        </div>
 
-        // LÓGICA DE GANHO POR AUDIÇÃO (MINERAÇÃO)
-        let sessaoAtiva = false;
-        let progresso = 0;
-        let timerInterval;
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="changePage('explorar', this)"><i class="bi bi-search d-block fs-4"></i>Market</button>
+            <button class="nav-item" onclick="changePage('carteira', this)"><i class="bi bi-briefcase d-block fs-4"></i>Carteira</button>
+            <button class="nav-item" onclick="changePage('extrato', this)"><i class="bi bi-receipt d-block fs-4"></i>Extrato</button>
+        </nav>
+    </div>
 
-        function ativarMineracao(id, titulo, capa) {
-            if(sessaoAtiva) return alert("Finalize a sessão anterior para iniciar uma nova.");
-            
-            const player = document.getElementById('player-miv');
-            player.style.transform = "translateY(0)";
-            document.getElementById('player-titulo').innerText = titulo;
-            document.getElementById('player-capa').style.backgroundImage = `url('${capa || ''}')`;
-            
-            sessaoAtiva = true;
-            progresso = 0;
-            
-            timerInterval = setInterval(async () => {
-                progresso += 5; // Simula 20 segundos de escuta
-                document.getElementById('player-progress').style.width = progresso + "%";
-                document.getElementById('player-timer').innerText = progresso + "%";
-                
-                if(progresso >= 100) {
-                    clearInterval(timerInterval);
-                    await confirmarNoBackend(id);
-                    fecharPlayerVisual();
-                }
-            }, 1000);
-        }
+    <script>
+        // CONFIGURAÇÕES BACKEND (Troque pelo seu Link de Deploy)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyTDfv9m7yRwJauGdPnvtbpMq9KTq9lmf8XWVKe9NT4OoaHTBPY2eamuHMfo1OJxSE-/exec";
+        const YT_PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+        const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
 
-        async function confirmarNoBackend(musicaId) {
-            // Regra 1 e 4: Frontend apenas envia o comando
+        let player, playlist = [], currentIndex = 0, currentUser = null;
+        let valorizou30s = false;
+
+        // REGRA 5: LOGIN
+        async function handleLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            if(!email || !pass) return alert("Preencha os campos!");
+
             try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({
-                        acao: 'registrar_play',
-                        ouvinteId: USER_SESSION.id,
-                        musicaId: musicaId
-                    })
-                });
-                alert("Crédito Auditado! Royalty inserido com sucesso em sua carteira.");
-            } catch (e) {
-                console.error("Erro no registro contábil.");
+                const res = await fetch(`${SCRIPT_URL}?acao=login&email=${email}&pass=${pass}`);
+                const user = await res.json();
+                if(user.success) {
+                    currentUser = user.data;
+                    startApp();
+                } else { alert("Acesso Negado. Verifique os dados."); }
+            } catch(e) { alert("Erro de conexão com o Ledger."); }
+        }
+
+        // REGRA 6: CADASTRO COM LINK DE TRABALHO
+        async function handleRegister() {
+            const data = {
+                acao: 'registrar_usuario',
+                nome: document.getElementById('reg-nome').value,
+                email: document.getElementById('reg-email').value,
+                pass: document.getElementById('reg-pass').value,
+                tipo: document.getElementById('reg-tipo').value,
+                workLink: document.getElementById('reg-link').value
+            };
+            
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
+            alert("Solicitação enviada! Auditores MIV entrarão em contato.");
+            toggleReg(false);
+        }
+
+        function startApp() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('badge-tipo').innerText = currentUser.Tipo;
+            syncLedger();
+            loadYT();
+        }
+
+        async function syncLedger() {
+            const res = await fetch(`${SCRIPT_URL}?acao=get_resumo&user=${currentUser.ID}`);
+            const data = await res.json();
+            document.getElementById('saldo-display').innerText = `R$ ${data.saldo_total.toFixed(2)}`;
+            document.getElementById('valor-ativos').innerText = `R$ ${data.patrimonio.toFixed(2)}`;
+        }
+
+        // YOUTUBE INTEGRATION
+        function loadYT() {
+            if (window.YT) { onYouTubeIframeAPIReady(); }
+        }
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('yt-placeholder', {
+                height: '100%', width: '100%',
+                playerVars: { 'controls': 0, 'modestbranding': 1 },
+                events: { 'onReady': carregarPlaylist, 'onStateChange': onPlayerStateChange }
+            });
+        }
+
+        async function carregarPlaylist() {
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${YT_PLAYLIST_ID}&key=${YT_API_KEY}`);
+            const data = await res.json();
+            playlist = data.items.map(item => ({
+                id: item.snippet.resourceId.videoId,
+                title: item.snippet.title,
+                thumb: item.snippet.thumbnails.high.url,
+                price: 10.00 + (Math.random() * 5)
+            }));
+            renderizarMercado();
+        }
+
+        function renderizarMercado() {
+            const container = document.getElementById('lista-musicas');
+            container.innerHTML = playlist.map((track, index) => `
+                <div class="col-12 col-md-6">
+                    <div class="music-card d-flex align-items-center">
+                        <img src="${track.thumb}" class="rounded me-3" style="width: 65px; height: 65px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
+                        <div class="flex-grow-1 overflow-hidden">
+                            <h6 class="text-truncate mb-0">${track.title}</h6>
+                            <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
+                        </div>
+                        <button class="btn btn-miv btn-sm" onclick="investir(${index})">INVESTIR</button>
+                    </div>
+                </div>`).join('');
+        }
+
+        function tocarMusica(index) {
+            currentIndex = index; valorizou30s = false;
+            const track = playlist[index];
+            document.getElementById('player-bar').style.display = 'block';
+            document.getElementById('track-title').innerText = track.title;
+            document.getElementById('track-img').src = track.thumb;
+            document.getElementById('track-price').innerText = `Cota: R$ ${track.price.toFixed(2)}`;
+            player.loadVideoById(track.id);
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) { 
+                document.getElementById('btn-play-pause').className = "bi bi-pause-circle-fill h1";
+                updateUI();
+            } else { 
+                document.getElementById('btn-play-pause').className = "bi bi-play-circle-fill h1"; 
             }
         }
 
-        function fecharPlayerVisual() {
-            document.getElementById('player-miv').style.transform = "translateY(100%)";
-            sessaoAtiva = false;
-        }
-
-        function cancelarSessao() {
-            if(confirm("Deseja interromper a mineração? Você não ganhará o crédito.")) {
-                clearInterval(timerInterval);
-                fecharPlayerVisual();
+        function updateUI() {
+            if(player && player.getCurrentTime) {
+                const cur = player.getCurrentTime();
+                const pct = (cur / player.getDuration()) * 100;
+                document.getElementById('p-bar').style.width = pct + '%';
+                // REGRA PLAY: Valorização simbólica
+                if (cur >= 30 && !valorizou30s) {
+                    valorizou30s = true;
+                    playlist[currentIndex].price += 0.05;
+                    renderizarMercado();
+                }
+                if(player.getPlayerState() === 1) setTimeout(updateUI, 1000);
             }
         }
 
-        function verRegras() {
-            alert("Regras MIV:\n1. Saldo interno é crédito via Ledger.\n2. Retiradas sujeitas a comissão.\n3. Ganhos por play requerem 20s de atenção.");
-        }
-
-        function investir(id) {
+        function investir(index) {
             window.open("https://link.mercadopago.com.br/selomiv", "_blank");
         }
 
-        window.onload = init;
+        // UTILITÁRIOS UI
+        function toggleReg(show) {
+            document.getElementById('login-fields').style.display = show ? 'none' : 'block';
+            document.getElementById('reg-fields').style.display = show ? 'block' : 'none';
+        }
+        function checkArtist() {
+            const tipo = document.getElementById('reg-tipo').value;
+            document.getElementById('reg-link').style.display = (tipo === 'artista') ? 'block' : 'none';
+        }
+        function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
+        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        function changePage(pageId, btn) {
+            document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if(btn) btn.classList.add('active');
+            closeNav();
+        }
+        function handlePlayerClick(e) {
+            if(e.target.closest('#btn-invest-player')) return;
+            const p = document.getElementById('player-bar');
+            p.classList.toggle('expanded');
+        }
+        function togglePlay() { player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo(); }
+        function playNext(dir) { 
+            currentIndex = (currentIndex + dir + playlist.length) % playlist.length;
+            tocarMusica(currentIndex);
+        }
+        function seekTrack(e) { player.seekTo(player.getDuration() * (e.offsetX / e.currentTarget.offsetWidth)); }
     </script>
 </body>
 </html>
