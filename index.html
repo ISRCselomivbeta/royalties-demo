@@ -10,93 +10,86 @@
     
     <style>
         :root { --miv-green: #00ff88; --bg-black: #000000; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
-        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; }
 
         .glass-card { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; }
         
-        /* Auth */
         #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); padding: 20px; }
         .miv-input { background: var(--glass) !important; border: 1px solid var(--glass-border) !important; color: white !important; border-radius: 12px !important; padding: 12px !important; margin-bottom: 12px; }
 
-        /* Dashboard */
-        #main-app { display: none; padding-bottom: 160px; }
+        #main-app { display: none; padding-bottom: 180px; }
         .balance-hero { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
-        .balance-amount { font-size: 2.5rem; font-weight: 700; }
 
-        /* Player */
-        .miv-player { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 75px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1001; }
+        /* MIV Player Estilo Apple Music */
+        .miv-player { position: fixed; bottom: 90px; left: 15px; right: 15px; height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1001; }
         
-        /* Tab Bar */
-        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
-        .tab-item { color: #888; font-size: 1.4rem; cursor: pointer; }
-        .tab-item.active { color: var(--miv-green); }
+        .music-card { background: var(--glass); border-radius: 18px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; border: 1px solid transparent; transition: 0.3s; }
+        .music-card:hover { border-color: var(--miv-green); background: rgba(255,255,255,0.08); }
 
-        .music-card { background: var(--glass); border-radius: 16px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; }
+        /* Esconder o vídeo do YouTube mas manter o som */
+        #yt-player-container { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .btn-play-miv { width: 40px; height: 40px; border-radius: 50%; background: var(--miv-green); color: black; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <div id="yt-player-container"><div id="player"></div></div>
+
     <section id="auth-page">
         <div class="glass-card w-100" style="max-width: 400px; padding: 30px;">
-            <div class="text-center mb-4"><h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2></div>
-            
-            <div id="box-login">
-                <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
-                <button class="btn btn-success w-100 fw-bold rounded-3 py-3 mb-3" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border:none;">ENTRAR</button>
-                <div class="text-center small text-secondary">Novo aqui? <a href="#" onclick="toggleAuth(true)" class="text-success">Criar Conta</a></div>
-            </div>
-
-            <div id="box-cadastro" style="display:none;">
-                <input type="text" id="c-nome" class="form-control miv-input" placeholder="Nome Completo">
-                <input type="email" id="c-email" class="form-control miv-input" placeholder="E-mail">
-                <input type="password" id="c-pass" class="form-control miv-input" placeholder="Senha">
-                <select id="c-tipo" class="form-control miv-input">
-                    <option value="ouvinte">Investidor</option>
-                    <option value="artista">Artista</option>
-                </select>
-                <button class="btn btn-outline-light w-100 fw-bold rounded-3 py-3 mb-3" onclick="acaoCadastro()">CADASTRAR E ATIVAR</button>
-                <div class="text-center small text-secondary"><a href="#" onclick="toggleAuth(false)" class="text-muted">Voltar ao Login</a></div>
-            </div>
+            <h2 class="text-center fw-bold mb-4">MIV <span style="color:var(--miv-green)">PRO</span></h2>
+            <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
+            <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
+            <button class="btn w-100 fw-bold py-3" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border-radius:12px;">ENTRAR</button>
         </div>
     </section>
 
     <main id="main-app">
         <header class="balance-hero">
-            <small class="text-secondary fw-bold" id="txt-perfil">CARTEIRA MIV</small>
-            <div class="balance-amount">R$ <span id="user-saldo">0,00</span></div>
-            <div class="small text-success mt-1" id="user-tipo">Investidor</div>
+            <small class="text-secondary fw-bold">SALDO DISPONÍVEL</small>
+            <div class="display-5 fw-bold">R$ <span id="user-saldo">0,00</span></div>
+            <div id="user-nome" class="small text-success mt-1">Investidor</div>
         </header>
 
-        <div class="container py-2">
-            <h6 class="fw-bold mb-3">Ativos na Playlist Oficial</h6>
-            <div id="market-list"></div>
+        <div class="container">
+            <h6 class="fw-bold mb-3 mt-4">Mercado de Ativos (Novas)</h6>
+            <div id="market-list">
+                </div>
         </div>
 
-        <div id="miv-player" class="miv-player glass-card">
-            <div class="player-info d-flex align-items-center gap-3">
-                <div class="bg-dark rounded" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center;">
-                    <i class="bi bi-play-circle text-success"></i>
-                </div>
+        <div class="miv-player glass-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="btn-play-miv" onclick="togglePlayback()"><i id="play-icon" class="bi bi-play-fill"></i></div>
                 <div>
-                    <div id="p-title" class="fw-bold small">Playlist Oficial</div>
-                    <div class="text-secondary" style="font-size: 0.7rem;">Selo MIV Ecosystem</div>
+                    <div id="p-title" class="fw-bold small">MIV Playlist</div>
+                    <div id="p-artist" class="text-secondary" style="font-size: 0.7rem;">Selecione uma faixa</div>
                 </div>
             </div>
-            <button class="btn btn-success btn-sm rounded-pill px-4 fw-bold" onclick="window.open('https://www.youtube.com/watch?v=sNRWCkk1o9w&list=PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN')">
-                OUVIR
-            </button>
+            <i class="bi bi-broadcast text-success"></i>
         </div>
 
         <nav class="tab-bar glass-card">
-            <div class="tab-item active"><i class="bi bi-house-door-fill"></i></div>
-            <div class="tab-item"><i class="bi bi-graph-up-arrow"></i></div>
-            <div class="tab-item" onclick="location.reload()"><i class="bi bi-person-circle"></i></div>
+            <i class="bi bi-house-door-fill text-success"></i>
+            <i class="bi bi-search text-secondary"></i>
+            <i class="bi bi-person-circle text-secondary" onclick="location.reload()"></i>
         </nav>
     </main>
 
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwbhgddJ6g1PuDSWqS8IiBI-6GfP7W2I3OSbuw3e-d1-tt5206EzEkg3H6ny-anbcZm/exec';
+        const API_URL = 'SEU_LINK_DEPLOY_GOOGLE';
+        let ytPlayer;
+
+        // Inicia o player do YouTube
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('player', {
+                height: '0', width: '0',
+                playerVars: { 'listType': 'playlist', 'list': 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN' },
+                events: { 'onStateChange': onPlayerStateChange }
+            });
+        }
 
         async function acaoLogin() {
             const email = document.getElementById('l-email').value;
@@ -105,33 +98,12 @@
             const data = await res.json();
             
             if(data.success) {
-                localStorage.setItem("miv_session", JSON.stringify(data));
-                carregarDashboard(data);
+                document.getElementById('auth-page').style.display = 'none';
+                document.getElementById('main-app').style.display = 'block';
+                document.getElementById('user-saldo').innerText = data.saldo.toFixed(2);
+                document.getElementById('user-nome').innerText = data.nome;
+                carregarMercado();
             } else { alert(data.msg); }
-        }
-
-        async function acaoCadastro() {
-            const n = document.getElementById('c-nome').value;
-            const e = document.getElementById('c-email').value;
-            const s = document.getElementById('c-pass').value;
-            const t = document.getElementById('c-tipo').value;
-            
-            alert("Enviando solicitação... Verifique seu e-mail em instantes.");
-            const res = await fetch(`${API_URL}?acao=cadastro&nome=${n}&email=${e}&senha=${s}&tipo=${t}&url_base=${window.location.href.split('?')[0]}`);
-            const data = await res.json();
-            if(data.success) {
-                alert("Sucesso! Clique no link enviado para o seu e-mail para ativar a conta.");
-                toggleAuth(false);
-            }
-        }
-
-        function carregarDashboard(user) {
-            document.getElementById('auth-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('user-saldo').innerText = user.saldo.toFixed(2);
-            document.getElementById('user-tipo').innerText = user.tipo.toUpperCase();
-            document.getElementById('txt-perfil').innerText = "OLÁ, " + user.nome.toUpperCase();
-            carregarMercado();
         }
 
         async function carregarMercado() {
@@ -139,24 +111,41 @@
             const data = await res.json();
             const container = document.getElementById('market-list');
             container.innerHTML = data.musicas.map(m => `
-                <div class="music-card">
+                <div class="music-card" onclick="tocarMusica('${m.videoId}', '${m.titulo}', '${m.artista}')">
+                    <div class="btn-play-miv" style="width:30px; height:30px; font-size:0.8rem;"><i class="bi bi-play-fill"></i></div>
                     <div class="flex-grow-1">
-                        <div class="fw-bold">${m.titulo}</div>
-                        <small class="text-secondary">Artista: ${m.artista} • Cota: R$ ${m.valor}</small>
+                        <div class="fw-bold" style="font-size:0.9rem;">${m.titulo}</div>
+                        <small class="text-secondary" style="font-size:0.75rem;">${m.artista} • Cota R$ ${m.valor}</small>
                     </div>
-                    <button class="btn btn-sm btn-light rounded-pill px-3 fw-bold" onclick="alert('Funcionalidade de compra em breve!')">Investir</button>
+                    <i class="bi bi-chevron-right text-secondary"></i>
                 </div>
             `).join('');
         }
 
-        function toggleAuth(cad) {
-            document.getElementById('box-login').style.display = cad ? 'none' : 'block';
-            document.getElementById('box-cadastro').style.display = cad ? 'block' : 'none';
+        function tocarMusica(videoId, titulo, artista) {
+            document.getElementById('p-title').innerText = titulo;
+            document.getElementById('p-artist').innerText = artista;
+            ytPlayer.loadVideoById(videoId);
+            document.getElementById('play-icon').className = "bi bi-pause-fill";
         }
 
-        window.onload = () => {
-            const sess = JSON.parse(localStorage.getItem("miv_session"));
-            if(sess) carregarDashboard(sess);
+        function togglePlayback() {
+            const state = ytPlayer.getPlayerState();
+            if (state === 1) {
+                ytPlayer.pauseVideo();
+                document.getElementById('play-icon').className = "bi bi-play-fill";
+            } else {
+                ytPlayer.playVideo();
+                document.getElementById('play-icon').className = "bi bi-pause-fill";
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                document.getElementById('play-icon').className = "bi bi-pause-fill";
+            } else {
+                document.getElementById('play-icon').className = "bi bi-play-fill";
+            }
         }
     </script>
 </body>
