@@ -3,248 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Music Pro | Investment v3.5</title>
+    <title>MIV Music Pro | Sistema Unificado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
+    
     <style>
         :root {
             --neon-green: #00ff88;
             --miv-blue: #0072ff;
-            --dark-surface: #07090c;
-            --card-bg: #111418;
+            --bg-dark: #07090c;
+            --bg-card: #111418;
             --border: #1e2329;
         }
 
         body {
             font-family: 'Outfit', sans-serif;
-            background-color: var(--dark-surface);
+            background-color: var(--bg-dark);
             color: #ffffff;
-            padding-bottom: 160px;
+            margin: 0;
+            padding-bottom: 180px; /* Espaço para o player e nav */
         }
 
-        /* --- Header Futurista --- */
+        /* --- Header --- */
         .miv-header {
-            background: linear-gradient(180deg, rgba(0,255,136,0.12) 0%, var(--dark-surface) 100%);
-            padding: 25px 20px;
+            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--bg-dark) 100%);
+            padding: 20px;
             border-bottom: 1px solid var(--border);
         }
 
-        .balance-val { font-size: 2rem; font-weight: 800; color: var(--neon-green); }
-
-        /* --- Cards --- */
+        /* --- Cards de Música --- */
         .music-card {
-            background: var(--card-bg);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 15px;
+            border-radius: 16px;
+            padding: 12px;
             transition: 0.3s;
         }
-        .music-card:hover { border-color: var(--neon-green); transform: translateY(-3px); }
+        .music-card:hover { border-color: var(--neon-green); }
 
-        /* --- Player Expandível --- */
+        /* --- Player Fixo (Estilo Spotify/TikTok) --- */
         .miv-player {
-            position: fixed; bottom: 70px; left: 0; right: 0;
-            background: rgba(17, 20, 24, 0.98); backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border); padding: 15px; z-index: 1000;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: fixed;
+            bottom: 70px;
+            left: 0; width: 100%;
+            background: rgba(17, 20, 24, 0.95);
+            backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border);
+            padding: 15px;
+            z-index: 1000;
+            display: none; /* Aparece ao dar play */
         }
-        .miv-player.expanded { height: 100vh; bottom: 0; }
-        
-        #canvas-yt { 
-            width: 100%; aspect-ratio: 16/9; border-radius: 12px; 
-            display: none; margin-bottom: 20px;
+
+        .miv-player.expanded {
+            height: 100vh;
+            bottom: 0;
+            padding-top: 50px;
         }
-        .expanded #canvas-yt { display: block; }
 
-        .progress-miv { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
-        .progress-bar-miv { height: 100%; background: var(--neon-green); width: 0%; border-radius: 10px; }
+        /* --- Barra de Progresso --- */
+        .progress-container {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--neon-green);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
 
-        /* --- Nav App --- */
+        /* --- Navegação --- */
         .bottom-nav {
-            background: #000; border-top: 1px solid var(--border);
-            position: fixed; bottom: 0; width: 100%; z-index: 1001;
-            display: flex; justify-content: space-around; padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #000;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid var(--border);
+            z-index: 1001;
         }
-        .nav-btn { background: none; border: none; color: #888; font-size: 0.75rem; transition: 0.3s; }
-        .nav-btn.active { color: var(--neon-green); }
-        .nav-btn i { font-size: 1.5rem; display: block; }
+        .nav-item { color: #888; text-decoration: none; font-size: 0.7rem; text-align: center; border: none; background: none; }
+        .nav-item.active { color: var(--neon-green); }
+        .nav-item i { font-size: 1.4rem; display: block; }
 
-        .btn-invest { background: var(--neon-green); color: #000; font-weight: 700; border-radius: 10px; border: none; padding: 5px 15px; }
         .section-page { display: none; }
         .section-page.active { display: block; }
+
+        .btn-miv {
+            background: var(--neon-green);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 12px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="yt-engine-container" style="position: absolute; left: -9999px;"><div id="yt-engine"></div></div>
+    <div id="yt-placeholder" style="display:none"></div>
 
     <header class="miv-header">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <small class="text-secondary fw-bold">SALDO EM CARTEIRA</small>
-                <div class="balance-val" id="topo-saldo">R$ 1.000,00</div>
+                <small class="text-secondary">SALDO DISPONÍVEL</small>
+                <h3 class="fw-bold mb-0" id="saldo-display">R$ 1.000,00</h3>
             </div>
-            <div class="text-end">
-                <span class="badge rounded-pill bg-dark border border-success text-success">STATUS: PRO</span>
+            <div id="status-badge">
+                <span class="badge rounded-pill bg-dark border border-success text-success">CONECTADO</span>
             </div>
         </div>
     </header>
 
-    <main class="container mt-4">
+    <div class="container mt-4">
         <section id="explorar" class="section-page active">
-            <h5 class="fw-bold mb-3">🔥 Drops do Dia</h5>
-            <div id="lista-mercado" class="row g-3"></div>
+            <h5 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow text-success"></i> Mercado de Royalties</h5>
+            <div id="lista-musicas" class="row g-3">
+                </div>
         </section>
 
         <section id="carteira" class="section-page">
-            <h5 class="fw-bold mb-4">Minhas <span class="text-info">Cotas</span></h5>
-            <div id="lista-ativos">
-                <p class="text-center text-muted py-5">Nenhum ativo adquirido ainda.</p>
+            <div class="card bg-dark border-secondary p-4 text-center mb-4">
+                <h6 class="text-secondary">VALOR EM ATIVOS</h6>
+                <h1 id="valor-ativos">R$ 0,00</h1>
+            </div>
+            <h6 class="fw-bold mb-3">Minhas Frações</h6>
+            <div id="meus-ativos">
+                <p class="text-center text-muted">Você ainda não possui ações musicais.</p>
             </div>
         </section>
 
-        <section id="perfil" class="section-page text-center">
-            <div class="py-4">
-                <div class="rounded-circle bg-primary mx-auto mb-3" style="width: 100px; height: 100px;"></div>
-                <h3 id="p-nome">@Investidor_MIV</h3>
-                <p class="text-secondary">Nível Bronze</p>
-                <button class="btn btn-outline-danger mt-4" onclick="location.reload()">Sair da Conta</button>
+        <section id="perfil" class="section-page">
+            <div class="text-center py-4">
+                <div class="bg-primary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; line-height: 80px; font-size: 2rem;">👤</div>
+                <h4 id="nome-perfil">@Investidor_MIV</h4>
+                <p class="text-muted small">ID: 55089</p>
+                <hr class="border-secondary">
+                <div class="card bg-dark border-secondary p-3 text-start">
+                    <h6>Tokenizar Música</h6>
+                    <input type="text" id="url-token" class="form-control bg-black text-white border-secondary mb-2" placeholder="Link do YouTube">
+                    <button class="btn btn-primary w-100" onclick="alert('Funcionalidade Beta: Música enviada para análise!')">GERAR TOKEN MIV</button>
+                </div>
             </div>
         </section>
-    </main>
+    </div>
 
-    <div class="miv-player" id="playerBar">
+    <div id="player-bar" class="miv-player">
         <div class="container">
-            <div id="canvas-yt"></div>
+            <div id="video-canvas" class="mb-3 d-none" style="width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; overflow:hidden"></div>
             
-            <div class="row align-items-center mb-3">
-                <div class="col-8 d-flex align-items-center">
-                    <img src="" id="p-img" style="width: 55px; height: 55px; border-radius: 10px; cursor: pointer;" onclick="toggleExpand()">
+            <div class="row align-items-center">
+                <div class="col-8 d-flex align-items-center" onclick="expandirPlayer()" style="cursor:pointer">
+                    <img src="" id="track-img" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
                     <div class="ms-3 overflow-hidden">
-                        <div class="fw-bold text-truncate" id="p-tit">Selecione uma faixa</div>
-                        <div class="text-success small fw-bold" id="p-cota-val">Cota: R$ 0,00</div>
+                        <div class="fw-bold text-truncate" id="track-title" style="font-size: 0.9rem;">Nome da Música</div>
+                        <div class="text-success small fw-bold" id="track-price">Cota: R$ 15,00</div>
                     </div>
                 </div>
                 <div class="col-4 text-end">
-                    <button class="btn-invest" id="btn-player-invest">INVESTIR</button>
+                    <button class="btn-miv" id="btn-invest-player">INVESTIR</button>
                 </div>
             </div>
 
-            <div class="progress-miv" onclick="seek(event)">
-                <div class="progress-bar-miv" id="p-bar"></div>
-            </div>
-
-            <div class="d-flex justify-content-center gap-5 mt-3">
-                <i class="bi bi-skip-start-fill h2" onclick="playPrev()"></i>
-                <i class="bi bi-play-circle-fill h1" id="p-play-icon" onclick="togglePlay()"></i>
-                <i class="bi bi-skip-end-fill h2" onclick="playNext()"></i>
+            <div class="mt-3">
+                <div class="progress-container" onclick="seekTrack(event)">
+                    <div class="progress-bar" id="p-bar"></div>
+                </div>
+                <div class="d-flex justify-content-center gap-4 mt-2">
+                    <i class="bi bi-skip-start-fill h2" onclick="playNext(-1)"></i>
+                    <i class="bi bi-play-circle-fill h1" id="btn-play-pause" onclick="togglePlay()"></i>
+                    <i class="bi bi-skip-end-fill h2" onclick="playNext(1)"></i>
+                </div>
             </div>
         </div>
     </div>
 
     <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="switchPage('explorar', this)">
-            <i class="bi bi-search"></i>Mercado
+        <button class="nav-item active" onclick="changePage('explorar', this)">
+            <i class="bi bi-search"></i>Explorar
         </button>
-        <button class="nav-btn" onclick="switchPage('carteira', this)">
-            <i class="bi bi-wallet2"></i>Carteira
+        <button class="nav-item" onclick="changePage('carteira', this)">
+            <i class="bi bi-briefcase"></i>Carteira
         </button>
-        <button class="nav-btn" onclick="switchPage('perfil', this)">
-            <i class="bi bi-person"></i>Perfil
+        <button class="nav-item" onclick="changePage('perfil', this)">
+            <i class="bi bi-person-circle"></i>Perfil
         </button>
     </nav>
 
     <script>
-        const YT_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
-        const PLAYLIST = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
-        let ytPlayer, fila = [], indexAtu = 0, saldo = 1000.00, precos = {};
+        // CONFIGURAÇÕES
+        const API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
+        const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+        
+        let player, playlist = [], currentIndex = 0, saldo = 1000.00;
+        let carteiraAtivos = [];
 
+        // 1. Inicializar API do YouTube
         function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-engine', {
-                height: '100%', width: '100%',
-                playerVars: { 'autoplay': 0, 'controls': 0 },
-                events: { 'onStateChange': e => {
-                    if(e.data === 1) startProgress();
-                    if(e.data === 0) { precos[fila[indexAtu].id] += 0.05; playNext(); }
-                }}
+            player = new YT.Player('yt-placeholder', {
+                height: '0', width: '0',
+                events: {
+                    'onReady': carregarPlaylist,
+                    'onStateChange': onPlayerStateChange
+                }
             });
         }
 
-        async function init() {
-            const r = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${PLAYLIST}&key=${YT_KEY}`);
-            const d = await r.json();
-            const list = document.getElementById('lista-mercado');
-            
-            fila = d.items.map((item, i) => {
-                const vid = item.snippet.resourceId.videoId;
-                precos[vid] = 15.00 + Math.random();
-                list.innerHTML += `
+        async function carregarPlaylist() {
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=15&playlistId=${PLAYLIST_ID}&key=${API_KEY}`);
+                const data = await res.json();
+                
+                playlist = data.items.map(item => ({
+                    id: item.snippet.resourceId.videoId,
+                    title: item.snippet.title,
+                    thumb: item.snippet.thumbnails.high.url,
+                    price: 15.00 + (Math.random() * 2) // Simulação de preço flutuante
+                }));
+
+                renderizarMercado();
+            } catch (e) { console.error("Erro ao carregar playlist"); }
+        }
+
+        function renderizarMercado() {
+            const container = document.getElementById('lista-musicas');
+            container.innerHTML = '';
+            playlist.forEach((track, index) => {
+                container.innerHTML += `
                     <div class="col-12 col-md-6">
                         <div class="music-card d-flex align-items-center">
-                            <img src="${item.snippet.thumbnails.default.url}" class="rounded-3 me-3" style="width:70px; cursor:pointer" onclick="loadTrack(${i})">
+                            <img src="${track.thumb}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
                             <div class="flex-grow-1 overflow-hidden">
-                                <h6 class="text-truncate mb-0">${item.snippet.title}</h6>
-                                <small class="text-success fw-bold">R$ ${precos[vid].toFixed(2)}</small>
+                                <h6 class="text-truncate mb-0">${track.title}</h6>
+                                <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
                             </div>
-                            <button class="btn-invest btn-sm" onclick="buy('${vid}', '${item.snippet.title}')">INVESTIR</button>
+                            <button class="btn-miv ms-2" onclick="investir(${index})">INVESTIR</button>
                         </div>
                     </div>`;
-                return { id: vid, tit: item.snippet.title, img: item.snippet.thumbnails.high.url };
             });
         }
 
-        function loadTrack(i) {
-            indexAtu = i;
-            const t = fila[i];
-            document.getElementById('playerBar').style.display = 'block';
-            document.getElementById('p-tit').innerText = t.tit;
-            document.getElementById('p-img').src = t.img;
-            document.getElementById('p-cota-val').innerText = `Cota: R$ ${precos[t.id].toFixed(2)}`;
-            document.getElementById('btn-player-invest').onclick = () => buy(t.id, t.tit);
-            ytPlayer.loadVideoById(t.id);
-            ytPlayer.playVideo();
+        function tocarMusica(index) {
+            currentIndex = index;
+            const track = playlist[index];
+            
+            // Atualizar UI do Player
+            document.getElementById('player-bar').style.display = 'block';
+            document.getElementById('track-title').innerText = track.title;
+            document.getElementById('track-img').src = track.thumb;
+            document.getElementById('track-price').innerText = `Cota: R$ ${track.price.toFixed(2)}`;
+            
+            // Lógica do Botão de Investimento no Player
+            document.getElementById('btn-invest-player').onclick = () => investir(index);
+
+            player.loadVideoById(track.id);
+            player.playVideo();
         }
 
-        function startProgress() {
-            setInterval(() => {
-                const pct = (ytPlayer.getCurrentTime() / ytPlayer.getDuration()) * 100;
+        function onPlayerStateChange(event) {
+            const btn = document.getElementById('btn-play-pause');
+            if (event.data === YT.PlayerState.PLAYING) {
+                btn.className = "bi bi-pause-circle-fill h1";
+                updateProgressBar();
+            } else {
+                btn.className = "bi bi-play-circle-fill h1";
+                if(event.data === YT.PlayerState.ENDED) valorizarAtivo();
+            }
+        }
+
+        function updateProgressBar() {
+            if(player && player.getCurrentTime) {
+                const pct = (player.getCurrentTime() / player.getDuration()) * 100;
                 document.getElementById('p-bar').style.width = pct + '%';
-            }, 1000);
+                if(player.getPlayerState() === YT.PlayerState.PLAYING) {
+                    setTimeout(updateProgressBar, 1000);
+                }
+            }
         }
 
-        function buy(id, nome) {
-            if(saldo >= precos[id]) {
-                saldo -= precos[id];
-                document.getElementById('topo-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
-                alert(`🚀 Adquirido: ${nome}`);
-            } else { alert("Saldo insuficiente!"); }
+        function valorizarAtivo() {
+            // Toda vez que termina de ouvir, o preço da música sobe (Simulando Royalty)
+            playlist[currentIndex].price += 0.05;
+            renderizarMercado();
+            alert("Ação Valorizada! O número de plays gerou rendimentos.");
+            playNext(1);
         }
 
-        function toggleExpand() {
-            const p = document.getElementById('playerBar');
-            p.classList.toggle('expanded');
-            if(p.classList.contains('expanded')) document.getElementById('canvas-yt').appendChild(document.getElementById('yt-engine'));
-            else document.getElementById('yt-engine-container').appendChild(document.getElementById('yt-engine'));
+        function investir(index) {
+            const track = playlist[index];
+            if(saldo >= track.price) {
+                saldo -= track.price;
+                carteiraAtivos.push(track);
+                atualizarFinancas();
+                alert(`🚀 Sucesso! Você comprou uma fração de: ${track.title}`);
+            } else {
+                alert("Saldo Insuficiente para esta operação.");
+            }
         }
 
-        function switchPage(id, btn) {
+        function atualizarFinancas() {
+            document.getElementById('saldo-display').innerText = `R$ ${saldo.toFixed(2)}`;
+            const valorTotalAtivos = carteiraAtivos.reduce((acc, item) => acc + item.price, 0);
+            document.getElementById('valor-ativos').innerText = `R$ ${valorTotalAtivos.toFixed(2)}`;
+            
+            const lista = document.getElementById('meus-ativos');
+            lista.innerHTML = carteiraAtivos.map(item => `
+                <div class="card bg-dark border-secondary p-2 mb-2 d-flex flex-row align-items-center">
+                    <img src="${item.thumb}" style="width:40px; border-radius:4px" class="me-3">
+                    <small class="flex-grow-1">${item.title}</small>
+                    <span class="text-success fw-bold">R$ ${item.price.toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+
+        function changePage(pageId, btn) {
             document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
             btn.classList.add('active');
         }
 
-        function togglePlay() { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
-        function playNext() { if(indexAtu < fila.length - 1) loadTrack(indexAtu + 1); }
-        function playPrev() { if(indexAtu > 0) loadTrack(indexAtu - 1); }
-        function seek(e) {
-            const rect = e.currentTarget.getBoundingClientRect();
-            ytPlayer.seekTo(ytPlayer.getDuration() * ((e.clientX - rect.left) / rect.width));
+        function togglePlay() {
+            const state = player.getPlayerState();
+            if(state === 1) player.pauseVideo();
+            else player.playVideo();
         }
 
-        window.onload = init;
+        function playNext(dir) {
+            currentIndex += dir;
+            if(currentIndex >= playlist.length) currentIndex = 0;
+            if(currentIndex < 0) currentIndex = playlist.length - 1;
+            tocarMusica(currentIndex);
+        }
+
+        function expandirPlayer() {
+            const p = document.getElementById('player-bar');
+            const canvas = document.getElementById('video-canvas');
+            p.classList.toggle('expanded');
+            canvas.classList.toggle('d-none');
+            
+            if(p.classList.contains('expanded')) {
+                // Ao expandir, movemos o iframe para o canvas
+                canvas.appendChild(document.getElementById('yt-placeholder'));
+                document.getElementById('yt-placeholder').style.display = 'block';
+                document.getElementById('yt-placeholder').style.width = '100%';
+                document.getElementById('yt-placeholder').style.height = '100%';
+            }
+        }
+
+        function seekTrack(e) {
+            const container = e.currentTarget;
+            const pct = e.offsetX / container.offsetWidth;
+            player.seekTo(player.getDuration() * pct);
+        }
     </script>
 </body>
 </html>
