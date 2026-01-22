@@ -235,4 +235,57 @@
                 const dur = ytPlayer.getDuration();
                 const pct = (cur / dur) * 100;
                 document.getElementById('barraProgresso').style.width = pct + '%';
-                document
+                document.getElementById('barraProgressoMob').style.width = pct + '%';
+                
+                const m = Math.floor(cur/60); const s = Math.floor(cur%60);
+                document.getElementById('timerTxt').innerText = `${m}:${s<10?'0':''}${s}`;
+            }, 1000);
+        }
+
+        function seek(e) {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const pct = (e.clientX - rect.left) / rect.width;
+            ytPlayer.seekTo(ytPlayer.getDuration() * pct);
+        }
+
+        async function finalizarMusica() {
+            const userId = localStorage.getItem('userId');
+            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${fila[indexAtual].id}`);
+            carregarDadosServidor();
+            playNext();
+        }
+
+        function playNext() { if(indexAtual < fila.length - 1) iniciarPlay(indexAtual + 1); }
+        function playPrev() { if(indexAtual > 0) iniciarPlay(indexAtual - 1); }
+
+        function uploadFoto(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('foto-perfil').src = e.target.result;
+                    localStorage.setItem('miv-foto', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function carregarDadosServidor() {
+            const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${localStorage.getItem('userId')}`);
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
+                document.getElementById('lista-historico').innerHTML = data.historico.reverse().slice(0, 5).map(i => `
+                    <div class="small opacity-75 d-flex justify-content-between"><span>${i.desc}</span><span class="text-success">+R$ ${i.valor.toFixed(2)}</span></div>
+                `).join('');
+            }
+        }
+
+        function switchTab(t, b) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('d-none'));
+            document.querySelectorAll('.btn-tab').forEach(x => x.classList.remove('active'));
+            document.getElementById('sec-'+t).classList.remove('d-none');
+            b.classList.add('active');
+        }
+    </script>
+</body>
+</html>
