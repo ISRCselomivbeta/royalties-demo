@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Premium | Dashboard</title>
+    <title>MIV Premium | Dashboard Unificado</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         :root {
             --miv-blue: #0072ff;
             --miv-cyan: #00c6ff;
+            --miv-red: #f6465d;
+            --miv-green: #0ecb81;
             --bg-dark: #05070a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --card-gray: #1e2329;
             --border: rgba(255, 255, 255, 0.1);
         }
 
@@ -19,245 +21,232 @@
             background: var(--bg-dark);
             color: #ffffff;
             font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-            padding-bottom: 110px;
+            padding-bottom: 120px;
         }
 
-        /* Barra de Notícias (Ticker) */
-        .ticker-wrap {
-            background: rgba(0, 114, 255, 0.1);
-            padding: 5px 0;
-            border-bottom: 1px solid var(--border);
-            overflow: hidden;
-        }
-        .ticker {
-            display: inline-block;
-            white-space: nowrap;
-            animation: ticker 30s linear infinite;
-            font-size: 0.75rem;
-            color: var(--miv-cyan);
-            font-weight: bold;
-        }
-        @keyframes ticker {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+        /* Ticker Superior */
+        .ticker-wrap { background: rgba(0, 114, 255, 0.1); padding: 5px 0; border-bottom: 1px solid var(--border); overflow: hidden; }
+        .ticker { display: inline-block; white-space: nowrap; animation: ticker 30s linear infinite; font-size: 0.75rem; color: var(--miv-cyan); font-weight: bold; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        /* Perfil Social */
-        .profile-header {
-            padding: 30px 20px;
-            background: radial-gradient(circle at top, rgba(0, 198, 255, 0.15), transparent);
-        }
-        .profile-pic {
-            width: 85px; height: 85px;
-            border-radius: 50%;
-            border: 3px solid var(--miv-cyan);
-            padding: 3px;
-            background: var(--bg-dark);
-            object-fit: cover;
-            box-shadow: 0 0 20px rgba(0, 198, 255, 0.3);
-        }
-
-        /* Card de Saldo Impressionante */
+        /* Card de Saldo */
         .wallet-card {
-            background: linear-gradient(135deg, rgba(0, 114, 255, 0.8), rgba(0, 198, 255, 0.4));
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, var(--miv-blue), var(--miv-cyan));
             border-radius: 24px;
             padding: 25px;
-            margin: 0 15px 30px;
-            box-shadow: 0 15px 35px rgba(0, 114, 255, 0.3);
-            transition: 0.3s;
+            margin: 20px 15px;
+            box-shadow: 0 10px 30px rgba(0, 114, 255, 0.3);
+            text-align: center;
         }
-        .saldo-valor {
-            font-size: 2.2rem;
-            font-weight: 800;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
-            letter-spacing: -1px;
-        }
+        .saldo-valor { font-size: 2.2rem; font-weight: 800; }
 
-        /* Músicas / Assets */
-        .music-card {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
+        /* Navegação por Abas (Estilo Pílula) */
+        .nav-miv { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding: 0 10px; }
+        .btn-tab {
+            background: var(--card-gray); border: 1px solid var(--border); color: #fff;
+            border-radius: 50px; padding: 8px 15px; font-size: 0.75rem; white-space: nowrap;
         }
-        .music-card:hover { border-color: var(--miv-cyan); transform: translateY(-3px); }
+        .btn-tab.active { background: var(--miv-cyan); color: #000; font-weight: bold; border-color: var(--miv-cyan); }
 
-        .album-art {
-            width: 55px; height: 55px;
-            border-radius: 12px;
-            background: linear-gradient(45deg, #1e2329, #0b0e11);
-            display: flex; align-items: center; justify-content: center;
-        }
+        /* Seções de Conteúdo */
+        .page-section { display: none; animation: fadeIn 0.3s ease; }
+        .page-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Player Inferior */
+        /* Mercado e Exchange Cards */
+        .music-card { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; padding: 15px; margin-bottom: 15px; }
+        .yt-frame { border-radius: 15px; width: 100%; height: 160px; margin-bottom: 10px; border: 1px solid var(--border); }
+        
+        /* Botões */
+        .btn-buy { background: var(--miv-green); border: none; color: black; font-weight: bold; border-radius: 10px; }
+        .btn-sell { background: var(--miv-red); border: none; color: white; font-weight: bold; border-radius: 10px; }
+        .btn-mine { background: transparent; border: 1px solid var(--miv-cyan); color: var(--miv-cyan); font-weight: bold; border-radius: 10px; }
+
+        /* Histórico */
+        .historico-item { background: var(--card-gray); border-radius: 12px; padding: 15px; margin-bottom: 10px; border-left: 4px solid var(--miv-cyan); }
+        .v-pos { color: var(--miv-green); }
+        .v-neg { color: var(--miv-red); }
+
+        /* Player Minerador */
         .miv-player {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(5, 7, 10, 0.9);
-            backdrop-filter: blur(25px);
-            border-top: 1px solid var(--border);
-            padding: 15px 25px;
-            z-index: 1000;
-            display: none;
+            background: rgba(5, 7, 10, 0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid var(--miv-cyan); padding: 15px 25px; z-index: 1000; display: none;
         }
-
-        .btn-miv {
-            background: var(--miv-cyan);
-            color: #000; font-weight: bold; border: none;
-            border-radius: 12px; padding: 12px;
-            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
-        }
-
-        .text-micro { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <div class="ticker-wrap">
-        <div class="ticker">
-            • @Miv_Artist lançou novo Token M002 • Play em "Som da Rua" rendendo R$ 0,0000001 • 1.254 usuários minerando agora • Bitcoin Musical em alta +4.2% •
-        </div>
+        <div class="ticker">• MIV Exchange: Ativos em alta +12% • @Ouvinte minerou R$ 0,01 agora • Participe dos Drops de Playlist •</div>
     </div>
 
-    <div class="profile-header text-center">
-        <div class="d-flex justify-content-between px-3">
-            <button class="btn text-white" onclick="alterarFoto()"><i class="bi bi-camera"></i></button>
-            <button onclick="logout()" class="btn text-danger"><i class="bi bi-power"></i></button>
-        </div>
-        <img id="userFoto" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" class="profile-pic mb-2">
-        <h5 class="fw-bold mb-0" id="nomeUser">...</h5>
-        <p class="text-micro text-info">Investidor Verificado MIV</p>
-    </div>
-
-    <div class="wallet-card text-center">
-        <p class="text-micro mb-1 opacity-75">Meu Patrimônio Musical</p>
-        <div class="saldo-valor" id="saldoTxt">R$ 0,00000000</div>
-        <div class="mt-2">
-            <span class="badge rounded-pill bg-success bg-opacity-25 text-success p-2 px-3" style="font-size: 0.7rem;">
-                <i class="bi bi-graph-up"></i> +0.0000008 hoje
+    <div class="wallet-card">
+        <p class="small mb-1 opacity-75">Meu Patrimônio Musical</p>
+        <div class="saldo-valor" id="saldoTxt">R$ 0,00</div>
+        <div class="d-flex justify-content-center gap-2 mt-2">
+            <span class="badge rounded-pill bg-black bg-opacity-25 p-2 px-3" style="font-size: 0.65rem;">
+                <i class="bi bi-lightning-charge-fill text-warning"></i> Ativo M01: R$ 18,50
             </span>
         </div>
     </div>
 
-    <div class="container px-4">
-        <h6 class="text-micro mb-3 opacity-50">Marketplace de Ativos</h6>
-        
-        <div class="music-card">
-            <div class="d-flex align-items-center mb-3">
-                <div class="album-art me-3 shadow">
-                    <i class="bi bi-vinyl-fill text-info h3 mb-0"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <h6 class="mb-0 fw-bold">Som da Rua</h6>
-                    <span class="text-muted small">Cota: R$ 15,00 | <span class="text-success">+2.1%</span></span>
-                </div>
-                <button class="btn btn-sm btn-outline-info rounded-pill" onclick="abrirInvest()">Investir</button>
-            </div>
-            <button class="btn btn-miv w-100" onclick="playMusic('M001', 'Som da Rua')">
-                <i class="bi bi-play-fill"></i> OUVIR E MINERAR
-            </button>
-        </div>
-
-        <div class="music-card py-3">
-            <h6 class="text-micro mb-2"><i class="bi bi-people-fill"></i> Atividade da Rede</h6>
-            <div id="socialFeed" style="font-size: 0.8rem;">
-                <div class="d-flex gap-2 mb-2">
-                    <div class="text-info fw-bold">Alex S.</div> <span>comprou 10 cotas de M001</span>
-                </div>
-                <div class="d-flex gap-2">
-                    <div class="text-info fw-bold">Marina</div> <span>minerou R$ 0,0000001 agora</span>
-                </div>
-            </div>
-        </div>
+    <div class="nav-miv">
+        <button class="btn-tab active" onclick="switchTab('market', this)">🔥 Mercado</button>
+        <button class="btn-tab" onclick="switchTab('exchange', this)">🚀 Exchange (Vender)</button>
+        <button class="btn-tab" onclick="switchTab('banca', this)">💎 Minha Banca</button>
     </div>
+
+    <main class="container px-4">
+        
+        <section id="sec-market" class="page-section active">
+            <h6 class="text-micro opacity-50 mb-3 small">Novos Ativos para Investir</h6>
+            <div id="lista-market">
+                <div class="text-center py-5"><div class="spinner-border text-info"></div></div>
+            </div>
+        </section>
+
+        <section id="sec-exchange" class="page-section">
+            <h6 class="text-micro opacity-50 mb-3 small">Realizar Lucro (Venda)</h6>
+            <div id="lista-venda">
+                <p class="text-muted text-center small py-5">Buscando seus ativos na rede...</p>
+            </div>
+        </section>
+
+        <section id="sec-banca" class="page-section">
+            <h6 class="text-micro opacity-50 mb-3 small">Histórico de Transações</h6>
+            <div id="lista-historico">
+                <p class="text-muted text-center small">Nenhuma transação registrada.</p>
+            </div>
+        </section>
+
+    </main>
 
     <div class="miv-player" id="playerArea">
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
-                <div class="spinner-grow text-info me-3" style="width: 1.2rem; height: 1.2rem;"></div>
+                <div class="spinner-grow text-info me-3" style="width: 1rem; height: 1rem;"></div>
                 <div>
-                    <small class="text-micro d-block" id="playingTitle">MINERANDO...</small>
-                    <span class="fw-bold text-info" id="timerStatus">Validando: 30s</span>
+                    <small class="text-info d-block fw-bold" style="font-size: 0.6rem;">BLOCKCHAIN VALIDANDO...</small>
+                    <span id="timerStatus" style="font-size: 0.9rem;">30s restantes</span>
                 </div>
             </div>
             <button class="btn text-white p-0" onclick="cancelarPlay()"><i class="bi bi-x-circle h4"></i></button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
+        const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
+        const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+        const APP_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
+        
         let timerInterval;
 
-        window.onload = () => {
-            const nome = localStorage.getItem('userName');
-            if(!nome) { window.location.href = 'login.html'; return; }
-            document.getElementById('nomeUser').innerText = nome;
-            
-            const foto = localStorage.getItem('userFoto');
-            if(foto) document.getElementById('userFoto').src = foto;
-            
-            carregarSaldo();
-        };
+        window.onload = () => carregarTudo();
 
-        async function carregarSaldo() {
-            try {
-                const res = await fetch(`${API_URL}?acao=ver_carteira&userId=${localStorage.getItem('userId')}`);
-                const data = await res.json();
-                if(data.success) {
-                    // Animação simples de atualização
-                    document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(8);
-                }
-            } catch(e) { console.log("Erro carregar saldo"); }
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-' + tab).classList.add('active');
+            btn.classList.add('active');
         }
 
-        function playMusic(id, titulo) {
+        async function carregarTudo() {
+            carregarMarketplace();
+            carregarDadosServidor();
+        }
+
+        async function carregarMarketplace() {
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
+                const data = await res.json();
+                const container = document.getElementById('lista-market');
+                const exchangeContainer = document.getElementById('lista-venda');
+                container.innerHTML = '';
+                exchangeContainer.innerHTML = '';
+
+                data.items.forEach(item => {
+                    const id = item.snippet.resourceId.videoId;
+                    const tit = item.snippet.title;
+                    
+                    // Card para o Mercado (Comprar)
+                    container.innerHTML += `
+                        <div class="music-card">
+                            <iframe class="yt-frame" src="https://www.youtube.com/embed/${id}" frameborder="0"></iframe>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0 text-truncate fw-bold" style="max-width: 60%;">${tit}</h6>
+                                <button class="btn btn-buy btn-sm px-3" onclick="negociar('${id}', '${tit}', 15.00, 'COMPRA')">COMPRAR</button>
+                            </div>
+                            <button class="btn btn-mine btn-sm w-100 mt-3" onclick="iniciarMineração('${id}', '${tit}')">OUVIR E MINERAR</button>
+                        </div>`;
+
+                    // Card para a Exchange (Venda) - Preço de mercado simulado em 18.50 para lucro
+                    exchangeContainer.innerHTML += `
+                        <div class="music-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div><small class="text-info opacity-75">ATIVO</small><br><span class="fw-bold">${tit}</span></div>
+                                <div class="text-end"><small class="text-muted">MERCADO</small><br><span class="text-success fw-bold">R$ 18,50</span></div>
+                            </div>
+                            <button class="btn btn-sell btn-sm w-100 mt-3" onclick="negociar('${id}', '${tit}', 18.50, 'VENDA')">VENDER TODAS (LUCRO)</button>
+                        </div>`;
+                });
+            } catch (e) { console.error("Erro API"); }
+        }
+
+        async function carregarDadosServidor() {
+            const userId = localStorage.getItem('userId');
+            try {
+                const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${userId}`);
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
+                    const histCont = document.getElementById('lista-historico');
+                    histCont.innerHTML = '';
+                    data.historico.reverse().forEach(item => {
+                        const isPos = item.valor >= 0;
+                        histCont.innerHTML += `
+                            <div class="historico-item d-flex justify-content-between">
+                                <div><div class="small fw-bold">${item.desc}</div><small class="opacity-50 text-micro">${new Date(item.data).toLocaleDateString()}</small></div>
+                                <div class="fw-bold ${isPos ? 'v-pos' : 'v-neg'}">${isPos ? '+' : ''} R$ ${item.valor.toFixed(2)}</div>
+                            </div>`;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function negociar(id, titulo, preco, tipo) {
+            const q = tipo === 'COMPRA' ? prompt(`Quantas cotas de ${titulo} deseja comprar?`) : 1; 
+            if(q > 0) {
+                const v = q * preco;
+                if(!confirm(`Confirmar ${tipo} de ${q} cotas por R$ ${v.toFixed(2)}?`)) return;
+                
+                fetch(`${APP_URL}?acao=negociar_acao&user_id=${localStorage.getItem('userId')}&musica_id=${id}&quantidade=${q}&preco_unitario=${preco}&valor=${v}&tipo_ordem=${tipo}`)
+                .then(() => { alert("Transação processada na rede MIV!"); carregarDadosServidor(); });
+            }
+        }
+
+        function iniciarMineração(id, titulo) {
             document.getElementById('playerArea').style.display = 'block';
-            document.getElementById('playingTitle').innerText = "MINERANDO: " + titulo;
-            let tempo = 30;
-            
+            let t = 30;
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
-                tempo--;
-                document.getElementById('timerStatus').innerText = "Validando: " + tempo + "s";
-                if(tempo <= 0) {
+                t--;
+                document.getElementById('timerStatus').innerText = `${t}s restantes`;
+                if(t <= 0) {
                     clearInterval(timerInterval);
-                    creditar(id);
+                    finalizarMineração(id);
                 }
             }, 1000);
         }
 
-        async function creditar(id) {
-            document.getElementById('timerStatus').innerText = "Depositando...";
-            await fetch(`${API_URL}?acao=registrar_play&ouvinte_id=${localStorage.getItem('userId')}&musica_id=${id}`);
+        async function finalizarMineração(id) {
+            document.getElementById('timerStatus').innerText = "Creditando...";
+            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${localStorage.getItem('userId')}&musica_id=${id}`);
             document.getElementById('playerArea').style.display = 'none';
-            alert("Mineração concluída! +R$ 0,0000001");
-            carregarSaldo();
+            alert("Mineração bem sucedida! +R$ 0,01");
+            carregarDadosServidor();
         }
 
-        function alterarFoto() {
-            const url = prompt("Link (URL) da sua foto:");
-            if(url) {
-                localStorage.setItem('userFoto', url);
-                document.getElementById('userFoto').src = url;
-            }
-        }
-
-        function abrirInvest() {
-            const q = prompt("Quantas ações de M001 deseja comprar (R$ 15,00 cada)?");
-            if(q) {
-                const v = q * 15;
-                fetch(`${API_URL}?acao=negociar_acao&user_id=${localStorage.getItem('userId')}&musica_id=M001&quantidade=${q}&preco_unitario=15&valor=${v}&tipo_ordem=COMPRA`)
-                .then(() => { alert("Sucesso! Verifique sua carteira."); location.reload(); });
-            }
-        }
-
-        function logout() { localStorage.clear(); location.href='login.html'; }
         function cancelarPlay() { clearInterval(timerInterval); document.getElementById('playerArea').style.display = 'none'; }
     </script>
 </body>
