@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro | SELO MIV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f2027; color: white; display: flex; align-items: center; min-height: 100vh; }
+        .card-auth { background: white; color: #333; padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; margin: auto; }
+    </style>
+</head>
+<body>
+    <div class="card-auth shadow">
+        <h3 class="text-center mb-4 text-primary">Criar Conta MIV</h3>
+        <input type="text" id="regNome" class="form-control mb-2" placeholder="Nome Completo">
+        <input type="email" id="regEmail" class="form-control mb-2" placeholder="Seu melhor E-mail">
+        <input type="password" id="regSenha" class="form-control mb-3" placeholder="Crie uma Senha">
+        
+        <label class="text-muted small">Eu sou:</label>
+        <select id="regTipo" class="form-select mb-3">
+            <option value="ouvinte">Ouvinte / Investidor</option>
+            <option value="artista">Artista</option>
+        </select>
+
+        <button onclick="realizarCadastro()" class="btn btn-primary w-100 p-2 fw-bold">CADASTRAR</button>
+        <p class="text-center mt-3 small">Já tem conta? <a href="login.html">Faça Login</a></p>
+    </div>
+
+    <script>
+        const API_URL = "SUA_URL_DO_SCRIPT_AQUI";
+
+        async function realizarCadastro() {
+            const dados = {
+                acao: 'cadastro',
+                nome: document.getElementById('regNome').value,
+                email: document.getElementById('regEmail').value,
+                senha: document.getElementById('regSenha').value,
+                tipo: document.getElementById('regTipo').value
+            };
+
+            const res = await fetch(API_URL, { method: 'POST', body: new URLSearchParams(dados) });
+            const data = await res.json();
+
+            if(data.success) {
+                alert("Conta criada! Agora faça seu login.");
+                window.location.href = "login.html";
+            }
+        }
+    </script>
+</body>
+</html>
