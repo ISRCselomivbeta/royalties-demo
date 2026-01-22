@@ -1,16 +1,107 @@
-<script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
-    
-    async function registrarPlay(idMusica) {
-        // Envia para as abas PLAYS e STREMS na planilha
-        await fetch(API_URL, {
-            method: "POST",
-            body: new URLSearchParams({
-                acao: "registrar_play",
-                musica_id: idMusica,
-                ouvinte_id: localStorage.getItem("userId")
-            })
-        });
-        alert("Play contabilizado no sistema!");
-    }
-</script>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Ouvinte | SELO MIV</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; }
+        .navbar-miv { background: #181a20; border-bottom: 1px solid #333; }
+        .card-saldo { background: linear-gradient(135deg, #0072ff, #00c6ff); border-radius: 15px; padding: 20px; margin-top: 20px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .menu-item { background: #1e2329; padding: 20px; border-radius: 12px; text-align: center; text-decoration: none; color: white; transition: 0.3s; border: 1px solid transparent; }
+        .menu-item:hover { background: #2b3139; border-color: #00c6ff; color: #00c6ff; }
+        .menu-item i { font-size: 2rem; display: block; margin-bottom: 10px; }
+        .musica-item { background: #1e2329; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-play { background: #00c6ff; border: none; border-radius: 50%; width: 45px; height: 45px; color: black; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-miv px-3">
+        <span class="navbar-brand fw-bold">SELO <span style="color:#00c6ff">MIV</span></span>
+        <button onclick="logout()" class="btn btn-outline-danger btn-sm">Sair</button>
+    </nav>
+
+    <div class="container">
+        <div class="card-saldo shadow">
+            <small>Olá, <span id="nomeUser">Ouvinte</span></small>
+            <h2 id="saldoTxt" class="fw-bold">R$ 0,00</h2>
+            <small>Saldo acumulado por ouvir músicas</small>
+        </div>
+
+        <div class="menu-grid">
+            <a href="perfil-artista.html" class="menu-item shadow">
+                <i class="bi bi-compass"></i>
+                <span>Explorar Artistas</span>
+            </a>
+            <a href="carteira.html" class="menu-item shadow">
+                <i class="bi bi-wallet2"></i>
+                <span>Minha Carteira</span>
+            </a>
+        </div>
+
+        <h5 class="mt-4 mb-3"><i class="bi bi-music-note-beamed"></i> Ouvir e Ganhar</h5>
+        <div id="listaMusicas">
+            <div class="musica-item">
+                <div>
+                    <strong>Som da Rua</strong><br>
+                    <small class="text-muted">Elzo MIV</small>
+                </div>
+                <button class="btn-play" onclick="ouvir('M01')"><i class="bi bi-play-fill"></i></button>
+            </div>
+            <div class="musica-item">
+                <div>
+                    <strong>Noite Urbana</strong><br>
+                    <small class="text-muted">MIV Records</small>
+                </div>
+                <button class="btn-play" onclick="ouvir('M02')"><i class="bi bi-play-fill"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // LINK DO SCRIPT ATUALIZADO
+        const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
+
+        // PROTEÇÃO: Só entra se for ouvinte
+        if(localStorage.getItem("userType") !== "ouvinte") {
+            window.location.href = "login.html";
+        }
+
+        // CARREGAR DADOS LOCAIS
+        document.getElementById("nomeUser").innerText = localStorage.getItem("userName") || "Ouvinte";
+        let saldoLocal = parseFloat(localStorage.getItem("saldo_miv") || "0");
+        document.getElementById("saldoTxt").innerText = "R$ " + saldoLocal.toFixed(2);
+
+        async function ouvir(idMusica) {
+            // 1. Ganho visual imediato
+            saldoLocal += 0.05;
+            localStorage.setItem("saldo_miv", saldoLocal);
+            document.getElementById("saldoTxt").innerText = "R$ " + saldoLocal.toFixed(2);
+
+            // 2. Enviar para a planilha (Abas PLAYS e STREMS)
+            try {
+                await fetch(API_URL, {
+                    method: "POST",
+                    body: new URLSearchParams({
+                        acao: "registrar_play",
+                        musica_id: idMusica,
+                        ouvinte_id: localStorage.getItem("userId")
+                    })
+                });
+                alert("Música finalizada! R$ 0,05 foram creditados.");
+            } catch (e) {
+                console.error("Erro ao registrar play no servidor");
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
