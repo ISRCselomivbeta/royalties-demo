@@ -5,29 +5,33 @@
     <title>Login | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #0f2027; color: white; display: flex; align-items: center; height: 100vh; }
-        .login-card { background: white; color: #333; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; margin: auto; }
+        body { background: #0b0e11; color: white; display: flex; align-items: center; min-height: 100vh; }
+        .card-login { background: #1e2329; padding: 30px; border-radius: 15px; width: 100%; max-width: 400px; margin: auto; border: 1px solid #333; }
+        .form-control { background: #2b3139; border: 1px solid #444; color: white; }
+        .btn-miv { background: #00c6ff; color: black; font-weight: bold; width: 100%; border: none; padding: 12px; border-radius: 10px; }
     </style>
 </head>
 <body>
-    <div class="login-card shadow">
-        <h2 class="text-center mb-4">SELO <span style="color:#0072ff">MIV</span></h2>
-        <input type="text" id="usuario" class="form-control mb-3" placeholder="E-mail">
-        <input type="password" id="senha" class="form-control mb-3" placeholder="Senha">
-        <button onclick="entrar()" id="btnEntrar" class="btn btn-primary w-100">ENTRAR</button>
-        <div id="erro" class="mt-3 text-danger text-center small d-none"></div>
+    <div class="card-login shadow">
+        <h3 class="text-center mb-4 text-white">Entrar no <span style="color:#00c6ff">MIV</span></h3>
+        <input type="text" id="user" class="form-control mb-3" placeholder="Seu E-mail">
+        <input type="password" id="pass" class="form-control mb-3" placeholder="Sua Senha">
+        <button onclick="logar()" id="btnEntrar" class="btn-miv">ENTRAR</button>
+        <p class="text-center mt-3 small">Não tem conta? <a href="cadastro.html" class="text-info">Cadastre-se</a></p>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
 
-        async function entrar() {
-            const u = document.getElementById('usuario').value;
-            const s = document.getElementById('senha').value;
-            if(!u || !s) return alert("Preencha tudo");
+        async function logar() {
+            const u = document.getElementById("user").value;
+            const s = document.getElementById("pass").value;
+            const btn = document.getElementById("btnEntrar");
 
-            const btn = document.getElementById('btnEntrar');
-            btn.disabled = true; btn.innerText = "Aguarde...";
+            if(!u || !s) return alert("Preencha tudo!");
+
+            btn.innerText = "Verificando...";
+            btn.disabled = true;
 
             try {
                 const res = await fetch(API_URL, {
@@ -36,17 +40,23 @@
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if(data.success) {
                     localStorage.setItem("userId", data.id);
-                    localStorage.setItem("userType", data.tipo);
                     localStorage.setItem("userName", data.nome);
+                    localStorage.setItem("userType", data.tipo);
+                    
+                    // Redireciona para o painel correto: ouvinte-dashboard.html ou artista-dashboard.html
                     window.location.href = data.tipo + "-dashboard.html";
                 } else {
-                    document.getElementById('erro').classList.remove('d-none');
-                    document.getElementById('erro').innerText = "Usuário ou senha incorretos";
-                    btn.disabled = false; btn.innerText = "ENTRAR";
+                    alert("E-mail ou senha incorretos.");
+                    btn.innerText = "ENTRAR";
+                    btn.disabled = false;
                 }
-            } catch (e) { alert("Erro de conexão"); btn.disabled = false; }
+            } catch (e) {
+                alert("Erro ao conectar com o servidor.");
+                btn.innerText = "ENTRAR";
+                btn.disabled = false;
+            }
         }
     </script>
 </body>
