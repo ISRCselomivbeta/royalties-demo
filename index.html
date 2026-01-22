@@ -27,6 +27,8 @@
             border-radius: 30px; 
             border: none;
             transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn-miv-primary:hover { background: #0072ff; color: white; transform: scale(1.05); }
         .btn-miv-outline { 
@@ -37,8 +39,11 @@
             border-radius: 30px;
             background: transparent;
             text-decoration: none;
+            transition: 0.3s;
+            display: inline-block;
         }
-        .feature-card { background: #1e2329; padding: 30px; border-radius: 15px; border: 1px solid #333; }
+        .btn-miv-outline:hover { background: rgba(0, 198, 255, 0.1); color: #fff; }
+        .feature-card { background: #1e2329; padding: 30px; border-radius: 15px; border: 1px solid #333; height: 100%; }
         .feature-card i { font-size: 2.5rem; color: #00c6ff; }
     </style>
 </head>
@@ -50,7 +55,7 @@
             <p class="lead mb-5">A primeira bolsa de valores musical onde você ganha ouvindo e lucra investindo.</p>
             
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
-                <a href="login.html" class="btn-miv-primary text-decoration-none">ENTRAR NO PAINEL</a>
+                <a href="login.html" class="btn-miv-primary">ENTRAR NO PAINEL</a>
                 <a href="cadastro.html" class="btn-miv-outline">CRIAR CONTA GRÁTIS</a>
             </div>
         </div>
@@ -60,21 +65,21 @@
         <div class="container">
             <div class="row g-4 text-center">
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card shadow">
                         <i class="bi bi-headphones"></i>
                         <h4 class="mt-3">Ouvinte</h4>
                         <p class="text-muted">Ganhe frações de reais por cada play. Use seu saldo para apoiar seus artistas favoritos.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card shadow">
                         <i class="bi bi-mic"></i>
                         <h4 class="mt-3">Artista</h4>
                         <p class="text-muted">Tokenize suas músicas, venda ações e financie sua carreira diretamente com seus fãs.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <div class="feature-card">
+                    <div class="feature-card shadow">
                         <i class="bi bi-graph-up-arrow"></i>
                         <h4 class="mt-3">Investidor</h4>
                         <p class="text-muted">Compre ações de músicas em ascensão e lucre com a valorização e royalties.</p>
@@ -84,15 +89,19 @@
         </div>
     </section>
 
-    <footer class="py-4 text-center border-top border-secondary">
-        <p class="text-muted small">&copy; 2024 SELO MIV - Todos os direitos reservados.</p>
+    <footer class="py-4 text-center border-top border-secondary bg-black">
+        <p class="text-muted small mb-0">&copy; 2026 SELO MIV - Todos os direitos reservados.</p>
     </footer>
 
     <script>
-        // Se o usuário já estiver logado, redireciona automaticamente para o dashboard dele
+        // REDIRECIONAMENTO AUTOMÁTICO
+        // Se o navegador já tiver os dados de login, ele pula a página inicial
         window.onload = function() {
             const userType = localStorage.getItem("userType");
-            if (userType) {
+            const userId = localStorage.getItem("userId");
+            
+            // Só redireciona se tiver o tipo de usuário E o ID salvos
+            if (userType && userId) {
                 window.location.href = userType + "-dashboard.html";
             }
         }
