@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Music Pro | Investment Dashboard</title>
+    <title>MIV Music Pro | Investment v3.5</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
@@ -21,63 +21,59 @@
             font-family: 'Outfit', sans-serif;
             background-color: var(--dark-surface);
             color: #ffffff;
-            padding-bottom: 100px;
-            overflow-x: hidden;
+            padding-bottom: 160px;
         }
 
-        /* --- HEADER --- */
+        /* --- Header Futurista --- */
         .miv-header {
-            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--dark-surface) 100%);
+            background: linear-gradient(180deg, rgba(0,255,136,0.12) 0%, var(--dark-surface) 100%);
             padding: 25px 20px;
             border-bottom: 1px solid var(--border);
         }
 
-        /* --- CARDS --- */
+        .balance-val { font-size: 2rem; font-weight: 800; color: var(--neon-green); }
+
+        /* --- Cards --- */
         .music-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 20px;
-            overflow: hidden;
+            padding: 15px;
             transition: 0.3s;
         }
         .music-card:hover { border-color: var(--neon-green); transform: translateY(-3px); }
-        .thumb-container { position: relative; cursor: pointer; }
-        .play-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
-            opacity: 0; transition: 0.3s;
-        }
-        .thumb-container:hover .play-overlay { opacity: 1; }
 
-        /* --- PLAYER FIXO --- */
+        /* --- Player Expandível --- */
         .miv-player {
             position: fixed; bottom: 70px; left: 0; right: 0;
-            background: rgba(17, 20, 24, 0.95); backdrop-filter: blur(15px);
-            border-top: 1px solid var(--border); padding: 12px 20px; z-index: 999;
-            display: none; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(17, 20, 24, 0.98); backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border); padding: 15px; z-index: 1000;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .miv-player.expanded { height: 100vh; bottom: 0; display: flex; flex-direction: column; }
+        .miv-player.expanded { height: 100vh; bottom: 0; }
         
-        .progress-miv { height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
-        .progress-bar-miv { height: 100%; background: var(--neon-green); width: 0%; box-shadow: 0 0 10px var(--neon-green); }
+        #canvas-yt { 
+            width: 100%; aspect-ratio: 16/9; border-radius: 12px; 
+            display: none; margin-bottom: 20px;
+        }
+        .expanded #canvas-yt { display: block; }
 
-        /* --- NAVEGAÇÃO APP --- */
+        .progress-miv { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
+        .progress-bar-miv { height: 100%; background: var(--neon-green); width: 0%; border-radius: 10px; }
+
+        /* --- Nav App --- */
         .bottom-nav {
             background: #000; border-top: 1px solid var(--border);
-            position: fixed; bottom: 0; width: 100%; z-index: 1000;
+            position: fixed; bottom: 0; width: 100%; z-index: 1001;
+            display: flex; justify-content: space-around; padding: 10px 0;
         }
-        .nav-link { color: #888; text-align: center; font-size: 0.75rem; padding: 10px 0; border: none; background: none; width: 25%; }
-        .nav-link.active { color: var(--neon-green) !important; }
-        .nav-link i { font-size: 1.4rem; display: block; }
+        .nav-btn { background: none; border: none; color: #888; font-size: 0.75rem; transition: 0.3s; }
+        .nav-btn.active { color: var(--neon-green); }
+        .nav-btn i { font-size: 1.5rem; display: block; }
 
-        .section-page { display: none; animation: fadeIn 0.4s; }
+        .btn-invest { background: var(--neon-green); color: #000; font-weight: 700; border-radius: 10px; border: none; padding: 5px 15px; }
+        .section-page { display: none; }
         .section-page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .btn-invest { background: var(--neon-green); color: #000; font-weight: 800; border-radius: 10px; border: none; padding: 8px 15px; }
-        .badge-miv { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
-
-        #canvas-yt { width: 100%; aspect-ratio: 16/9; border-radius: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -87,272 +83,168 @@
     <header class="miv-header">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <small class="text-secondary fw-bold">CARTEIRA MIV</small>
-                <h3 class="fw-bold mb-0" id="saldo-topo">R$ 0,00</h3>
+                <small class="text-secondary fw-bold">SALDO EM CARTEIRA</small>
+                <div class="balance-val" id="topo-saldo">R$ 1.000,00</div>
             </div>
             <div class="text-end">
-                <span class="badge badge-miv" id="user-tipo">INVESTIDOR</span>
+                <span class="badge rounded-pill bg-dark border border-success text-success">STATUS: PRO</span>
             </div>
         </div>
     </header>
 
     <main class="container mt-4">
         <section id="explorar" class="section-page active">
-            <h5 class="fw-bold mb-3"><i class="bi bi-fire text-danger"></i> Tendências de Mercado</h5>
-            <div id="mercado-lista" class="row g-3">
-                </div>
+            <h5 class="fw-bold mb-3">🔥 Drops do Dia</h5>
+            <div id="lista-mercado" class="row g-3"></div>
         </section>
 
         <section id="carteira" class="section-page">
-            <h5 class="fw-bold mb-4">Minha <span class="text-info">Banca</span></h5>
-            <div class="card bg-dark border-secondary p-4 text-center mb-4">
-                <p class="text-secondary mb-1">Patrimônio em Ativos</p>
-                <h1 id="valor-ativos">R$ 0,00</h1>
-            </div>
-            <div id="meus-ativos-lista">
-                <p class="text-center text-muted">Buscando seus ativos na rede...</p>
+            <h5 class="fw-bold mb-4">Minhas <span class="text-info">Cotas</span></h5>
+            <div id="lista-ativos">
+                <p class="text-center text-muted py-5">Nenhum ativo adquirido ainda.</p>
             </div>
         </section>
 
-        <section id="perfil" class="section-page">
-            <div class="text-center mb-4">
-                <div class="avatar-lg mx-auto bg-primary rounded-circle mb-3" id="user-iniciais" style="width: 80px; height: 80px; display: flex; align-items:center; justify-content:center; font-size: 2rem;">--</div>
-                <h4 id="user-nome">Usuário MIV</h4>
-                <p class="text-muted" id="user-id">ID: 000000</p>
+        <section id="perfil" class="section-page text-center">
+            <div class="py-4">
+                <div class="rounded-circle bg-primary mx-auto mb-3" style="width: 100px; height: 100px;"></div>
+                <h3 id="p-nome">@Investidor_MIV</h3>
+                <p class="text-secondary">Nível Bronze</p>
+                <button class="btn btn-outline-danger mt-4" onclick="location.reload()">Sair da Conta</button>
             </div>
-            
-            <div class="card bg-dark border-secondary p-3 mb-3">
-                <h6>Tokenizar Nova Obra</h6>
-                <div class="input-group mt-2">
-                    <input type="text" id="yt-link" class="form-control bg-black text-white border-secondary" placeholder="Link do YouTube">
-                    <button class="btn btn-primary" onclick="alert('Token gerado na rede de teste!')">GERAR</button>
-                </div>
-            </div>
-
-            <button class="btn btn-outline-danger w-100 mt-4" onclick="logout()">Sair da Conta</button>
         </section>
     </main>
 
     <div class="miv-player" id="playerBar">
         <div class="container">
-            <div id="canvas-area" class="d-none">
-                <div class="d-flex justify-content-between mb-2">
-                    <span class="badge bg-danger">MIV CANVAS 4K</span>
-                    <i class="bi bi-chevron-down h3" onclick="toggleExpand()"></i>
-                </div>
-                <div id="canvas-placeholder"></div>
-            </div>
-
-            <div class="row align-items-center">
+            <div id="canvas-yt"></div>
+            
+            <div class="row align-items-center mb-3">
                 <div class="col-8 d-flex align-items-center">
-                    <img src="" id="p-thumb" style="width: 50px; height: 50px; border-radius: 8px; cursor: pointer;" onclick="toggleExpand()">
+                    <img src="" id="p-img" style="width: 55px; height: 55px; border-radius: 10px; cursor: pointer;" onclick="toggleExpand()">
                     <div class="ms-3 overflow-hidden">
-                        <div class="fw-bold text-truncate" id="p-titulo" style="font-size: 0.9rem;">Música</div>
-                        <div class="text-success fw-bold" id="p-preco" style="font-size: 0.8rem;">Cota: R$ 15,00</div>
+                        <div class="fw-bold text-truncate" id="p-tit">Selecione uma faixa</div>
+                        <div class="text-success small fw-bold" id="p-cota-val">Cota: R$ 0,00</div>
                     </div>
                 </div>
                 <div class="col-4 text-end">
-                    <button class="btn-invest btn-sm" id="btn-invest-player">INVESTIR</button>
+                    <button class="btn-invest" id="btn-player-invest">INVESTIR</button>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <div class="progress-miv" onclick="seek(event)">
-                    <div class="progress-bar-miv" id="p-progresso"></div>
-                </div>
-                <div class="d-flex justify-content-between mt-1 small text-secondary">
-                    <span id="p-time">0:00</span>
-                    <span id="p-total">--:--</span>
-                </div>
+            <div class="progress-miv" onclick="seek(event)">
+                <div class="progress-bar-miv" id="p-bar"></div>
             </div>
 
-            <div class="d-flex justify-content-center gap-4 mt-2">
+            <div class="d-flex justify-content-center gap-5 mt-3">
                 <i class="bi bi-skip-start-fill h2" onclick="playPrev()"></i>
-                <i class="bi bi-play-circle-fill h1" id="p-play-btn" onclick="togglePlay()"></i>
+                <i class="bi bi-play-circle-fill h1" id="p-play-icon" onclick="togglePlay()"></i>
                 <i class="bi bi-skip-end-fill h2" onclick="playNext()"></i>
             </div>
         </div>
     </div>
 
-    <nav class="bottom-nav d-flex justify-content-around">
-        <button class="nav-link active" onclick="showPage('explorar', this)">
-            <i class="bi bi-compass"></i>Explorar
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="switchPage('explorar', this)">
+            <i class="bi bi-search"></i>Mercado
         </button>
-        <button class="nav-link" onclick="showPage('carteira', this)">
-            <i class="bi bi-gem"></i>Carteira
+        <button class="nav-btn" onclick="switchPage('carteira', this)">
+            <i class="bi bi-wallet2"></i>Carteira
         </button>
-        <button class="nav-link" onclick="showPage('perfil', this)">
-            <i class="bi bi-person-badge"></i>Perfil
+        <button class="nav-btn" onclick="switchPage('perfil', this)">
+            <i class="bi bi-person"></i>Perfil
         </button>
     </nav>
 
     <script>
-        const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
-        const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
-        const APP_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
-
-        let ytPlayer, fila = [], indexAtual = 0, progressoTimer, saldoGlobal = 1000.00;
-        let precosAcoes = {}; // Armazena valorização dinâmica
+        const YT_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
+        const PLAYLIST = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+        let ytPlayer, fila = [], indexAtu = 0, saldo = 1000.00, precos = {};
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-engine', {
                 height: '100%', width: '100%',
-                playerVars: { 'autoplay': 0, 'controls': 0, 'modestbranding': 1 },
-                events: { 'onStateChange': onPlayerStateChange }
+                playerVars: { 'autoplay': 0, 'controls': 0 },
+                events: { 'onStateChange': e => {
+                    if(e.data === 1) startProgress();
+                    if(e.data === 0) { precos[fila[indexAtu].id] += 0.05; playNext(); }
+                }}
             });
         }
 
-        async function carregarApp() {
-            // Configurar Perfil
-            const nome = localStorage.getItem("userName") || "Investidor MIV";
-            const id = localStorage.getItem("userId") || "777";
-            document.getElementById('user-nome').innerText = nome;
-            document.getElementById('user-id').innerText = "ID: " + id;
-            document.getElementById('user-iniciais').innerText = nome.substring(0,2).toUpperCase();
-
-            // Buscar Músicas
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=15&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
-            const data = await res.json();
+        async function init() {
+            const r = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${PLAYLIST}&key=${YT_KEY}`);
+            const d = await r.json();
+            const list = document.getElementById('lista-mercado');
             
-            const container = document.getElementById('mercado-lista');
-            container.innerHTML = '';
-
-            fila = data.items.map((item, i) => {
+            fila = d.items.map((item, i) => {
                 const vid = item.snippet.resourceId.videoId;
-                // Simulação de preço inicial + valorização aleatória (ou baseada no ID)
-                precosAcoes[vid] = 15.00 + (Math.random() * 2); 
-                
-                const card = `
-                <div class="col-12 col-md-6">
-                    <div class="music-card p-3">
-                        <div class="thumb-container mb-3" onclick="iniciarTrack(${i})">
-                            <img src="${item.snippet.thumbnails.high.url}" class="w-100 rounded-3">
-                            <div class="play-overlay"><i class="bi bi-play-fill h1 text-white"></i></div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="overflow-hidden me-2">
+                precos[vid] = 15.00 + Math.random();
+                list.innerHTML += `
+                    <div class="col-12 col-md-6">
+                        <div class="music-card d-flex align-items-center">
+                            <img src="${item.snippet.thumbnails.default.url}" class="rounded-3 me-3" style="width:70px; cursor:pointer" onclick="loadTrack(${i})">
+                            <div class="flex-grow-1 overflow-hidden">
                                 <h6 class="text-truncate mb-0">${item.snippet.title}</h6>
-                                <small class="text-success fw-bold">R$ ${precosAcoes[vid].toFixed(2)}</small>
+                                <small class="text-success fw-bold">R$ ${precos[vid].toFixed(2)}</small>
                             </div>
-                            <button class="btn-invest" onclick="comprarAcao('${vid}', '${item.snippet.title}')">INVESTIR</button>
+                            <button class="btn-invest btn-sm" onclick="buy('${vid}', '${item.snippet.title}')">INVESTIR</button>
                         </div>
-                    </div>
-                </div>`;
-                container.innerHTML += card;
-                return { id: vid, tit: item.snippet.title, thumb: item.snippet.thumbnails.high.url };
+                    </div>`;
+                return { id: vid, tit: item.snippet.title, img: item.snippet.thumbnails.high.url };
             });
-            atualizarFinanceiro();
         }
 
-        function iniciarTrack(idx) {
-            indexAtual = idx;
-            const track = fila[idx];
+        function loadTrack(i) {
+            indexAtu = i;
+            const t = fila[i];
             document.getElementById('playerBar').style.display = 'block';
-            document.getElementById('p-titulo').innerText = track.tit;
-            document.getElementById('p-thumb').src = track.thumb;
-            document.getElementById('p-preco').innerText = `Cota: R$ ${precosAcoes[track.id].toFixed(2)}`;
-            
-            // Vincular botão de investimento do player
-            document.getElementById('btn-invest-player').onclick = () => comprarAcao(track.id, track.tit);
-
-            ytPlayer.loadVideoById(track.id);
+            document.getElementById('p-tit').innerText = t.tit;
+            document.getElementById('p-img').src = t.img;
+            document.getElementById('p-cota-val').innerText = `Cota: R$ ${precos[t.id].toFixed(2)}`;
+            document.getElementById('btn-player-invest').onclick = () => buy(t.id, t.tit);
+            ytPlayer.loadVideoById(t.id);
             ytPlayer.playVideo();
         }
 
-        function onPlayerStateChange(e) {
-            const playBtn = document.getElementById('p-play-btn');
-            if(e.data === YT.PlayerState.PLAYING) {
-                playBtn.className = "bi bi-pause-circle-fill h1";
-                startProgress();
-            } else {
-                playBtn.className = "bi bi-play-circle-fill h1";
-                clearInterval(progressoTimer);
-                if(e.data === YT.PlayerState.ENDED) finalizarMining();
-            }
-        }
-
         function startProgress() {
-            progressoTimer = setInterval(() => {
-                const cur = ytPlayer.getCurrentTime();
-                const dur = ytPlayer.getDuration();
-                const pct = (cur / dur) * 100;
-                document.getElementById('p-progresso').style.width = pct + '%';
-                document.getElementById('p-time').innerText = formatTime(cur);
-                document.getElementById('p-total').innerText = formatTime(dur);
+            setInterval(() => {
+                const pct = (ytPlayer.getCurrentTime() / ytPlayer.getDuration()) * 100;
+                document.getElementById('p-bar').style.width = pct + '%';
             }, 1000);
         }
 
-        async function finalizarMining() {
-            // Valorização por play
-            const vid = fila[indexAtual].id;
-            precosAcoes[vid] += 0.05; // Sobe 5 centavos por play
-            
-            const userId = localStorage.getItem('userId');
-            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${vid}`);
-            atualizarFinanceiro();
-            playNext();
-        }
-
-        function comprarAcao(id, nome) {
-            const preco = precosAcoes[id];
-            if(saldoGlobal >= preco) {
-                saldoGlobal -= preco;
-                alert(`🚀 Sucesso! Você comprou 1 cota de "${nome}" por R$ ${preco.toFixed(2)}`);
-                // Aqui você enviaria para o seu Banco de Dados no Apps Script
-                atualizarFinanceiro();
-            } else {
-                alert("Saldo Insuficiente!");
-            }
+        function buy(id, nome) {
+            if(saldo >= precos[id]) {
+                saldo -= precos[id];
+                document.getElementById('topo-saldo').innerText = `R$ ${saldo.toFixed(2)}`;
+                alert(`🚀 Adquirido: ${nome}`);
+            } else { alert("Saldo insuficiente!"); }
         }
 
         function toggleExpand() {
             const p = document.getElementById('playerBar');
-            const area = document.getElementById('canvas-area');
-            const engine = document.getElementById('yt-engine');
-            
             p.classList.toggle('expanded');
-            area.classList.toggle('d-none');
-
-            if(p.classList.contains('expanded')) {
-                document.getElementById('canvas-placeholder').appendChild(engine);
-            } else {
-                document.getElementById('yt-engine-container').appendChild(engine);
-            }
+            if(p.classList.contains('expanded')) document.getElementById('canvas-yt').appendChild(document.getElementById('yt-engine'));
+            else document.getElementById('yt-engine-container').appendChild(document.getElementById('yt-engine'));
         }
 
-        function showPage(pageId, btn) {
+        function switchPage(id, btn) {
             document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
             btn.classList.add('active');
         }
 
-        function atualizarFinanceiro() {
-            document.getElementById('saldo-topo').innerText = `R$ ${saldoGlobal.toFixed(2)}`;
-            // Simulação de lista de ativos
-            document.getElementById('meus-ativos-lista').innerHTML = `
-                <div class="card bg-dark border-secondary p-3 mb-2 d-flex flex-row justify-content-between">
-                    <span>Ativos em Carteira</span>
-                    <span class="text-success fw-bold">R$ ${(1000 - saldoGlobal).toFixed(2)}</span>
-                </div>`;
-        }
-
-        function formatTime(s) {
-            const m = Math.floor(s/60); const sc = Math.floor(s%60);
-            return `${m}:${sc < 10 ? '0'+sc : sc}`;
-        }
-
         function togglePlay() { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
-        function playNext() { if(indexAtual < fila.length -1) iniciarTrack(indexAtual + 1); }
-        function playPrev() { if(indexAtual > 0) iniciarTrack(indexAtual - 1); }
-        function logout() { localStorage.clear(); location.reload(); }
+        function playNext() { if(indexAtu < fila.length - 1) loadTrack(indexAtu + 1); }
+        function playPrev() { if(indexAtu > 0) loadTrack(indexAtu - 1); }
         function seek(e) {
             const rect = e.currentTarget.getBoundingClientRect();
-            const pct = (e.clientX - rect.left) / rect.width;
-            ytPlayer.seekTo(ytPlayer.getDuration() * pct);
+            ytPlayer.seekTo(ytPlayer.getDuration() * ((e.clientX - rect.left) / rect.width));
         }
 
-        window.onload = carregarApp;
+        window.onload = init;
     </script>
 </body>
 </html>
