@@ -1,74 +1,349 @@
-// Inicializa API YouTube com configurações de permissão
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIV Music | Seu App de Investimento Musical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <style>
+        :root {
+            --sp-green: #1DB954;
+            --sp-black: #121212;
+            --sp-dark-gray: #181818;
+            --sp-light-gray: #282828;
+            --sp-white: #FFFFFF;
+        }
+
+        body {
+            background-color: var(--sp-black);
+            color: var(--sp-white);
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 120px;
+            overflow-x: hidden;
+        }
+
+        /* HEADER & TICKET */
+        .header-miv {
+            background: linear-gradient(to bottom, #333, var(--sp-black));
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--sp-light-gray);
+        }
+        .balance-val { font-size: 2.8rem; font-weight: 800; color: var(--sp-green); letter-spacing: -1px; }
+
+        /* NAVEGAÇÃO ESTILO SPOTIFY */
+        .nav-miv {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            background: var(--sp-black);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .btn-tab {
+            background: var(--sp-light-gray);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-tab.active { background: var(--sp-white); color: black; }
+
+        /* CARDS */
+        .song-card {
+            background: var(--sp-dark-gray);
+            border-radius: 10px;
+            padding: 15px;
+            transition: 0.3s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            height: 100%;
+        }
+        .song-card:hover { background: #252525; border-color: #444; }
+        .song-img { 
+            width: 100%; 
+            aspect-ratio: 1/1; 
+            border-radius: 8px; 
+            object-fit: cover; 
+            margin-bottom: 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        /* PLAYER FIXO */
+        .sp-player {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #000;
+            border-top: 1px solid #282828;
+            padding: 12px 20px;
+            z-index: 1000;
+            display: none;
+        }
+        .progress-miv { height: 4px; background: #404040; border-radius: 2px; width: 100%; margin-top: 8px; }
+        .progress-bar-miv { height: 100%; background: var(--sp-green); width: 0%; transition: width 0.5s linear; }
+
+        /* HISTORICO */
+        .hist-item {
+            background: var(--sp-dark-gray);
+            border-radius: 8px;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .d-none { display: none !important; }
+        #yt-engine { position: absolute; top: -999px; left: -999px; visibility: hidden; }
+    </style>
+</head>
+<body>
+
+    <div id="yt-engine"></div>
+
+    <div class="header-miv">
+        <small class="text-uppercase opacity-50 fw-bold" style="font-size: 0.65rem; letter-spacing: 2px;">Meu Patrimônio MIV</small>
+        <div class="balance-val" id="saldoTxt">R$ 0,00</div>
+    </div>
+
+    <nav class="nav-miv">
+        <button class="btn-tab active" onclick="switchTab('market', this)">Navegar</button>
+        <button class="btn-tab" onclick="switchTab('exchange', this)">Exchange (Venda)</button>
+        <button class="btn-tab" onclick="switchTab('banca', this)">Minha Banca</button>
+    </nav>
+
+    <main class="container mt-3 px-3">
+        
+        <section id="sec-market" class="page-section">
+            <h6 class="mb-4 opacity-75">Recomendados para você</h6>
+            <div class="row g-3" id="lista-market">
+                </div>
+        </section>
+
+        <section id="sec-exchange" class="page-section d-none">
+            <h6 class="mb-4 opacity-75">Suas Ações no Mercado</h6>
+            <div class="row g-3" id="lista-venda">
+                </div>
+        </section>
+
+        <section id="sec-banca" class="page-section d-none">
+            <h6 class="mb-4 opacity-75">Atividade da Conta</h6>
+            <div id="lista-historico">
+                </div>
+        </section>
+
+    </main>
+
+    <div class="sp-player" id="playerArea">
+        <div class="row align-items-center">
+            <div class="col-8 col-md-4 d-flex align-items-center">
+                <img src="" id="playerThumb" style="width: 48px; height: 48px; border-radius: 4px; margin-right: 12px;">
+                <div class="overflow-hidden">
+                    <div class="fw-bold text-truncate" id="playerTitle" style="font-size: 0.9rem;">Música</div>
+                    <div id="playerStatus" class="text-secondary" style="font-size: 0.75rem;">Sincronizando...</div>
+                </div>
+            </div>
+            <div class="col-md-4 d-none d-md-block text-center">
+                <div class="d-flex justify-content-center align-items-center gap-3">
+                    <i class="bi bi-play-circle-fill h2 text-white" id="playBtn"></i>
+                </div>
+                <div class="progress-miv">
+                    <div class="progress-bar-miv" id="barraProgresso"></div>
+                </div>
+            </div>
+            <div class="col-4 col-md-4 text-end">
+                <span id="timerTxt" class="fw-bold text-success" style="font-size: 0.85rem;">00:30</span>
+                <button class="btn btn-sm text-white ms-2" onclick="cancelarPlay()"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="col-12 d-md-none">
+                <div class="progress-miv">
+                    <div class="progress-bar-miv" id="barraProgressoMob"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
+        const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+        const APP_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
+        
+        let ytPlayer;
+        let timerInterval;
+        let musicaAtivaId = "";
+        let tempoRestante = 30;
+
+        // 1. CARREGAR PLAYER DO YOUTUBE
         function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-hidden-engine', {
+            ytPlayer = new YT.Player('yt-engine', {
                 height: '0', width: '0',
-                playerVars: {
-                    'autoplay': 1,
-                    'playsinline': 1,
-                    'mute': 1 // Começa mudo para contornar bloqueio de navegadores
-                },
-                events: { 
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange 
-                }
+                playerVars: { 'autoplay': 1, 'controls': 0, 'mute': 0 },
+                events: { 'onStateChange': onPlayerStateChange }
             });
         }
 
-        function onPlayerReady(event) {
-            console.log("Player pronto para minerar");
-        }
-
         function onPlayerStateChange(event) {
-            // Se o usuário pausar o vídeo manualmente na barra, paramos o timer
-            if (event.data == YT.PlayerState.PAUSED) {
-                clearInterval(timerInterval);
-                document.getElementById('playerStatus').innerText = "Música Pausada";
-            }
-            // Se ele der play novamente
             if (event.data == YT.PlayerState.PLAYING) {
-                retomarTimer();
+                document.getElementById('playerStatus').innerText = "Minerando Ativos...";
+            } else {
+                document.getElementById('playerStatus').innerText = "Pausado";
             }
         }
 
-        function playMusic(id, tit, thumb) {
+        // 2. NAVEGAÇÃO ENTRE ABAS
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.page-section').forEach(s => s.classList.add('d-none'));
+            document.querySelectorAll('.btn-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-' + tab).classList.remove('d-none');
+            btn.classList.add('active');
+        }
+
+        // 3. CARREGAR DADOS
+        window.onload = () => {
+            carregarMusicas();
+            carregarDadosServidor();
+        };
+
+        async function carregarMusicas() {
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=12&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
+                const data = await res.json();
+                const market = document.getElementById('lista-market');
+                const exchange = document.getElementById('lista-venda');
+                
+                market.innerHTML = ''; exchange.innerHTML = '';
+
+                data.items.forEach(item => {
+                    const id = item.snippet.resourceId.videoId;
+                    const tit = item.snippet.title;
+                    const thumb = item.snippet.thumbnails.high.url;
+
+                    // Grid Mercado
+                    market.innerHTML += `
+                        <div class="col-6 col-md-3">
+                            <div class="song-card" onclick="prepararPlay('${id}', '${tit}', '${thumb}')">
+                                <img src="${thumb}" class="song-img">
+                                <div class="song-title text-truncate fw-bold" style="font-size:0.85rem;">${tit}</div>
+                                <button class="btn btn-sm btn-success w-100 mt-2 fw-bold" style="font-size:0.7rem;" onclick="event.stopPropagation(); negociar('${id}', '${tit}', 15, 'COMPRA')">INVESTIR R$ 15</button>
+                            </div>
+                        </div>`;
+
+                    // Grid Exchange
+                    exchange.innerHTML += `
+                        <div class="col-12 col-md-4">
+                            <div class="song-card d-flex align-items-center gap-3">
+                                <img src="${thumb}" style="width:60px; height:60px; border-radius:5px;">
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="text-truncate fw-bold" style="font-size:0.8rem;">${tit}</div>
+                                    <div class="text-success small fw-bold">R$ 18,50</div>
+                                </div>
+                                <button class="btn btn-sm btn-danger fw-bold" onclick="negociar('${id}', '${tit}', 18.50, 'VENDA')">VENDER</button>
+                            </div>
+                        </div>`;
+                });
+            } catch (e) { console.error("Erro ao carregar músicas"); }
+        }
+
+        // 4. LÓGICA DO PLAYER E MINERAÇÃO
+        function prepararPlay(id, tit, thumb) {
             musicaAtivaId = id;
-            const playerArea = document.getElementById('playerArea');
-            playerArea.style.display = 'block';
+            document.getElementById('playerArea').style.display = 'block';
             document.getElementById('playerTitle').innerText = tit;
             document.getElementById('playerThumb').src = thumb;
-            document.getElementById('playerStatus').innerText = "Minerando...";
             
-            // Carrega e tenta tocar
             ytPlayer.loadVideoById(id);
-            ytPlayer.unMute(); // Tenta tirar o mudo após a interação do clique
-            ytPlayer.setVolume(100);
             ytPlayer.playVideo();
-
-            iniciarTimer();
+            
+            iniciarCronometro();
         }
 
-        let tempoRestante = 30;
-        function iniciarTimer() {
+        function iniciarCronometro() {
             tempoRestante = 30;
             clearInterval(timerInterval);
-            document.getElementById('barraProgresso').style.width = '0%';
             
             timerInterval = setInterval(() => {
-                if(ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                // Só conta se o vídeo estiver tocando
+                if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
                     tempoRestante--;
-                    let progresso = ((30 - tempoRestante) / 30) * 100;
-                    document.getElementById('barraProgresso').style.width = progresso + '%';
+                    let pct = ((30 - tempoRestante) / 30) * 100;
+                    
+                    document.getElementById('barraProgresso').style.width = pct + '%';
+                    document.getElementById('barraProgressoMob').style.width = pct + '%';
                     document.getElementById('timerTxt').innerText = `00:${tempoRestante < 10 ? '0'+tempoRestante : tempoRestante}`;
 
-                    if(tempoRestante <= 0) {
+                    if (tempoRestante <= 0) {
                         clearInterval(timerInterval);
-                        finalizarMineração();
+                        finalizarMineracao();
                     }
                 }
             }, 1000);
         }
 
-        function retomarTimer() {
-            document.getElementById('playerStatus').innerText = "Minerando...";
-            // Lógica para continuar de onde parou se necessário
+        async function finalizarMineracao() {
+            document.getElementById('playerStatus').innerText = "Validando ganhos...";
+            ytPlayer.pauseVideo();
+
+            try {
+                const userId = localStorage.getItem('userId');
+                await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${musicaAtivaId}`);
+                document.getElementById('playerStatus').innerText = "✅ R$ 0,01 creditado!";
+                carregarDadosServidor();
+                setTimeout(cancelarPlay, 3000);
+            } catch (e) {
+                alert("Erro ao creditar. Verifique sua conexão.");
+            }
         }
+
+        function cancelarPlay() {
+            ytPlayer.pauseVideo();
+            clearInterval(timerInterval);
+            document.getElementById('playerArea').style.display = 'none';
+        }
+
+        // 5. FINANCEIRO
+        async function carregarDadosServidor() {
+            const userId = localStorage.getItem('userId');
+            if(!userId) return;
+            try {
+                const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${userId}`);
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
+                    const hist = document.getElementById('lista-historico');
+                    hist.innerHTML = '';
+                    data.historico.reverse().forEach(item => {
+                        hist.innerHTML += `
+                            <div class="hist-item d-flex justify-content-between align-items-center">
+                                <div><b>${item.desc}</b><br><small class="opacity-50">${new Date(item.data).toLocaleDateString()}</small></div>
+                                <div class="${item.valor > 0 ? 'text-success' : 'text-danger'} fw-bold">
+                                    ${item.valor > 0 ? '+' : ''}R$ ${item.valor.toFixed(2)}
+                                </div>
+                            </div>`;
+                    });
+                }
+            } catch(e) {}
+        }
+
+        function negociar(id, titulo, preco, tipo) {
+            const userId = localStorage.getItem('userId');
+            const q = tipo === 'COMPRA' ? prompt(`Quantas cotas de "${titulo}" deseja comprar?`) : 1;
+            
+            if (q > 0) {
+                const valorTotal = q * preco;
+                if(!confirm(`Confirmar ${tipo} de ${q} cota(s) por R$ ${valorTotal.toFixed(2)}?`)) return;
+                
+                fetch(`${APP_URL}?acao=negociar_acao&user_id=${userId}&musica_id=${id}&quantidade=${q}&preco_unitario=${preco}&valor=${valorTotal}&tipo_ordem=${tipo}`)
+                .then(() => {
+                    alert("Transação enviada para a rede MIV!");
+                    carregarDadosServidor();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
