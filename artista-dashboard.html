@@ -8,29 +8,31 @@
 </head>
 <body>
     <div class="container py-5">
-        <h3>Painel do Artista</h3>
+        <div class="d-flex justify-content-between">
+            <h3>Painel do Artista</h3>
+            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn btn-sm btn-danger">Sair</button>
+        </div>
         <hr>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card bg-dark text-white p-4">
-                    <h5>Cadastrar Nova Música</h5>
-                    <input type="text" id="nomeMusica" class="form-control mb-2" placeholder="Nome da Música">
-                    <input type="text" id="isrc" class="form-control mb-2" placeholder="ISRC (Opcional)">
-                    <button onclick="cadastrarMusica()" class="btn btn-primary">Salvar na Nuvem</button>
-                </div>
+        <div class="card bg-dark text-white p-4 border-secondary">
+            <h5>Lançar Nova Música</h5>
+            <div class="mb-3">
+                <input type="text" id="musicaNome" class="form-control mb-2" placeholder="Nome da Música">
+                <button onclick="lancar()" id="btnLancar" class="btn btn-primary w-100">Enviar para Selo MIV</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyessSRsTQZ1ESv56tc44nggP0Ohi6od29YjM4lGAT17Y2KaD1qvnGSsdK6syD-0Z8C/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbybVbmeFPeJj95a4RgWCq5ihR_47ZIumJIAdnxDHedYvjfOkgu2fIppsi0Ma_8_DnjZ/exec";
         if(localStorage.getItem("userType") !== "artista") window.location.href = "login.html";
 
-        async function cadastrarMusica() {
-            const nome = document.getElementById("nomeMusica").value;
+        async function lancar() {
+            const nome = document.getElementById("musicaNome").value;
             if(!nome) return alert("Digite o nome da música");
 
-            const res = await fetch(API_URL, {
+            document.getElementById("btnLancar").disabled = true;
+            
+            await fetch(API_URL, {
                 method: "POST",
                 body: new URLSearchParams({
                     acao: "cadastrar_musica",
@@ -38,7 +40,10 @@
                     artista_id: localStorage.getItem("userId")
                 })
             });
-            alert("Música enviada para aprovação!");
+            
+            alert("Sucesso! Sua música foi enviada para a planilha do Selo.");
+            document.getElementById("musicaNome").value = "";
+            document.getElementById("btnLancar").disabled = false;
         }
     </script>
 </body>
