@@ -1,50 +1,16 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Artista | SELO MIV</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>body { background: #000; color: #fff; }</style>
-</head>
-<body>
-    <div class="container py-5">
-        <div class="d-flex justify-content-between">
-            <h3>Painel do Artista</h3>
-            <button onclick="localStorage.clear(); window.location.href='login.html'" class="btn btn-sm btn-danger">Sair</button>
-        </div>
-        <hr>
-        <div class="card bg-dark text-white p-4 border-secondary">
-            <h5>Lançar Nova Música</h5>
-            <div class="mb-3">
-                <input type="text" id="musicaNome" class="form-control mb-2" placeholder="Nome da Música">
-                <button onclick="lancar()" id="btnLancar" class="btn btn-primary w-100">Enviar para Selo MIV</button>
-            </div>
-        </div>
-    </div>
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
 
-    <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbybVbmeFPeJj95a4RgWCq5ihR_47ZIumJIAdnxDHedYvjfOkgu2fIppsi0Ma_8_DnjZ/exec";
-        if(localStorage.getItem("userType") !== "artista") window.location.href = "login.html";
-
-        async function lancar() {
-            const nome = document.getElementById("musicaNome").value;
-            if(!nome) return alert("Digite o nome da música");
-
-            document.getElementById("btnLancar").disabled = true;
-            
-            await fetch(API_URL, {
-                method: "POST",
-                body: new URLSearchParams({
-                    acao: "cadastrar_musica",
-                    nome: nome,
-                    artista_id: localStorage.getItem("userId")
-                })
-            });
-            
-            alert("Sucesso! Sua música foi enviada para a planilha do Selo.");
-            document.getElementById("musicaNome").value = "";
-            document.getElementById("btnLancar").disabled = false;
-        }
-    </script>
-</body>
-</html>
+    async function cadastrarMusica() {
+        const nome = document.getElementById("nomeMusica").value;
+        await fetch(API_URL, {
+            method: "POST",
+            body: new URLSearchParams({
+                acao: "cadastrar_musica",
+                nome: nome,
+                artista_id: localStorage.getItem("userId")
+            })
+        });
+        alert("Música enviada para a aba MUSICAS!");
+    }
+</script>
