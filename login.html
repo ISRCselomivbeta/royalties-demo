@@ -13,48 +13,40 @@
 </head>
 <body>
     <div class="card-login shadow">
-        <h3 class="text-center mb-4 text-white">Entrar no <span style="color:#00c6ff">MIV</span></h3>
-        <input type="text" id="user" class="form-control mb-3" placeholder="Seu E-mail">
-        <input type="password" id="pass" class="form-control mb-3" placeholder="Sua Senha">
+        <h3 class="text-center mb-4">MIV <span style="color:#00c6ff">Login</span></h3>
+        <input type="email" id="user" class="form-control mb-3" placeholder="E-mail">
+        <input type="password" id="pass" class="form-control mb-3" placeholder="Senha">
         <button onclick="logar()" id="btnEntrar" class="btn-miv">ENTRAR</button>
-        <p class="text-center mt-3 small">Não tem conta? <a href="cadastro.html" class="text-info">Cadastre-se</a></p>
+        <p class="text-center mt-3 small text-muted">Ainda não tem conta? <a href="cadastro.html" class="text-info text-decoration-none">Cadastre-se</a></p>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbybg-Ca4Kaxszk0KO2wNHUu3ZJkV4hepCm94plbWnvFSzg0ye-c09F61S7QddvRqGBz/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
 
         async function logar() {
             const u = document.getElementById("user").value;
             const s = document.getElementById("pass").value;
             const btn = document.getElementById("btnEntrar");
 
-            if(!u || !s) return alert("Preencha tudo!");
-
-            btn.innerText = "Verificando...";
+            btn.innerText = "Entrando...";
             btn.disabled = true;
 
             try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: new URLSearchParams({ acao: "login", usuario: u, senha: s })
-                });
+                const res = await fetch(API_URL + "?acao=login&usuario=" + u + "&senha=" + s);
                 const data = await res.json();
 
                 if(data.success) {
                     localStorage.setItem("userId", data.id);
                     localStorage.setItem("userName", data.nome);
                     localStorage.setItem("userType", data.tipo);
-                    
-                    // Redireciona para o painel correto: ouvinte-dashboard.html ou artista-dashboard.html
                     window.location.href = data.tipo + "-dashboard.html";
                 } else {
-                    alert("E-mail ou senha incorretos.");
-                    btn.innerText = "ENTRAR";
+                    alert("Login inválido!");
                     btn.disabled = false;
+                    btn.innerText = "ENTRAR";
                 }
             } catch (e) {
-                alert("Erro ao conectar com o servidor.");
-                btn.innerText = "ENTRAR";
+                alert("Erro ao conectar.");
                 btn.disabled = false;
             }
         }
