@@ -1,89 +1,163 @@
-const SPREADSHEET_ID = '1NOc5RHVoWdfdMDur55C5R25FAsAcqQtk5PHVmFlViV0';
-const PLAYLIST_URL = 'https://www.youtube.com/watch?v=sNRWCkk1o9w&list=PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIV PRO | Ecosystem</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --miv-green: #00ff88; --bg-black: #000000; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-black); color: #ffffff; margin: 0; min-height: 100vh; overflow-x: hidden; }
 
-function doGet(e) { return processarRequisicao(e); }
-function doPost(e) { return processarRequisicao(e); }
+        .glass-card { background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 24px; }
+        
+        /* Auth */
+        #auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top right, #003322, #000); padding: 20px; }
+        .miv-input { background: var(--glass) !important; border: 1px solid var(--glass-border) !important; color: white !important; border-radius: 12px !important; padding: 12px !important; margin-bottom: 12px; }
 
-function processarRequisicao(e) {
-  const p = e.parameter;
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  
-  try {
-    // --- LOGIN COM TRAVA DE STATUS ---
-    if (p.acao === 'login') {
-      const aba = ss.getSheetByName('Usuarios');
-      const dados = aba.getDataRange().getValues();
-      for (let i = 1; i < dados.length; i++) {
-        if (String(dados[i][1]).toLowerCase() === String(p.usuario).toLowerCase() && String(dados[i][2]) === String(p.senha)) {
-          if (dados[i][9] !== "ATIVO") { // Coluna J (Status)
-             return gerarSaida({ success: false, msg: "Por favor, ative seu e-mail primeiro." });
-          }
-          return gerarSaida({ 
-            success: true, 
-            id: dados[i][0], 
-            nome: dados[i][4], 
-            tipo: dados[i][3],
-            saldo: somarSaldo(ss, dados[i][0])
-          });
+        /* Dashboard */
+        #main-app { display: none; padding-bottom: 160px; }
+        .balance-hero { text-align: center; padding: 40px 20px; background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, transparent 100%); }
+        .balance-amount { font-size: 2.5rem; font-weight: 700; }
+
+        /* Player */
+        .miv-player { position: fixed; bottom: 85px; left: 15px; right: 15px; height: 75px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1001; }
+        
+        /* Tab Bar */
+        .tab-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; height: 65px; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .tab-item { color: #888; font-size: 1.4rem; cursor: pointer; }
+        .tab-item.active { color: var(--miv-green); }
+
+        .music-card { background: var(--glass); border-radius: 16px; padding: 15px; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; }
+    </style>
+</head>
+<body>
+
+    <section id="auth-page">
+        <div class="glass-card w-100" style="max-width: 400px; padding: 30px;">
+            <div class="text-center mb-4"><h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2></div>
+            
+            <div id="box-login">
+                <input type="email" id="l-email" class="form-control miv-input" placeholder="E-mail">
+                <input type="password" id="l-pass" class="form-control miv-input" placeholder="Senha">
+                <button class="btn btn-success w-100 fw-bold rounded-3 py-3 mb-3" onclick="acaoLogin()" style="background:var(--miv-green); color:black; border:none;">ENTRAR</button>
+                <div class="text-center small text-secondary">Novo aqui? <a href="#" onclick="toggleAuth(true)" class="text-success">Criar Conta</a></div>
+            </div>
+
+            <div id="box-cadastro" style="display:none;">
+                <input type="text" id="c-nome" class="form-control miv-input" placeholder="Nome Completo">
+                <input type="email" id="c-email" class="form-control miv-input" placeholder="E-mail">
+                <input type="password" id="c-pass" class="form-control miv-input" placeholder="Senha">
+                <select id="c-tipo" class="form-control miv-input">
+                    <option value="ouvinte">Investidor</option>
+                    <option value="artista">Artista</option>
+                </select>
+                <button class="btn btn-outline-light w-100 fw-bold rounded-3 py-3 mb-3" onclick="acaoCadastro()">CADASTRAR E ATIVAR</button>
+                <div class="text-center small text-secondary"><a href="#" onclick="toggleAuth(false)" class="text-muted">Voltar ao Login</a></div>
+            </div>
+        </div>
+    </section>
+
+    <main id="main-app">
+        <header class="balance-hero">
+            <small class="text-secondary fw-bold" id="txt-perfil">CARTEIRA MIV</small>
+            <div class="balance-amount">R$ <span id="user-saldo">0,00</span></div>
+            <div class="small text-success mt-1" id="user-tipo">Investidor</div>
+        </header>
+
+        <div class="container py-2">
+            <h6 class="fw-bold mb-3">Ativos na Playlist Oficial</h6>
+            <div id="market-list"></div>
+        </div>
+
+        <div id="miv-player" class="miv-player glass-card">
+            <div class="player-info d-flex align-items-center gap-3">
+                <div class="bg-dark rounded" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-play-circle text-success"></i>
+                </div>
+                <div>
+                    <div id="p-title" class="fw-bold small">Playlist Oficial</div>
+                    <div class="text-secondary" style="font-size: 0.7rem;">Selo MIV Ecosystem</div>
+                </div>
+            </div>
+            <button class="btn btn-success btn-sm rounded-pill px-4 fw-bold" onclick="window.open('https://www.youtube.com/watch?v=sNRWCkk1o9w&list=PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN')">
+                OUVIR
+            </button>
+        </div>
+
+        <nav class="tab-bar glass-card">
+            <div class="tab-item active"><i class="bi bi-house-door-fill"></i></div>
+            <div class="tab-item"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="tab-item" onclick="location.reload()"><i class="bi bi-person-circle"></i></div>
+        </nav>
+    </main>
+
+    <script>
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwbhgddJ6g1PuDSWqS8IiBI-6GfP7W2I3OSbuw3e-d1-tt5206EzEkg3H6ny-anbcZm/exec';
+
+        async function acaoLogin() {
+            const email = document.getElementById('l-email').value;
+            const pass = document.getElementById('l-pass').value;
+            const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
+            const data = await res.json();
+            
+            if(data.success) {
+                localStorage.setItem("miv_session", JSON.stringify(data));
+                carregarDashboard(data);
+            } else { alert(data.msg); }
         }
-      }
-      return gerarSaida({ success: false, msg: "Usuário ou senha incorretos." });
-    }
 
-    // --- CADASTRO COM ENVIO DE E-MAIL ---
-    if (p.acao === 'cadastro') {
-      const aba = ss.getSheetByName('Usuarios');
-      const id = (p.tipo === 'artista' ? "ART" : "U") + Date.now();
-      aba.appendRow([id, p.email, p.senha, p.tipo, p.nome, new Date(), "", "", "", "PENDENTE"]);
-
-      const linkAtivacao = p.url_base + "?acao=confirmar&id=" + id;
-      MailApp.sendEmail({
-        to: p.email,
-        subject: "Ative sua conta - MIV PRO",
-        htmlBody: `<h2>Bem-vindo, ${p.nome}!</h2><p>Clique no botão para ativar seu acesso:</p>
-                   <a href="${linkAtivacao}" style="background:#00ff88; color:black; padding:12px 20px; text-decoration:none; border-radius:8px; font-weight:bold;">ATIVAR AGORA</a>`
-      });
-      return gerarSaida({ success: true });
-    }
-
-    // --- CONFIRMAR E-MAIL ---
-    if (p.acao === 'confirmar') {
-      const aba = ss.getSheetByName('Usuarios');
-      const dados = aba.getDataRange().getValues();
-      for (let i = 1; i < dados.length; i++) {
-        if (dados[i][0] === p.id) {
-          aba.getRange(i + 1, 10).setValue("ATIVO");
-          return ContentService.createTextOutput("<h1>MIV PRO: Conta Ativada!</h1><p>Pode fechar e fazer login.</p>").setMimeType(ContentService.MimeType.TEXT_HTML);
+        async function acaoCadastro() {
+            const n = document.getElementById('c-nome').value;
+            const e = document.getElementById('c-email').value;
+            const s = document.getElementById('c-pass').value;
+            const t = document.getElementById('c-tipo').value;
+            
+            alert("Enviando solicitação... Verifique seu e-mail em instantes.");
+            const res = await fetch(`${API_URL}?acao=cadastro&nome=${n}&email=${e}&senha=${s}&tipo=${t}&url_base=${window.location.href.split('?')[0]}`);
+            const data = await res.json();
+            if(data.success) {
+                alert("Sucesso! Clique no link enviado para o seu e-mail para ativar a conta.");
+                toggleAuth(false);
+            }
         }
-      }
-    }
 
-    // --- LISTAR MERCADO (DA PLAYLIST) ---
-    if (p.acao === 'listar_mercado') {
-      const abaMus = ss.getSheetByName('MÚSICAS');
-      const dados = abaMus.getDataRange().getValues();
-      let lista = [];
-      for (let i = 1; i < dados.length; i++) {
-        if(dados[i][7] === "ATIVO") {
-          lista.push({ id: dados[i][0], titulo: dados[i][4], artista: dados[i][9], valor: dados[i][13] || 10 });
+        function carregarDashboard(user) {
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('user-saldo').innerText = user.saldo.toFixed(2);
+            document.getElementById('user-tipo').innerText = user.tipo.toUpperCase();
+            document.getElementById('txt-perfil').innerText = "OLÁ, " + user.nome.toUpperCase();
+            carregarMercado();
         }
-      }
-      return gerarSaida({ success: true, musicas: lista });
-    }
 
-  } catch (e) { return gerarSaida({ success: false, error: e.toString() }); }
-}
+        async function carregarMercado() {
+            const res = await fetch(`${API_URL}?acao=listar_mercado`);
+            const data = await res.json();
+            const container = document.getElementById('market-list');
+            container.innerHTML = data.musicas.map(m => `
+                <div class="music-card">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">${m.titulo}</div>
+                        <small class="text-secondary">Artista: ${m.artista} • Cota: R$ ${m.valor}</small>
+                    </div>
+                    <button class="btn btn-sm btn-light rounded-pill px-3 fw-bold" onclick="alert('Funcionalidade de compra em breve!')">Investir</button>
+                </div>
+            `).join('');
+        }
 
-function gerarSaida(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
-}
+        function toggleAuth(cad) {
+            document.getElementById('box-login').style.display = cad ? 'none' : 'block';
+            document.getElementById('box-cadastro').style.display = cad ? 'block' : 'none';
+        }
 
-function somarSaldo(ss, userId) {
-  const aba = ss.getSheetByName('SALDOS');
-  const dados = aba.getDataRange().getValues();
-  let total = 0;
-  for (let i = 1; i < dados.length; i++) {
-    if (String(dados[i][1]) === String(userId)) total += parseFloat(dados[i][3] || 0);
-  }
-  return total;
-}
+        window.onload = () => {
+            const sess = JSON.parse(localStorage.getItem("miv_session"));
+            if(sess) carregarDashboard(sess);
+        }
+    </script>
+</body>
+</html>
