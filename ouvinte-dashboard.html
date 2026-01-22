@@ -3,81 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ouvinte Dashboard | SELO MIV</title>
+    <title>Dashboard | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body { background: #0b0e11; color: white; font-family: sans-serif; }
-        .card-saldo { background: linear-gradient(135deg, #0072ff, #00c6ff); border-radius: 15px; padding: 20px; margin-top: 20px; }
-        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-        .menu-item { background: #1e2329; padding: 20px; border-radius: 12px; text-align: center; text-decoration: none; color: white; border: 1px solid transparent; transition: 0.3s; }
-        .menu-item:hover { border-color: #00c6ff; color: #00c6ff; }
-        .menu-item i { font-size: 2rem; display: block; margin-bottom: 10px; }
-        .musica-item { background: #1e2329; border-radius: 10px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-play { background: #00c6ff; border: none; border-radius: 50%; width: 40px; height: 40px; color: black; }
+        .card-miv { background: #1e2329; border: 1px solid #333; border-radius: 15px; padding: 20px; margin-bottom: 20px; }
+        .saldo-destaque { font-size: 1.8rem; color: #00c6ff; font-weight: bold; }
     </style>
 </head>
 <body>
-
-    <nav class="navbar px-3 border-bottom border-secondary">
-        <span class="navbar-brand fw-bold text-white">MIV <span style="color:#00c6ff">OUVINTE</span></span>
-        <button onclick="logout()" class="btn btn-outline-danger btn-sm">Sair</button>
-    </nav>
-
-    <div class="container pb-5">
-        <div class="card-saldo shadow">
-            <small>Olá, <span id="nomeUser">Carregando...</span></small>
-            <h2 id="saldoTxt" class="fw-bold">R$ 0,00</h2>
-            <p class="mb-0 small">Ouvir músicas rende saldo para investir!</p>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4>Olá, <span id="nomeUser">...</span></h4>
+            <button onclick="localStorage.clear(); location.href='login.html'" class="btn btn-sm btn-outline-danger">Sair</button>
         </div>
 
-        <div class="menu-grid">
-            <a href="perfil-artista.html" class="menu-item shadow">
-                <i class="bi bi-compass"></i><span>Explorar Artistas</span>
-            </a>
-            <a href="vender.html" class="menu-item shadow">
-                <i class="bi bi-graph-up-arrow"></i><span>Vender Ações</span>
-            </a>
-            <a href="carteira.html" class="menu-item shadow">
-                <i class="bi bi-wallet2"></i><span>Minha Carteira</span>
-            </a>
-            <a href="#" class="menu-item shadow">
-                <i class="bi bi-gear"></i><span>Configurações</span>
-            </a>
+        <div class="card-miv text-center">
+            <p class="mb-1 text-muted">Meu Saldo (8 Decimais)</p>
+            <div class="saldo-destaque" id="saldoTxt">R$ 0,00000000</div>
         </div>
 
-        <h5 class="mt-4 mb-3">Músicas para Ouvir e Ganhar</h5>
-        <div id="listaMusicas">
-            <div class="musica-item">
-                <div><strong>Som da Rua</strong><br><small class="text-muted">Artista: Elzo MIV</small></div>
-                <button class="btn-play" onclick="registrarPlay('M01')"><i class="bi bi-play-fill"></i></button>
+        <div class="card-miv">
+            <h6 class="text-info">Player de Recompensa (R$ 0,0000001 p/ play)</h6>
+            <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/4cOdzh9InnoOFmY7qZ630G" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+            <button id="btnGanhar" class="btn btn-info w-100 mt-3 fw-bold" onclick="iniciarContagem()">ATIVAR GANHOS</button>
+            <p id="timerTxt" class="text-center mt-2 small" style="display:none">Validando em: <span id="segundos">30</span>s</p>
+        </div>
+
+        <div class="card-miv">
+            <h6>Mercado de Ações (M001)</h6>
+            <p class="small text-muted">Preço: R$ 15,00</p>
+            <div class="input-group">
+                <input type="number" id="qtdAcoes" class="form-control bg-dark text-white border-secondary" placeholder="Qtd">
+                <button class="btn btn-success" onclick="negociar('COMPRA')">Comprar</button>
             </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
-        
-        document.getElementById("nomeUser").innerText = localStorage.getItem("userName");
+
+        window.onload = () => {
+            document.getElementById('nomeUser').innerText = localStorage.getItem('userName');
+            carregarSaldo();
+        };
 
         async function carregarSaldo() {
-            try {
-                const res = await fetch(`${API_URL}?acao=ver_carteira&userId=${localStorage.getItem("userId")}`);
-                const data = await res.json();
-                if(data.success) {
-                    document.getElementById("saldoTxt").innerText = "R$ " + data.saldo.toFixed(2);
+            const res = await fetch(`${API_URL}?acao=ver_carteira&userId=${localStorage.getItem('userId')}`);
+            const data = await res.json();
+            if(data.success) document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(8);
+        }
+
+        function iniciarContagem() {
+            let t = 30;
+            const btn = document.getElementById('btnGanhar');
+            btn.disabled = true;
+            document.getElementById('timerTxt').style.display = 'block';
+            const it = setInterval(() => {
+                t--;
+                document.getElementById('segundos').innerText = t;
+                if(t <= 0) {
+                    clearInterval(it);
+                    creditar();
                 }
-            } catch (e) { console.error("Erro saldo"); }
+            }, 1000);
         }
 
-        async function registrarPlay(id) {
-            alert("Você ganhou R$ 0,05 por ouvir!");
-            await fetch(API_URL + `?acao=registrar_play&musica_id=${id}&ouvinte_id=${localStorage.getItem("userId")}`, {method:"POST", mode:"no-cors"});
-            carregarSaldo();
+        async function creditar() {
+            await fetch(`${API_URL}?acao=registrar_play&ouvinte_id=${localStorage.getItem('userId')}&musica_id=M001`);
+            alert("Creditado: R$ 0,0000001");
+            location.reload();
         }
 
-        function logout() { localStorage.clear(); window.location.href = "login.html"; }
-        carregarSaldo();
+        async function negociar(tipo) {
+            const q = document.getElementById('qtdAcoes').value;
+            const v = q * 15;
+            const res = await fetch(`${API_URL}?acao=negociar_acao&user_id=${localStorage.getItem('userId')}&musica_id=M001&quantidade=${q}&preco_unitario=15&valor=${v}&tipo_ordem=${tipo}`);
+            const data = await res.json();
+            if(data.success) { alert("Sucesso!"); location.reload(); } else { alert(data.error); }
+        }
     </script>
 </body>
 </html>
