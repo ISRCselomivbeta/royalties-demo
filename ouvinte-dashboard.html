@@ -3,297 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIV Music Pro | Ultra Streaming</title>
+    <title>MIV Music Pro | Investment Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         :root {
-            --sp-green: #1DB954;
-            --sp-black: #090909;
-            --sp-dark-gray: #121212;
-            --sp-card: #181818;
-            --sp-light-gray: #282828;
+            --neon-green: #00ff88;
+            --miv-blue: #0072ff;
+            --dark-surface: #07090c;
+            --card-bg: #111418;
+            --border: #1e2329;
         }
 
         body {
-            background-color: var(--sp-black);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            padding-bottom: 120px;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--dark-surface);
+            color: #ffffff;
+            padding-bottom: 100px;
             overflow-x: hidden;
         }
 
-        /* HEADER & PERFIL */
-        .header-miv {
-            background: linear-gradient(180deg, rgba(29,185,84,0.2) 0%, var(--sp-black) 100%);
-            padding: 30px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* --- HEADER --- */
+        .miv-header {
+            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--dark-surface) 100%);
+            padding: 25px 20px;
+            border-bottom: 1px solid var(--border);
         }
-        .balance-val { font-size: 2.2rem; font-weight: 900; color: #fff; }
-        .user-photo-container {
-            width: 50px; height: 50px; border-radius: 50%;
-            border: 2px solid var(--sp-green); overflow: hidden; cursor: pointer;
+
+        /* --- CARDS --- */
+        .music-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: 0.3s;
         }
-        #userAvatar { width: 100%; height: 100%; object-fit: cover; }
-
-        /* NAV */
-        .nav-miv { display: flex; gap: 12px; padding: 10px 20px; position: sticky; top: 0; z-index: 100; background: var(--sp-black); }
-        .btn-tab { background: var(--sp-light-gray); color: #fff; border: none; padding: 8px 20px; border-radius: 50px; font-weight: 700; font-size: 0.8rem; }
-        .btn-tab.active { background: var(--sp-green); color: #000; }
-
-        /* CARDS */
-        .song-card { background: var(--sp-card); border-radius: 12px; padding: 15px; transition: 0.3s; cursor: pointer; }
-        .song-img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; margin-bottom: 10px; }
-
-        /* PLAYER BAR */
-        .sp-player {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(18, 18, 18, 0.98); backdrop-filter: blur(15px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            padding: 15px 20px; z-index: 1000; display: none;
-            transition: all 0.4s ease-in-out;
+        .music-card:hover { border-color: var(--neon-green); transform: translateY(-3px); }
+        .thumb-container { position: relative; cursor: pointer; }
+        .play-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: 0.3s;
         }
+        .thumb-container:hover .play-overlay { opacity: 1; }
+
+        /* --- PLAYER FIXO --- */
+        .miv-player {
+            position: fixed; bottom: 70px; left: 0; right: 0;
+            background: rgba(17, 20, 24, 0.95); backdrop-filter: blur(15px);
+            border-top: 1px solid var(--border); padding: 12px 20px; z-index: 999;
+            display: none; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .miv-player.expanded { height: 100vh; bottom: 0; display: flex; flex-direction: column; }
         
-        /* EXPANSÃO (MODO CANVAS) */
-        .sp-player.expanded { height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-        .canvas-container { 
-            display: none; width: 100%; max-width: 800px; 
-            margin: 0 auto 20px; aspect-ratio: 16/9; border-radius: 12px; overflow: hidden;
+        .progress-miv { height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; }
+        .progress-bar-miv { height: 100%; background: var(--neon-green); width: 0%; box-shadow: 0 0 10px var(--neon-green); }
+
+        /* --- NAVEGAÇÃO APP --- */
+        .bottom-nav {
+            background: #000; border-top: 1px solid var(--border);
+            position: fixed; bottom: 0; width: 100%; z-index: 1000;
         }
-        .sp-player.expanded .canvas-container { display: block; }
-        .sp-player.expanded .mini-info { position: absolute; bottom: 120px; width: 90%; }
+        .nav-link { color: #888; text-align: center; font-size: 0.75rem; padding: 10px 0; border: none; background: none; width: 25%; }
+        .nav-link.active { color: var(--neon-green) !important; }
+        .nav-link i { font-size: 1.4rem; display: block; }
 
-        /* CONTROLES */
-        .progress-miv { height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; margin: 10px 0; }
-        .progress-bar-miv { height: 100%; background: var(--sp-green); width: 0%; }
-        .control-btn { background: none; border: none; color: white; font-size: 1.5rem; }
+        .section-page { display: none; animation: fadeIn 0.4s; }
+        .section-page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #yt-engine { width: 100%; height: 100%; }
-        input[type="file"] { display: none; }
+        .btn-invest { background: var(--neon-green); color: #000; font-weight: 800; border-radius: 10px; border: none; padding: 8px 15px; }
+        .badge-miv { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid var(--neon-green); }
+
+        #canvas-yt { width: 100%; aspect-ratio: 16/9; border-radius: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <input type="file" id="fileInput" accept="image/*" onchange="loadPhoto(this)">
     <div id="yt-engine-container" style="position: absolute; left: -9999px;"><div id="yt-engine"></div></div>
 
-    <header class="header-miv">
-        <div>
-            <span class="text-secondary small fw-bold">SALDO DISPONÍVEL</span>
-            <div class="balance-val" id="saldoTxt">R$ 0,00</div>
-        </div>
-        <div class="user-photo-container" onclick="document.getElementById('fileInput').click()">
-            <img src="https://via.placeholder.com/150" id="userAvatar">
+    <header class="miv-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <small class="text-secondary fw-bold">CARTEIRA MIV</small>
+                <h3 class="fw-bold mb-0" id="saldo-topo">R$ 0,00</h3>
+            </div>
+            <div class="text-end">
+                <span class="badge badge-miv" id="user-tipo">INVESTIDOR</span>
+            </div>
         </div>
     </header>
 
-    <nav class="nav-miv">
-        <button class="btn-tab active" onclick="switchTab('market', this)">Navegar</button>
-        <button class="btn-tab" onclick="switchTab('exchange', this)">Exchange</button>
-        <button class="btn-tab" onclick="switchTab('banca', this)">Histórico</button>
-    </nav>
-
     <main class="container mt-4">
-        <section id="sec-market" class="page-section">
-            <div class="row g-3" id="lista-market"></div>
+        <section id="explorar" class="section-page active">
+            <h5 class="fw-bold mb-3"><i class="bi bi-fire text-danger"></i> Tendências de Mercado</h5>
+            <div id="mercado-lista" class="row g-3">
+                </div>
         </section>
 
-        <section id="sec-exchange" class="page-section d-none">
-            <div class="row g-3" id="lista-venda"></div>
+        <section id="carteira" class="section-page">
+            <h5 class="fw-bold mb-4">Minha <span class="text-info">Banca</span></h5>
+            <div class="card bg-dark border-secondary p-4 text-center mb-4">
+                <p class="text-secondary mb-1">Patrimônio em Ativos</p>
+                <h1 id="valor-ativos">R$ 0,00</h1>
+            </div>
+            <div id="meus-ativos-lista">
+                <p class="text-center text-muted">Buscando seus ativos na rede...</p>
+            </div>
         </section>
 
-        <section id="sec-banca" class="page-section d-none">
-            <div id="lista-historico" class="d-flex flex-column gap-2"></div>
+        <section id="perfil" class="section-page">
+            <div class="text-center mb-4">
+                <div class="avatar-lg mx-auto bg-primary rounded-circle mb-3" id="user-iniciais" style="width: 80px; height: 80px; display: flex; align-items:center; justify-content:center; font-size: 2rem;">--</div>
+                <h4 id="user-nome">Usuário MIV</h4>
+                <p class="text-muted" id="user-id">ID: 000000</p>
+            </div>
+            
+            <div class="card bg-dark border-secondary p-3 mb-3">
+                <h6>Tokenizar Nova Obra</h6>
+                <div class="input-group mt-2">
+                    <input type="text" id="yt-link" class="form-control bg-black text-white border-secondary" placeholder="Link do YouTube">
+                    <button class="btn btn-primary" onclick="alert('Token gerado na rede de teste!')">GERAR</button>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-danger w-100 mt-4" onclick="logout()">Sair da Conta</button>
         </section>
     </main>
 
-    <div class="sp-player" id="playerArea">
-        <div class="container h-100">
-            <button class="btn text-white position-absolute top-0 end-0 m-4 d-none" id="btnClose" onclick="toggleExpand()">
-                <i class="bi bi-chevron-down h2"></i>
-            </button>
+    <div class="miv-player" id="playerBar">
+        <div class="container">
+            <div id="canvas-area" class="d-none">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="badge bg-danger">MIV CANVAS 4K</span>
+                    <i class="bi bi-chevron-down h3" onclick="toggleExpand()"></i>
+                </div>
+                <div id="canvas-placeholder"></div>
+            </div>
 
-            <div class="canvas-container" id="canvasBox"></div>
-
-            <div class="mini-info">
-                <div class="row align-items-center">
-                    <div class="col-8 col-md-4 d-flex align-items-center">
-                        <img src="" id="playerThumb" style="width: 50px; height: 50px; border-radius: 6px; cursor: pointer;" onclick="toggleExpand()">
-                        <div class="ms-3 overflow-hidden">
-                            <div class="fw-bold text-truncate" id="playerTitle">Selecione uma música</div>
-                            <div id="playerStatus" class="text-success small fw-bold">Ouvindo Agora</div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4 d-none d-md-block text-center">
-                        <div class="d-flex justify-content-center gap-4">
-                            <button class="control-btn" onclick="playPrev()"><i class="bi bi-skip-start-fill"></i></button>
-                            <button class="control-btn" onclick="togglePlay()"><i class="bi bi-play-circle-fill h2" id="playBtnIcon"></i></button>
-                            <button class="control-btn" onclick="playNext()"><i class="bi bi-skip-end-fill"></i></button>
-                        </div>
-                        <div class="progress-miv" onclick="seek(event)"><div class="progress-bar-miv" id="barraProgresso"></div></div>
-                    </div>
-
-                    <div class="col-4 col-md-4 text-end">
-                        <span id="timerTxt" class="badge bg-success">0:00</span>
+            <div class="row align-items-center">
+                <div class="col-8 d-flex align-items-center">
+                    <img src="" id="p-thumb" style="width: 50px; height: 50px; border-radius: 8px; cursor: pointer;" onclick="toggleExpand()">
+                    <div class="ms-3 overflow-hidden">
+                        <div class="fw-bold text-truncate" id="p-titulo" style="font-size: 0.9rem;">Música</div>
+                        <div class="text-success fw-bold" id="p-preco" style="font-size: 0.8rem;">Cota: R$ 15,00</div>
                     </div>
                 </div>
-
-                <div class="d-md-none mt-3">
-                    <div class="progress-miv" onclick="seek(event)"><div class="progress-bar-miv" id="barraProgressoMob"></div></div>
-                    <div class="d-flex justify-content-center gap-5 align-items-center">
-                        <i class="bi bi-skip-start-fill h3" onclick="playPrev()"></i>
-                        <i class="bi bi-play-circle-fill h1" id="playBtnIconMob" onclick="togglePlay()"></i>
-                        <i class="bi bi-skip-end-fill h3" onclick="playNext()"></i>
-                    </div>
+                <div class="col-4 text-end">
+                    <button class="btn-invest btn-sm" id="btn-invest-player">INVESTIR</button>
                 </div>
+            </div>
+
+            <div class="mt-3">
+                <div class="progress-miv" onclick="seek(event)">
+                    <div class="progress-bar-miv" id="p-progresso"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-1 small text-secondary">
+                    <span id="p-time">0:00</span>
+                    <span id="p-total">--:--</span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-4 mt-2">
+                <i class="bi bi-skip-start-fill h2" onclick="playPrev()"></i>
+                <i class="bi bi-play-circle-fill h1" id="p-play-btn" onclick="togglePlay()"></i>
+                <i class="bi bi-skip-end-fill h2" onclick="playNext()"></i>
             </div>
         </div>
     </div>
+
+    <nav class="bottom-nav d-flex justify-content-around">
+        <button class="nav-link active" onclick="showPage('explorar', this)">
+            <i class="bi bi-compass"></i>Explorar
+        </button>
+        <button class="nav-link" onclick="showPage('carteira', this)">
+            <i class="bi bi-gem"></i>Carteira
+        </button>
+        <button class="nav-link" onclick="showPage('perfil', this)">
+            <i class="bi bi-person-badge"></i>Perfil
+        </button>
+    </nav>
 
     <script>
         const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
         const PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
         const APP_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
-        
-        let ytPlayer, progressInterval, fila = [], indexAtual = 0;
+
+        let ytPlayer, fila = [], indexAtual = 0, progressoTimer, saldoGlobal = 1000.00;
+        let precosAcoes = {}; // Armazena valorização dinâmica
 
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('yt-engine', {
                 height: '100%', width: '100%',
-                playerVars: { 'autoplay': 0, 'controls': 0 },
-                events: { 
-                    'onStateChange': onPlayerStateChange,
-                    'onReady': () => { carregarDados(); }
-                }
+                playerVars: { 'autoplay': 0, 'controls': 0, 'modestbranding': 1 },
+                events: { 'onStateChange': onPlayerStateChange }
             });
         }
 
-        function onPlayerStateChange(e) {
-            const icons = [document.getElementById('playBtnIcon'), document.getElementById('playBtnIconMob')];
-            if(e.data === YT.PlayerState.PLAYING) {
-                icons.forEach(i => i.className = 'bi bi-pause-circle-fill');
-                startTimer();
-            } else {
-                icons.forEach(i => i.className = 'bi bi-play-circle-fill');
-                clearInterval(progressInterval);
-                if(e.data === YT.PlayerState.ENDED) finalizarMusica();
-            }
-        }
+        async function carregarApp() {
+            // Configurar Perfil
+            const nome = localStorage.getItem("userName") || "Investidor MIV";
+            const id = localStorage.getItem("userId") || "777";
+            document.getElementById('user-nome').innerText = nome;
+            document.getElementById('user-id').innerText = "ID: " + id;
+            document.getElementById('user-iniciais').innerText = nome.substring(0,2).toUpperCase();
 
-        async function carregarDados() {
-            // Foto de Perfil
-            const savedPhoto = localStorage.getItem('miv-avatar');
-            if(savedPhoto) document.getElementById('userAvatar').src = savedPhoto;
-
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
+            // Buscar Músicas
+            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=15&playlistId=${PLAYLIST_ID}&key=${YT_API_KEY}`);
             const data = await res.json();
-            fila = data.items.map(i => ({ id: i.snippet.resourceId.videoId, tit: i.snippet.title, thumb: i.snippet.thumbnails.high.url }));
             
-            const market = document.getElementById('lista-market');
-            fila.forEach((m, i) => {
-                market.innerHTML += `
-                <div class="col-6 col-md-3">
-                    <div class="song-card" onclick="iniciarStream(${i})">
-                        <img src="${m.thumb}" class="song-img">
-                        <div class="fw-bold text-truncate small">${m.tit}</div>
+            const container = document.getElementById('mercado-lista');
+            container.innerHTML = '';
+
+            fila = data.items.map((item, i) => {
+                const vid = item.snippet.resourceId.videoId;
+                // Simulação de preço inicial + valorização aleatória (ou baseada no ID)
+                precosAcoes[vid] = 15.00 + (Math.random() * 2); 
+                
+                const card = `
+                <div class="col-12 col-md-6">
+                    <div class="music-card p-3">
+                        <div class="thumb-container mb-3" onclick="iniciarTrack(${i})">
+                            <img src="${item.snippet.thumbnails.high.url}" class="w-100 rounded-3">
+                            <div class="play-overlay"><i class="bi bi-play-fill h1 text-white"></i></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="overflow-hidden me-2">
+                                <h6 class="text-truncate mb-0">${item.snippet.title}</h6>
+                                <small class="text-success fw-bold">R$ ${precosAcoes[vid].toFixed(2)}</small>
+                            </div>
+                            <button class="btn-invest" onclick="comprarAcao('${vid}', '${item.snippet.title}')">INVESTIR</button>
+                        </div>
                     </div>
                 </div>`;
+                container.innerHTML += card;
+                return { id: vid, tit: item.snippet.title, thumb: item.snippet.thumbnails.high.url };
             });
-            atualizarSaldo();
+            atualizarFinanceiro();
         }
 
-        function iniciarStream(idx) {
+        function iniciarTrack(idx) {
             indexAtual = idx;
-            const m = fila[idx];
-            document.getElementById('playerArea').style.display = 'block';
-            document.getElementById('playerTitle').innerText = m.tit;
-            document.getElementById('playerThumb').src = m.thumb;
-            ytPlayer.loadVideoById(m.id);
+            const track = fila[idx];
+            document.getElementById('playerBar').style.display = 'block';
+            document.getElementById('p-titulo').innerText = track.tit;
+            document.getElementById('p-thumb').src = track.thumb;
+            document.getElementById('p-preco').innerText = `Cota: R$ ${precosAcoes[track.id].toFixed(2)}`;
+            
+            // Vincular botão de investimento do player
+            document.getElementById('btn-invest-player').onclick = () => comprarAcao(track.id, track.tit);
+
+            ytPlayer.loadVideoById(track.id);
             ytPlayer.playVideo();
         }
 
-        function togglePlay() {
-            ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
+        function onPlayerStateChange(e) {
+            const playBtn = document.getElementById('p-play-btn');
+            if(e.data === YT.PlayerState.PLAYING) {
+                playBtn.className = "bi bi-pause-circle-fill h1";
+                startProgress();
+            } else {
+                playBtn.className = "bi bi-play-circle-fill h1";
+                clearInterval(progressoTimer);
+                if(e.data === YT.PlayerState.ENDED) finalizarMining();
+            }
         }
 
-        function playNext() { if(indexAtual < fila.length -1) iniciarStream(indexAtual + 1); }
-        function playPrev() { if(indexAtual > 0) iniciarStream(indexAtual - 1); }
-
-        function startTimer() {
-            clearInterval(progressInterval);
-            progressInterval = setInterval(() => {
+        function startProgress() {
+            progressoTimer = setInterval(() => {
                 const cur = ytPlayer.getCurrentTime();
                 const dur = ytPlayer.getDuration();
                 const pct = (cur / dur) * 100;
-                document.getElementById('barraProgresso').style.width = pct + '%';
-                document.getElementById('barraProgressoMob').style.width = pct + '%';
-                
-                const min = Math.floor(cur/60); const sec = Math.floor(cur%60);
-                document.getElementById('timerTxt').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+                document.getElementById('p-progresso').style.width = pct + '%';
+                document.getElementById('p-time').innerText = formatTime(cur);
+                document.getElementById('p-total').innerText = formatTime(dur);
             }, 1000);
         }
 
+        async function finalizarMining() {
+            // Valorização por play
+            const vid = fila[indexAtual].id;
+            precosAcoes[vid] += 0.05; // Sobe 5 centavos por play
+            
+            const userId = localStorage.getItem('userId');
+            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${vid}`);
+            atualizarFinanceiro();
+            playNext();
+        }
+
+        function comprarAcao(id, nome) {
+            const preco = precosAcoes[id];
+            if(saldoGlobal >= preco) {
+                saldoGlobal -= preco;
+                alert(`🚀 Sucesso! Você comprou 1 cota de "${nome}" por R$ ${preco.toFixed(2)}`);
+                // Aqui você enviaria para o seu Banco de Dados no Apps Script
+                atualizarFinanceiro();
+            } else {
+                alert("Saldo Insuficiente!");
+            }
+        }
+
+        function toggleExpand() {
+            const p = document.getElementById('playerBar');
+            const area = document.getElementById('canvas-area');
+            const engine = document.getElementById('yt-engine');
+            
+            p.classList.toggle('expanded');
+            area.classList.toggle('d-none');
+
+            if(p.classList.contains('expanded')) {
+                document.getElementById('canvas-placeholder').appendChild(engine);
+            } else {
+                document.getElementById('yt-engine-container').appendChild(engine);
+            }
+        }
+
+        function showPage(pageId, btn) {
+            document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function atualizarFinanceiro() {
+            document.getElementById('saldo-topo').innerText = `R$ ${saldoGlobal.toFixed(2)}`;
+            // Simulação de lista de ativos
+            document.getElementById('meus-ativos-lista').innerHTML = `
+                <div class="card bg-dark border-secondary p-3 mb-2 d-flex flex-row justify-content-between">
+                    <span>Ativos em Carteira</span>
+                    <span class="text-success fw-bold">R$ ${(1000 - saldoGlobal).toFixed(2)}</span>
+                </div>`;
+        }
+
+        function formatTime(s) {
+            const m = Math.floor(s/60); const sc = Math.floor(s%60);
+            return `${m}:${sc < 10 ? '0'+sc : sc}`;
+        }
+
+        function togglePlay() { ytPlayer.getPlayerState() === 1 ? ytPlayer.pauseVideo() : ytPlayer.playVideo(); }
+        function playNext() { if(indexAtual < fila.length -1) iniciarTrack(indexAtual + 1); }
+        function playPrev() { if(indexAtual > 0) iniciarTrack(indexAtual - 1); }
+        function logout() { localStorage.clear(); location.reload(); }
         function seek(e) {
             const rect = e.currentTarget.getBoundingClientRect();
             const pct = (e.clientX - rect.left) / rect.width;
             ytPlayer.seekTo(ytPlayer.getDuration() * pct);
         }
 
-        function toggleExpand() {
-            const player = document.getElementById('playerArea');
-            const canvas = document.getElementById('canvasBox');
-            const engine = document.getElementById('yt-engine-container');
-            
-            player.classList.toggle('expanded');
-            document.getElementById('btnClose').classList.toggle('d-none');
-
-            if(player.classList.contains('expanded')) {
-                canvas.appendChild(document.getElementById('yt-engine'));
-            } else {
-                engine.appendChild(document.getElementById('yt-engine'));
-            }
-        }
-
-        async function finalizarMusica() {
-            const userId = localStorage.getItem('userId');
-            await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${userId}&musica_id=${fila[indexAtual].id}`);
-            atualizarSaldo();
-            playNext();
-        }
-
-        async function atualizarSaldo() {
-            const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${localStorage.getItem('userId')}`);
-            const data = await res.json();
-            if(data.success) {
-                document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
-                document.getElementById('lista-historico').innerHTML = data.historico.reverse().slice(0, 5).map(h => `
-                    <div class="small opacity-75 d-flex justify-content-between border-bottom border-secondary pb-1">
-                        <span>${h.desc}</span><span class="text-success">+R$ ${h.valor.toFixed(2)}</span>
-                    </div>`).join('');
-            }
-        }
-
-        function loadPhoto(input) {
-            if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('userAvatar').src = e.target.result;
-                    localStorage.setItem('miv-avatar', e.target.result);
-                };
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function switchTab(t, b) {
-            document.querySelectorAll('.page-section').forEach(s => s.classList.add('d-none'));
-            document.querySelectorAll('.btn-tab').forEach(x => x.classList.remove('active'));
-            document.getElementById('sec-'+t).classList.remove('d-none');
-            b.classList.add('active');
-        }
+        window.onload = carregarApp;
     </script>
 </body>
 </html>
