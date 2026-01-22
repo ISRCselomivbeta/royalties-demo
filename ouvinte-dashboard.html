@@ -6,52 +6,50 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #121212; color: white; }
-        .card-miv { background: #1e1e1e; border: none; border-radius: 10px; padding: 20px; margin-bottom: 20px; }
-        .btn-play { background: #00c6ff; border: none; color: black; border-radius: 50%; width: 40px; height: 40px; }
+        .card-miv { background: #1e1e1e; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
+        .btn-play { background: #00c6ff; border: none; color: black; border-radius: 50%; width: 45px; height: 45px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Painel do Ouvinte</h4>
+            <h4>Olá, <span id="nomeUser">Ouvinte</span>!</h4>
             <button onclick="logout()" class="btn btn-outline-danger btn-sm">Sair</button>
         </div>
 
         <div class="card-miv">
-            <h5>Seu Saldo Acumulado</h5>
+            <small class="text-muted">SALDO ACUMULADO</small>
             <h2 id="saldoTxt" style="color:#00c6ff">R$ 0,00</h2>
-            <small>Você ganha R$ 0,05 por cada música que ouve até o fim.</small>
         </div>
 
-        <h5 class="mb-3">Músicas Disponíveis</h5>
-        <div id="listaMusicas">
+        <h5>Músicas para Ouvir e Ganhar</h5>
+        <div id="lista">
             <div class="card-miv d-flex justify-content-between align-items-center">
-                <span>1. Som da Rua - Elzo</span>
-                <button class="btn-play" onclick="ouvir(1)">▶</button>
+                <div><strong>Som da Rua</strong><br><small>Artista: Elzo</small></div>
+                <button class="btn-play" onclick="registrarPlay('M001')">▶</button>
             </div>
             <div class="card-miv d-flex justify-content-between align-items-center">
-                <span>2. Noite Urbana - MIV Records</span>
-                <button class="btn-play" onclick="ouvir(2)">▶</button>
+                <div><strong>Noite Urbana</strong><br><small>Artista: MIV</small></div>
+                <button class="btn-play" onclick="registrarPlay('M002')">▶</button>
             </div>
         </div>
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbyessSRsTQZ1ESv56tc44nggP0Ohi6od29YjM4lGAT17Y2KaD1qvnGSsdK6syD-0Z8C/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbybVbmeFPeJj95a4RgWCq5ihR_47ZIumJIAdnxDHedYvjfOkgu2fIppsi0Ma_8_DnjZ/exec";
         
-        // Bloqueio de segurança
         if(localStorage.getItem("userType") !== "ouvinte") window.location.href = "login.html";
+        document.getElementById("nomeUser").innerText = localStorage.getItem("userName");
 
-        let saldo = parseFloat(localStorage.getItem("saldo") || "0");
+        let saldo = parseFloat(localStorage.getItem("saldo_miv") || "0");
         document.getElementById("saldoTxt").innerText = "R$ " + saldo.toFixed(2);
 
-        async function ouvir(idMusica) {
-            // 1. Aumenta o saldo local
+        async function registrarPlay(idMusica) {
+            // Ganha R$ 0,05 por play
             saldo += 0.05;
-            localStorage.setItem("saldo", saldo);
+            localStorage.setItem("saldo_miv", saldo);
             document.getElementById("saldoTxt").innerText = "R$ " + saldo.toFixed(2);
 
-            // 2. Avisa o servidor para registrar na planilha
             fetch(API_URL, {
                 method: "POST",
                 body: new URLSearchParams({
@@ -60,7 +58,7 @@
                     ouvinte_id: localStorage.getItem("userId")
                 })
             });
-            alert("Música concluída! R$ 0,05 adicionados ao seu saldo.");
+            alert("Play registrado com sucesso!");
         }
 
         function logout() { localStorage.clear(); window.location.href = "login.html"; }
