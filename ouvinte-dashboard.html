@@ -253,4 +253,47 @@
                 tempo--;
                 let progresso = ((30 - tempo) / 30) * 100;
                 document.getElementById('barraProgresso').style.width = progresso + '%';
-                document.getElementById
+                document.getElementById('timerTxt').innerText = `00:${tempo < 10 ? '0'+tempo : tempo}`;
+
+                if(tempo <= 0) {
+                    clearInterval(timerInterval);
+                    finalizarMineração();
+                }
+            }, 1000);
+        }
+
+        async function finalizarMineração() {
+            document.getElementById('playerStatus').innerText = "Recompensa enviada!";
+            ytPlayer.pauseVideo();
+            
+            try {
+                await fetch(`${APP_URL}?acao=registrar_play&ouvinte_id=${localStorage.getItem('userId')}&musica_id=${musicaAtivaId}`);
+                carregarDadosServidor();
+            } catch (e) {}
+        }
+
+        function cancelarPlay() {
+            ytPlayer.pauseVideo();
+            clearInterval(timerInterval);
+            document.getElementById('playerArea').style.display = 'none';
+        }
+
+        async function carregarDadosServidor() {
+            const userId = localStorage.getItem('userId');
+            const res = await fetch(`${APP_URL}?acao=ver_carteira&userId=${userId}`);
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(2);
+            }
+        }
+
+        function investir(id) {
+            const q = prompt("Quantas cotas (R$ 15,00 cada)?");
+            if(q > 0) {
+                fetch(`${APP_URL}?acao=negociar_acao&user_id=${localStorage.getItem('userId')}&musica_id=${id}&quantidade=${q}&preco_unitario=15&valor=${q*15}&tipo_ordem=COMPRA`)
+                .then(() => alert("Ordem enviada para Blockchain MIV!"));
+            }
+        }
+    </script>
+</body>
+</html>
