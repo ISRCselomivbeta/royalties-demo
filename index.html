@@ -6,237 +6,207 @@
     <title>MIV PRO | Ecosystem Híbrido</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --miv-green: #00ff88;
             --miv-blue: #0072ff;
-            --bg-black: #07090c;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --miv-cyan: #00c6ff;
+            --miv-green: #00ff88;
+            --bg-dark: #07090c;
+            --bg-card: #111418;
+            --border: #1e2329;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-black);
+            background: var(--bg-dark);
             color: #ffffff;
-            margin: 0; padding-bottom: 180px;
+            font-family: 'Inter', sans-serif;
+            padding-bottom: 100px; /* Espaço para o player */
         }
 
-        .glass-card {
-            background: rgba(28, 28, 30, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-        }
-
-        /* --- PERFIL HEADER (UNIFICADO) --- */
+        /* Header Dinâmico */
         .profile-header {
-            background: linear-gradient(180deg, rgba(0,255,136,0.15) 0%, var(--bg-black) 100%);
-            padding: 40px 20px;
-            text-align: center;
+            background: linear-gradient(180deg, rgba(0,114,255,0.1) 0%, var(--bg-dark) 100%);
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
         }
 
-        .avatar-main {
-            width: 80px; height: 80px;
-            background: linear-gradient(45deg, var(--miv-green), var(--miv-blue));
-            border-radius: 50%; margin: 0 auto 15px;
+        .avatar-lg {
+            width: 90px; height: 90px;
+            background: linear-gradient(45deg, var(--miv-blue), var(--miv-cyan));
+            border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 30px; font-weight: bold; color: black;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            font-size: 32px; font-weight: bold; color: #000;
+            box-shadow: 0 0 20px rgba(0, 198, 255, 0.2);
         }
 
-        /* --- STATUS BAR --- */
-        .stat-box { text-align: center; flex: 1; }
-        .stat-value { font-weight: bold; font-size: 1.1rem; color: var(--miv-green); }
-        .stat-label { font-size: 0.65rem; color: #8b949e; text-transform: uppercase; }
+        .card-miv {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
 
-        /* --- PLAYER BAR --- */
-        .miv-player-bar {
-            position: fixed; bottom: 90px; left: 15px; right: 15px;
-            height: 75px; z-index: 1100; padding: 0 15px;
+        .miv-green-text { color: var(--miv-green); font-weight: bold; }
+
+        /* Player Estilo Spotify */
+        .miv-player {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: rgba(17, 20, 24, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            padding: 15px 20px;
             display: flex; align-items: center; justify-content: space-between;
+            z-index: 1000;
         }
 
-        .music-card {
-            background: var(--glass); border-radius: 16px; padding: 12px;
-            margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
-            border: 1px solid var(--glass-border);
-        }
-
-        /* --- BOTÕES --- */
         .btn-miv {
-            background: var(--miv-green); color: black; font-weight: bold;
-            border-radius: 12px; border: none; padding: 10px 20px;
+            background: linear-gradient(90deg, var(--miv-blue), var(--miv-cyan));
+            border: none; color: white; font-weight: bold; border-radius: 10px;
+            padding: 10px 20px; transition: 0.3s;
         }
 
-        .tab-bar {
-            position: fixed; bottom: 15px; left: 15px; right: 15px;
-            height: 65px; display: flex; justify-content: space-around;
-            align-items: center; z-index: 1000;
-        }
-
-        /* Esconder seções inicialmente */
-        #main-app, #section-market, #section-profile, #auth-page { display: none; }
-        .artist-only { display: none; } /* Só aparece para artistas */
+        /* Esconder seções por padrão */
+        #areaArtista { display: none; }
     </style>
 </head>
 <body>
 
-    <section id="auth-page" style="display: flex; align-items: center; justify-content: center; min-height: 100vh;">
-        <div class="glass-card w-100 m-3" style="max-width: 400px; padding: 30px;">
-            <div class="text-center mb-4">
-                <h2 class="fw-bold">MIV <span style="color:var(--miv-green)">PRO</span></h2>
-            </div>
-            <div id="box-login">
-                <input type="email" id="l-email" class="form-control mb-2 bg-dark text-white border-secondary" placeholder="E-mail">
-                <input type="password" id="l-pass" class="form-control mb-3 bg-dark text-white border-secondary" placeholder="Senha">
-                <button class="btn btn-miv w-100" onclick="acaoLogin()">ENTRAR NO ECOSSISTEMA</button>
+    <div class="profile-header text-center">
+        <div class="container">
+            <div class="avatar-lg mx-auto mb-3" id="u-avatar">--</div>
+            <h4 class="mb-1" id="u-nome">Carregando...</h4>
+            <div id="u-badge" class="badge bg-info mb-3 text-dark">OUVINTE</div>
+            
+            <div class="d-flex justify-content-center gap-4 mt-2">
+                <div class="stat-box text-center">
+                    <div class="h5 mb-0 miv-green-text" id="u-saldo">R$ 0,00</div>
+                    <small class="text-muted">SALDO</small>
+                </div>
+                <div class="stat-box text-center border-start border-end px-4 border-secondary">
+                    <div class="h5 mb-0" id="u-seguidores">0</div>
+                    <small class="text-muted">SEGUIDORES</small>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <main id="main-app">
-        
-        <header class="profile-header">
-            <div class="avatar-main" id="u-avatar">--</div>
-            <h4 id="u-nome">Carregando...</h4>
-            <div class="badge bg-dark border border-success text-success mb-3" id="u-tipo">OUVINTE</div>
+    <div class="container mt-4">
+        <div class="row">
             
-            <div class="d-flex justify-content-center gap-2 mb-3">
-                <div class="stat-box">
-                    <div class="stat-value" id="u-saldo">0,00</div>
-                    <div class="stat-label">Saldo R$</div>
+            <div class="col-md-6">
+                <div id="areaArtista" class="card-miv shadow border-info">
+                    <h6 class="text-info mb-3 fw-bold"><i class="bi bi-star-fill"></i> PAINEL DO ARTISTA</h6>
+                    <p class="small text-muted">Reinvista seus royalties ou crie novos tokens musicais.</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-info" onclick="reinvestir()">REINVESTIR NO PERFIL</button>
+                        <button class="btn btn-miv" onclick="alert('Iniciando Tokenização...')">GERAR NOVO TOKEN MIV</button>
+                    </div>
                 </div>
-                <div class="stat-box border-start border-end border-secondary">
-                    <div class="stat-value">1.2k</div>
-                    <div class="stat-label">Seguidores</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-value">45</div>
-                    <div class="stat-label">Seguindo</div>
+
+                <div class="card-miv">
+                    <h6 class="text-secondary mb-3 fw-bold">CARTEIRA MIV</h6>
+                    <p class="small text-muted">Ações globais da sua conta.</p>
+                    <button class="btn btn-dark w-100 mb-2 border-secondary" onclick="alert('QR Code de depósito aberto!')">
+                        <i class="bi bi-qr-code"></i> RECEBER VALORES
+                    </button>
                 </div>
             </div>
-        </header>
 
-        <div class="container">
-            
-            <div id="section-market">
-                <h6 class="fw-bold mb-3"><i class="bi bi-play-circle text-success"></i> Ouvir & Investir</h6>
-                <div id="music-list">
-                    <div class="music-card">
-                        <div class="btn-play" onclick="playMusic('Vibe do Verão', 'MC Teste', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')" style="cursor:pointer">
-                            <i class="bi bi-play-fill fs-3 text-success"></i>
+            <div class="col-md-6">
+                <div class="card-miv">
+                    <h6 class="text-secondary mb-3 fw-bold">EXPLORAR ARTISTAS</h6>
+                    <div class="d-flex align-items-center justify-content-between mb-3 p-2 bg-dark rounded">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-primary rounded-circle" style="width:30px; height:30px;"></div>
+                            <span class="small">Artista Exemplo</span>
                         </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-bold small">Vibe do Verão <span class="badge bg-secondary" style="font-size: 0.5rem;" onclick="alert('Seguindo!')">Seguir</span></div>
-                            <div class="text-secondary small">MC Teste • Cota R$ 10,00</div>
+                        <button class="btn btn-sm btn-outline-success rounded-pill" onclick="seguir()">SEGUIR</button>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-2 bg-dark rounded">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="bg-info rounded-circle" style="width:30px; height:30px;"></div>
+                            <span class="small">Novo Talento</span>
                         </div>
-                        <button class="btn btn-sm btn-outline-success rounded-pill" onclick="alert('Investindo...')">INVESTIR</button>
+                        <button class="btn btn-sm btn-outline-success rounded-pill" onclick="seguir()">SEGUIR</button>
                     </div>
                 </div>
             </div>
 
-            <div id="section-artist" class="artist-only mt-4">
-                <div class="glass-card p-3 mb-3 border-success">
-                    <h6 class="text-success fw-bold"><i class="bi bi-cpu"></i> Tokenizar Nova Obra</h6>
-                    <input type="text" class="form-control bg-transparent text-white border-secondary mb-2" id="yt-link" placeholder="Link do YouTube">
-                    <button class="btn btn-sm btn-success w-100 fw-bold" onclick="alert('Tokenizando música na rede MIV...')">GERAR TOKEN MIV</button>
-                </div>
-            </div>
-
         </div>
+    </div>
 
-        <div class="miv-player-bar glass-card">
-            <div class="d-flex align-items-center gap-2">
-                <div class="bg-dark rounded" style="width:45px; height:45px; display:flex; align-items:center; justify-content:center;">
-                    <i class="bi bi-music-note-beamed text-success"></i>
-                </div>
-                <div style="max-width: 120px;">
-                    <div id="p-title" class="fw-bold small text-truncate">Nenhuma tocando</div>
-                    <div id="p-artist" class="text-secondary" style="font-size: 0.6rem;">MIV Ecosystem</div>
-                </div>
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <i class="bi bi-skip-start-fill fs-4"></i>
-                <i id="p-play-btn" class="bi bi-play-circle-fill text-success" style="font-size: 2.5rem;" onclick="toggleAudio()"></i>
-                <i class="bi bi-skip-end-fill fs-4"></i>
+    <div class="miv-player">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-play-circle-fill fs-1 text-info" id="playIcon" onclick="tocarMusica()" style="cursor:pointer"></i>
+            <div>
+                <div class="fw-bold small">Ouvir Música do Selo</div>
+                <div class="text-muted small">Tocando agora no Ecossistema</div>
             </div>
         </div>
-
-        <nav class="tab-bar glass-card">
-            <a href="#" class="tab-item active" onclick="showTab('market')"><i class="bi bi-house-door-fill"></i></a>
-            <a href="#" class="tab-item" onclick="showTab('market')"><i class="bi bi-search"></i></a>
-            <a href="#" class="tab-item"><i class="bi bi-graph-up-arrow"></i></a>
-            <a href="#" class="tab-item" onclick="location.reload()"><i class="bi bi-person-circle"></i></a>
-        </nav>
-
-    </main>
-
-    <audio id="main-audio"></audio>
+        <button class="btn btn-sm btn-outline-secondary" onclick="alert('Compartilhando...')"><i class="bi bi-share"></i></button>
+    </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwbhgddJ6g1PuDSWqS8IiBI-6GfP7W2I3OSbuw3e-d1-tt5206EzEkg3H6ny-anbcZm/exec';
-        const audio = document.getElementById('main-audio');
-        let isPlaying = false;
+        // CONFIGURAÇÃO DO USUÁRIO (Simula o banco de dados)
+        // DICA: Mude 'artista' para 'investidor' para ver a mágica acontecer!
+        const usuarioLogado = {
+            nome: "Bruno MIV Artista",
+            tipo: "artista", 
+            saldo: 1580.45,
+            seguidores: 1240
+        };
 
-        async function acaoLogin() {
-            const email = document.getElementById('l-email').value;
-            const pass = document.getElementById('l-pass').value;
-            
-            try {
-                const res = await fetch(`${API_URL}?acao=login&usuario=${email}&senha=${pass}`);
-                const data = await res.json();
-                
-                if(data.success) {
-                    renderApp(data);
-                } else { alert("Erro no login!"); }
-            } catch(e) { alert("Erro de conexão."); }
-        }
+        function inicializarApp() {
+            // 1. Preenche os dados básicos
+            document.getElementById("u-nome").innerText = usuarioLogado.nome;
+            document.getElementById("u-avatar").innerText = usuarioLogado.nome.substring(0,2).toUpperCase();
+            document.getElementById("u-saldo").innerText = "R$ " + usuarioLogado.saldo.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById("u-seguidores").innerText = usuarioLogado.seguidores;
 
-        function renderApp(data) {
-            document.getElementById('auth-page').style.display = 'none';
-            document.getElementById('main-app').style.display = 'block';
-            document.getElementById('section-market').style.display = 'block';
-            
-            document.getElementById('u-nome').innerText = data.nome;
-            document.getElementById('u-avatar').innerText = data.nome.substring(0,2).toUpperCase();
-            document.getElementById('u-saldo').innerText = data.saldo.toFixed(2).replace('.',',');
-            document.getElementById('u-tipo').innerText = data.tipo.toUpperCase();
-
-            // Lógica Híbrida: Se for artista, mostra ferramentas de tokenização
-            if(data.tipo.toLowerCase() === 'artista') {
-                document.querySelectorAll('.artist-only').forEach(el => el.style.display = 'block');
-                document.getElementById('u-avatar').style.background = 'linear-gradient(45deg, #0072ff, #00c6ff)'; // Azul para artista
-            }
-        }
-
-        function showTab(tab) {
-            // Futura lógica de troca de abas
-            alert("Navegando para: " + tab);
-        }
-
-        function playMusic(title, artist, url) {
-            document.getElementById('p-title').innerText = title;
-            document.getElementById('p-artist').innerText = artist;
-            audio.src = url;
-            audio.play();
-            isPlaying = true;
-            document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill text-success';
-        }
-
-        function toggleAudio() {
-            if(!audio.src) return;
-            if(isPlaying) {
-                audio.pause();
-                document.getElementById('p-play-btn').className = 'bi bi-play-circle-fill text-success';
+            // 2. Regra de Segurança Híbrida
+            if (usuarioLogado.tipo === "artista") {
+                document.getElementById("areaArtista").style.display = "block";
+                document.getElementById("u-badge").innerText = "MODO ARTISTA";
+                document.getElementById("u-badge").className = "badge bg-info text-dark";
             } else {
-                audio.play();
-                document.getElementById('p-play-btn').className = 'bi bi-pause-circle-fill text-success';
+                document.getElementById("areaArtista").style.display = "none";
+                document.getElementById("u-badge").innerText = "MODO INVESTIDOR";
+                document.getElementById("u-badge").className = "badge bg-success text-dark";
             }
-            isPlaying = !isPlaying;
         }
+
+        // Função de Reinvestimento
+        function reinvestir() {
+            let valor = prompt("Quanto do seu saldo você deseja reinvestir em tráfego e seguidores?");
+            if(valor && valor <= usuarioLogado.saldo) {
+                alert("Sucesso! Seu perfil será impulsionado para o ecossistema.");
+            } else {
+                alert("Saldo insuficiente ou valor inválido.");
+            }
+        }
+
+        // Função de Seguir
+        function seguir() {
+            alert("Você agora está seguindo este artista e receberá notificações de novos tokens!");
+        }
+
+        // Função do Player
+        let tocando = false;
+        function tocarMusica() {
+            const icon = document.getElementById("playIcon");
+            if(!tocando) {
+                icon.className = "bi bi-pause-circle-fill fs-1 text-info";
+                alert("Ouvindo música do ecossistema...");
+            } else {
+                icon.className = "bi bi-play-circle-fill fs-1 text-info";
+            }
+            tocando = !tocando;
+        }
+
+        // Inicia tudo ao carregar a página
+        window.onload = inicializarApp;
     </script>
 </body>
 </html>
