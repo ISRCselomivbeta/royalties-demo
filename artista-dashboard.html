@@ -3,117 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel do Artista | SELO MIV</title>
+    <title>Artist Studio | SELO MIV</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        body { background: #0b0e11; color: white; font-family: 'Segoe UI', sans-serif; }
-        .navbar { background: #1e2329; border-bottom: 1px solid #333; }
-        .card-stats { background: #1e2329; border: 1px solid #333; border-radius: 15px; padding: 20px; transition: 0.3s; }
-        .card-stats:hover { border-color: #00c6ff; }
-        .balance-box { background: linear-gradient(135deg, #00c6ff, #0072ff); border-radius: 15px; padding: 30px; margin-bottom: 30px; }
-        .btn-miv { background: #00c6ff; color: #000; border: none; font-weight: bold; border-radius: 10px; padding: 10px 20px; }
-        .btn-miv:hover { background: #0072ff; color: #fff; }
+        :root { --accent: #00c6ff; --bg-dark: #0b0e11; --card-bg: #1e2329; }
+        body { background: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; }
+        
+        /* Navbar Estilizada */
+        .navbar { background: rgba(30, 35, 41, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #333; }
+        
+        /* Card de Saldo Principal */
+        .hero-balance {
+            background: linear-gradient(135deg, #0072ff 0%, #00c6ff 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 198, 255, 0.2);
+        }
+
+        /* Cartões de Stats */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .stat-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .icon-shape {
+            width: 48px; height: 48px;
+            background: rgba(0, 198, 255, 0.1);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 15px; color: var(--accent); font-size: 24px;
+        }
+
+        /* Lista de Músicas */
+        .song-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid transparent;
+        }
+        .song-item:hover { border-left-color: var(--accent); background: #2b3139; }
+        
+        .btn-action { background: var(--accent); color: #000; font-weight: 700; border-radius: 8px; border: none; padding: 10px 20px; }
+        .text-micro { font-size: 0.75rem; letter-spacing: 1px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-dark px-3">
-        <span class="navbar-brand fw-bold"><i class="bi bi-mic-fill text-info"></i> SELO MIV <small class="text-muted" style="font-size: 0.6em;">ARTISTA</small></span>
-        <button onclick="logout()" class="btn btn-outline-danger btn-sm">Sair</button>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-patch-check-fill text-info"></i> MIV STUDIO</a>
+            <div class="d-flex align-items-center">
+                <span class="me-3 d-none d-md-inline small text-white-50" id="userEmailDisplay">artista@selomiv.com</span>
+                <button onclick="logout()" class="btn btn-sm btn-outline-danger border-0"><i class="bi bi-box-arrow-right"></i></button>
+            </div>
+        </div>
     </nav>
 
-    <div class="container py-4">
-        <div class="balance-box shadow">
-            <h4 class="mb-1">Bem-vindo, <span id="nomeArtista">Artista</span>!</h4>
-            <p class="small opacity-75">Seu saldo total de royalties acumulados:</p>
-            <h1 class="fw-bold" id="saldoRoyalties">R$ 0,00</h1>
-            <button class="btn btn-light btn-sm mt-2 fw-bold" onclick="alert('Funcionalidade de Saque em breve!')">SOLICITAR SAQUE</button>
-        </div>
-
-        <div class="row g-3">
-            <div class="col-6 col-md-3">
-                <div class="card-stats text-center shadow">
-                    <i class="bi bi-people-fill text-info h2"></i>
-                    <h5 class="mt-2" id="totalSeguidores">0</h5>
-                    <p class="text-muted small mb-0">Seguidores</p>
+    <div class="container pb-5">
+        <div class="hero-balance mb-4 text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <p class="text-micro fw-bold text-white-50 mb-1">Royalties Acumulados</p>
+                    <h1 class="display-4 fw-bold mb-0" id="saldoTxt">R$ 0,00000000</h1>
+                    <p class="small text-white-50 mt-2">* Atualizado em tempo real via Blockchain MIV</p>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card-stats text-center shadow">
-                    <i class="bi bi-play-circle-fill text-info h2"></i>
-                    <h5 class="mt-2" id="totalPlays">0</h5>
-                    <p class="text-muted small mb-0">Plays Totais</p>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card-stats text-center shadow">
-                    <i class="bi bi-graph-up text-info h2"></i>
-                    <h5 class="mt-2" id="acoesVendidas">0</h5>
-                    <p class="text-muted small mb-0">Ações Vendidas</p>
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="card-stats text-center shadow">
-                    <i class="bi bi-currency-dollar text-info h2"></i>
-                    <h5 class="mt-2">R$ 0,00</h5>
-                    <p class="text-muted small mb-0">Valor da Ação</p>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button class="btn btn-light btn-lg fw-bold px-4 shadow" onclick="alert('Saque disponível a partir de R$ 50,00')">Sacar Agora</button>
                 </div>
             </div>
         </div>
 
-        <div class="mt-5">
-            <h5 class="mb-3">Minhas Músicas Tokenizadas</h5>
-            <div class="card-stats shadow mb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong class="d-block">Som da Rua</strong>
-                        <small class="text-muted">ID: M01 | Status: Ativa</small>
+        <div class="row g-3 mb-5">
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="icon-shape"><i class="bi bi-play-circle"></i></div>
+                    <h3 class="fw-bold mb-0">1.2k</h3>
+                    <p class="text-white-50 small mb-0">Plays hoje</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="icon-shape"><i class="bi bi-people"></i></div>
+                    <h3 class="fw-bold mb-0">458</h3>
+                    <p class="text-white-50 small mb-0">Investidores</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="icon-shape"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h3 class="fw-bold mb-0">15%</h3>
+                    <p class="text-white-50 small mb-0">Valorização</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="icon-shape"><i class="bi bi-coin"></i></div>
+                    <h3 class="fw-bold mb-0">M01</h3>
+                    <p class="text-white-50 small mb-0">Ativo Principal</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Minhas Músicas Tokenizadas</h5>
+                    <button class="btn btn-sm btn-outline-info">Ver Todas</button>
+                </div>
+                
+                <div class="song-item d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-secondary rounded me-3" style="width: 50px; height: 50px; background: url('https://via.placeholder.com/50') center/cover;"></div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Som da Rua</h6>
+                            <span class="text-micro text-success">Ativa na Exchange</span>
+                        </div>
                     </div>
-                    <button class="btn-miv btn-sm">DETALHES</button>
+                    <div class="text-end">
+                        <div class="fw-bold">R$ 15,00</div>
+                        <div class="text-white-50 small">Preço Atual</div>
+                    </div>
+                </div>
+
+                <div class="song-item d-flex align-items-center justify-content-between opacity-50">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-secondary rounded me-3" style="width: 50px; height: 50px;"></div>
+                        <div>
+                            <h6 class="mb-0 fw-bold">Nova Música</h6>
+                            <span class="text-micro text-warning">Aguardando Lançamento</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-dark">Configurar</button>
                 </div>
             </div>
-            <button class="btn btn-outline-info w-100 py-3 border-dashed" style="border-style: dashed !important;">
-                <i class="bi bi-plus-circle me-2"></i>TOKENIZAR NOVA MÚSICA
-            </button>
+
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="stat-card bg-transparent border-dashed">
+                    <h6 class="fw-bold mb-3">Ações Rápidas</h6>
+                    <button class="btn btn-action w-100 mb-2" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Atualizar Dados</button>
+                    <button class="btn btn-outline-light w-100" onclick="alert('Tokenização de nova faixa disponível em breve!')"><i class="bi bi-plus-lg"></i> Tokenizar Faixa</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbz-XDvFYhUjmZMfnZreUdzULCfAprqStkfNAWaY2vXqR4XwOgtF0OOe30g4z7-v_-xu/exec";
 
-        // Carrega dados básicos ao entrar
-        window.onload = function() {
-            const nome = localStorage.getItem("userName");
-            const userId = localStorage.getItem("userId");
-
-            if (!userId) {
-                window.location.href = "login.html";
-                return;
-            }
-
-            document.getElementById("nomeArtista").innerText = nome;
-            carregarDadosArtista(userId);
+        window.onload = () => {
+            const userName = localStorage.getItem('userName');
+            if(!userName) { window.location.href = 'login.html'; return; }
+            carregarDadosArtista();
         };
 
-        async function carregarDadosArtista(id) {
+        async function carregarDadosArtista() {
             try {
-                // Aqui o script busca os dados na planilha para o artista
-                const response = await fetch(`${API_URL}?acao=ver_carteira&userId=${id}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    document.getElementById("saldoRoyalties").innerText = "R$ " + data.saldo.toFixed(2);
-                    // Aqui você poderia carregar mais dados como plays e seguidores das outras abas
+                const res = await fetch(`${API_URL}?acao=ver_carteira&userId=${localStorage.getItem('userId')}`);
+                const data = await res.json();
+                if(data.success) {
+                    // Exibe o saldo com 8 casas decimais para parecer "mineração"
+                    document.getElementById('saldoTxt').innerText = "R$ " + data.saldo.toFixed(8);
                 }
-            } catch (error) {
-                console.error("Erro ao carregar dados do artista.");
+            } catch (e) {
+                console.error("Erro ao carregar dados.");
             }
         }
 
         function logout() {
             localStorage.clear();
-            window.location.href = "login.html";
+            window.location.href = 'login.html';
         }
     </script>
 </body>
