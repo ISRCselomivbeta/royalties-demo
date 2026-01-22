@@ -1,0 +1,27 @@
+<div class="card bg-dark p-3 mb-3">
+    <h5>Música: Som da Rua</h5>
+    <p>Preço da Ação: <span class="text-success">R$ 15,00</span></p>
+    <div class="input-group mb-3">
+        <input type="number" id="qtdAcoes" class="form-control" placeholder="Qtd">
+        <button class="btn btn-success" onclick="negociar('COMPRA')">Comprar</button>
+        <button class="btn btn-danger" onclick="negociar('VENDA')">Vender</button>
+    </div>
+</div>
+
+<script>
+async function negociar(tipo) {
+    const qtd = document.getElementById('qtdAcoes').value;
+    const res = await fetch(API_URL, {
+        method: 'POST',
+        body: new URLSearchParams({
+            acao: 'negociar_acao',
+            user_id: localStorage.getItem('userId'),
+            musica_id: 'M001',
+            quantidade: qtd,
+            preco_unitario: 15.00,
+            tipo_ordem: tipo
+        })
+    });
+    alert(tipo + " realizada com sucesso!");
+}
+</script>
