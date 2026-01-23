@@ -112,15 +112,25 @@
                         </select>
                     </div>
                     
+                    <div class="mb-2">
+                        <label class="form-label text-secondary small">CPF/CNPJ *</label>
+                        <input type="text" id="reg-cpf" class="form-control" placeholder="Digite seu CPF ou CNPJ" required>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label text-secondary small">Telefone *</label>
+                        <input type="tel" id="reg-telefone" class="form-control" placeholder="(11) 99999-9999" required>
+                    </div>
+                    
                     <div class="mb-3" id="artist-fields" style="display:none;">
-                        <label class="form-label text-info small">Link do Trabalho *</label>
+                        <label class="form-label text-info small">Link do YouTube *</label>
                         <div class="input-group">
                             <span class="input-group-text bg-dark text-white border-secondary">
-                                <i class="bi bi-link"></i>
+                                <i class="bi bi-youtube"></i>
                             </span>
-                            <input type="url" id="reg-link" class="form-control" placeholder="https://seusite.com/trabalho ou link do YouTube/SoundCloud">
+                            <input type="url" id="reg-youtube" class="form-control" placeholder="https://youtube.com/seucanal">
                         </div>
-                        <div class="form-text text-info small">Artistas devem compartilhar um link do trabalho para validação</div>
+                        <div class="form-text text-info small">Artistas devem compartilhar link do YouTube para validação</div>
                     </div>
                     
                     <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleRegister()">SOLICITAR ACESSO</button>
@@ -248,7 +258,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // CONFIGURAÇÕES - URL SIMPLIFICADA (REMOVA O /dev)
+        // CONFIGURAÇÕES
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWAsAyhd2Ltnra7fsRnPIcE4TSs7QbC4R4u95RA87usOclyg2Jc4-A1lpFjkBOOTg/exec";
         const YT_PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
         const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
@@ -274,11 +284,10 @@
             try {
                 console.log('🔐 Tentando login com:', email);
                 
-                // Usar GET para login - método mais confiável
-                const url = `${SCRIPT_URL}?acao=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+                // Construir URL com parâmetros para buscar na planilha corretamente
+                const url = `${SCRIPT_URL}?acao=login&email=${encodeURIComponent(email)}&senha=${encodeURIComponent(pass)}`;
                 console.log('📡 URL:', url);
                 
-                // Usar fetch com tratamento de CORS
                 const res = await fetch(url, {
                     method: 'GET',
                     mode: 'cors',
@@ -287,18 +296,27 @@
                 
                 console.log('✅ Status:', res.status, res.statusText);
                 
-                // Verificar se a resposta é JSON válido
-                const contentType = res.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Resposta do servidor não é JSON válido');
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
                 }
                 
                 const data = await res.json();
                 console.log('📦 Dados recebidos:', data);
                 
                 if(data && data.success) {
-                    currentUser = data.data;
-                    currentToken = data.data.token || data.data.id; // Usar ID como fallback
+                    // Ajustar para a estrutura da planilha: ID, Email, Senha, Tipo, Nome, Data, CPF/CNPJ, Telefone, YouTube
+                    currentUser = {
+                        id: data.data.ID || data.data.id,
+                        email: data.data.Email || data.data.email,
+                        nome: data.data.Nome || data.data.nome,
+                        tipo: data.data.Tipo || data.data.tipo,
+                        cpf: data.data['CPF/CNPJ'] || data.data.cpf,
+                        telefone: data.data.Telefone || data.data.telefone,
+                        youtube: data.data.YouTube || data.data.youtube,
+                        status: data.data.Status || 'ATIVO'
+                    };
+                    
+                    currentToken = data.data.token || currentUser.id;
                     localStorage.setItem('miv_token', currentToken);
                     localStorage.setItem('miv_user', JSON.stringify(currentUser));
                     showMessage('login-message', '✅ Login realizado com sucesso!', 'success');
@@ -308,15 +326,18 @@
                 }
             } catch(e) {
                 console.error('❌ Erro no login:', e);
-                // Fallback: Criar usuário local para desenvolvimento
+                // Fallback para desenvolvimento
                 if (email === 'admin@miv.com' && pass === 'admin123') {
                     showMessage('login-message', '⚠️ Modo offline ativado (servidor não disponível)', 'warning');
                     currentUser = {
                         id: 'ADMIN001',
+                        email: 'admin@miv.com',
                         nome: 'Administrador',
                         tipo: 'admin',
-                        status: 'ATIVO',
-                        token: 'offline_token'
+                        cpf: '000.000.000-00',
+                        telefone: '(11) 99999-9999',
+                        youtube: 'https://youtube.com/miv',
+                        status: 'ATIVO'
                     };
                     currentToken = 'offline_token';
                     localStorage.setItem('miv_token', currentToken);
@@ -335,16 +356,18 @@
             const email = document.getElementById('reg-email').value.trim();
             const pass = document.getElementById('reg-pass').value;
             const tipo = document.getElementById('reg-tipo').value;
-            const link = document.getElementById('reg-link').value.trim();
+            const cpf = document.getElementById('reg-cpf').value.trim();
+            const telefone = document.getElementById('reg-telefone').value.trim();
+            const youtube = document.getElementById('reg-youtube').value.trim();
 
             // Validação básica
-            if(!nome || !email || !pass || !tipo) {
+            if(!nome || !email || !pass || !tipo || !cpf || !telefone) {
                 showMessage('reg-message', '❌ Preencha todos os campos obrigatórios!', 'error');
                 return;
             }
 
-            if(tipo === 'artista' && !link) {
-                showMessage('reg-message', '❌ Artistas devem fornecer link do trabalho!', 'error');
+            if(tipo === 'artista' && !youtube) {
+                showMessage('reg-message', '❌ Artistas devem fornecer link do YouTube!', 'error');
                 return;
             }
 
@@ -362,15 +385,16 @@
             try {
                 console.log('📝 Iniciando registro...');
                 
-                // **SOLUÇÃO: Usar GET em vez de POST para evitar CORS issues**
-                // Construir URL com parâmetros GET
+                // **SOLUÇÃO: Usar GET com os parâmetros corretos para a planilha**
                 const params = new URLSearchParams();
                 params.append('acao', 'registrar');
                 params.append('nome', nome);
                 params.append('email', email);
-                params.append('pass', pass);
+                params.append('senha', pass); // ATENÇÃO: Na planilha é "Senha", não "pass"
                 params.append('tipo', tipo);
-                if (link) params.append('workLink', link);
+                params.append('cpf', cpf); // CPF/CNPJ
+                params.append('telefone', telefone);
+                if (youtube) params.append('youtube', youtube);
                 
                 const url = `${SCRIPT_URL}?${params.toString()}`;
                 console.log('📡 URL do registro:', url);
@@ -378,13 +402,12 @@
                 // Tentar fazer requisição GET
                 const res = await fetch(url, {
                     method: 'GET',
-                    mode: 'no-cors' // Modo no-cors para evitar problemas
+                    mode: 'no-cors'
                 });
                 
                 console.log('✅ Registro enviado (modo no-cors)');
                 
-                // Como usamos no-cors, não podemos ler a resposta
-                // Mas mostramos mensagem de sucesso
+                // Mostrar mensagem de sucesso
                 showMessage('reg-message', '✅ Solicitação enviada! Aguarde aprovação dos administradores.', 'success');
                 
                 // Fallback: Criar usuário local para desenvolvimento
@@ -393,8 +416,10 @@
                     nome: nome,
                     email: email,
                     tipo: tipo,
-                    status: tipo === 'artista' ? 'PENDENTE_AUDITORIA' : 'ATIVO',
-                    token: 'temp_token_' + Date.now()
+                    cpf: cpf,
+                    telefone: telefone,
+                    youtube: youtube || '',
+                    status: tipo === 'artista' ? 'PENDENTE_AUDITORIA' : 'ATIVO'
                 };
                 
                 localStorage.setItem('temp_user', JSON.stringify(userData));
@@ -404,7 +429,9 @@
                 document.getElementById('reg-email').value = '';
                 document.getElementById('reg-pass').value = '';
                 document.getElementById('reg-tipo').value = '';
-                document.getElementById('reg-link').value = '';
+                document.getElementById('reg-cpf').value = '';
+                document.getElementById('reg-telefone').value = '';
+                document.getElementById('reg-youtube').value = '';
                 document.getElementById('artist-fields').style.display = 'none';
                 
                 setTimeout(() => {
@@ -440,14 +467,14 @@
             const tempUser = localStorage.getItem('temp_user');
             if (tempUser && !currentUser) {
                 currentUser = JSON.parse(tempUser);
-                currentToken = currentUser.token;
+                currentToken = currentUser.id;
                 localStorage.setItem('miv_token', currentToken);
                 localStorage.setItem('miv_user', JSON.stringify(currentUser));
                 localStorage.removeItem('temp_user');
             }
             
             document.getElementById('badge-tipo').innerText = currentUser?.tipo || 'Ouvinte';
-            document.getElementById('badge-tipo').className = `badge rounded-pill ${currentUser?.tipo === 'admin' ? 'bg-danger' : 'bg-secondary'} text-uppercase`;
+            document.getElementById('badge-tipo').className = `badge rounded-pill ${currentUser?.tipo === 'admin' ? 'bg-danger' : currentUser?.tipo === 'artista' ? 'bg-warning' : 'bg-secondary'} text-uppercase`;
             
             // Inicializar controle de valorização
             musicaJaValorizou = {};
@@ -603,370 +630,4 @@
         function renderizarMercado() {
             const container = document.getElementById('lista-musicas');
             if(!playlist || playlist.length === 0) {
-                container.innerHTML = '<p class="text-center text-secondary">Carregando músicas...</p>';
-                return;
-            }
-            
-            container.innerHTML = playlist.map((track, index) => `
-                <div class="col-12 col-md-6">
-                    <div class="music-card d-flex align-items-center">
-                        <img src="${track.thumb}" class="rounded me-3" style="width: 65px; height: 65px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
-                        <div class="flex-grow-1 overflow-hidden">
-                            <h6 class="text-truncate mb-0">${track.title}</h6>
-                            <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
-                            ${track.alreadyValorized ? '<span class="badge bg-success ms-2">✓ Valorizada</span>' : ''}
-                        </div>
-                        <button class="btn btn-miv btn-sm" onclick="abrirModalInvestimento(${index})">INVESTIR</button>
-                    </div>
-                </div>`).join('');
-        }
-
-        function renderizarCarteira(ativos) {
-            const container = document.getElementById('meus-ativos');
-            if(!ativos || ativos.length === 0) {
-                container.innerHTML = '<p class="text-center text-secondary">Nenhum ativo na carteira</p>';
-                return;
-            }
-            
-            container.innerHTML = ativos.map(ativo => `
-                <div class="col-12">
-                    <div class="music-card d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">${ativo.ATIVO || 'Ativo'}</h6>
-                            <div class="d-flex justify-content-between small">
-                                <span>${ativo.QUANTIDADE || 0} cotas</span>
-                                <span class="text-success">R$ ${parseFloat(ativo.VALOR_TOTAL || 0).toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`).join('');
-        }
-
-        function renderizarExtrato(transacoes) {
-            const container = document.getElementById('ledger-list');
-            if(!transacoes || transacoes.length === 0) {
-                container.innerHTML = '<tr><td colspan="3" class="text-center text-secondary">Nenhuma transação</td></tr>';
-                return;
-            }
-            
-            container.innerHTML = transacoes.map(t => `
-                <tr>
-                    <td class="small">${formatDate(t.DATA)}</td>
-                    <td>${t.DESCRICAO || 'Transação'}</td>
-                    <td class="text-end ${parseFloat(t.SALDO || 0) >= 0 ? 'text-success' : 'text-danger'}">
-                        R$ ${Math.abs(parseFloat(t.SALDO || 0)).toFixed(2)}
-                    </td>
-                </tr>`).join('');
-        }
-
-        // ========== FUNÇÕES DO PLAYER ==========
-
-        function tocarMusica(index) {
-            if(!playlist[index]) return;
-            
-            currentIndex = index;
-            const track = playlist[index];
-            
-            // Resetar flag de valorização apenas se a música não foi valorizada ainda
-            const valorizouKey = `${currentUser?.id}_${track.id}`;
-            valorizou30s = musicaJaValorizou[valorizouKey] || false;
-            
-            document.getElementById('player-bar').style.display = 'block';
-            document.getElementById('track-title').innerText = track.title;
-            document.getElementById('track-img').src = track.thumb;
-            document.getElementById('track-price').innerText = `Cota: R$ ${track.price.toFixed(2)}`;
-            
-            if(player && player.loadVideoById) {
-                player.loadVideoById(track.id);
-            }
-        }
-
-        function onPlayerStateChange(event) {
-            const playBtn = document.getElementById('btn-play-pause');
-            
-            if (event.data === YT.PlayerState.PLAYING) {
-                playBtn.className = "bi bi-pause-circle-fill h1";
-                updateUI();
-            } else if (event.data === YT.PlayerState.PAUSED) {
-                playBtn.className = "bi bi-play-circle-fill h1";
-            } else if (event.data === YT.PlayerState.ENDED) {
-                playBtn.className = "bi bi-play-circle-fill h1";
-                playNext(1);
-            }
-        }
-
-        function updateUI() {
-            if(player && player.getCurrentTime && player.getDuration) {
-                const cur = player.getCurrentTime();
-                const dur = player.getDuration();
-                
-                if(dur > 0) {
-                    const pct = (cur / dur) * 100;
-                    document.getElementById('p-bar').style.width = pct + '%';
-                    
-                    // VALORIZAÇÃO: Usuário ganha R$ 0,0000001 após 30 segundos, APENAS UMA VEZ por música
-                    if (cur >= 30 && !valorizou30s && dur > 30 && currentUser) {
-                        valorizou30s = true;
-                        const track = playlist[currentIndex];
-                        const valorizouKey = `${currentUser.id}_${track.id}`;
-                        
-                        // Marcar que esta música já valorizou para este usuário
-                        musicaJaValorizou[valorizouKey] = true;
-                        track.alreadyValorized = true;
-                        
-                        // Aplicar valorização mínima (0,0000001)
-                        const valorizacao = 0.0000001;
-                        playlist[currentIndex].price += valorizacao;
-                        
-                        // Atualizar exibição
-                        document.getElementById('track-price').innerText = `Cota: R$ ${playlist[currentIndex].price.toFixed(8)}`;
-                        renderizarMercado();
-                        
-                        // Mostrar notificação para o usuário
-                        showMessage('login-message', `🎵 +R$ ${valorizacao.toFixed(8)} por ouvir 30s de "${track.title}"!`, 'success');
-                    }
-                }
-                
-                if(player.getPlayerState() === YT.PlayerState.PLAYING) {
-                    setTimeout(updateUI, 1000);
-                }
-            }
-        }
-
-        function abrirModalInvestimento(index) {
-            investTrackIndex = index;
-            const track = playlist[index];
-            
-            document.getElementById('modal-track-title').innerText = track.title;
-            document.getElementById('modal-unit-price').innerText = `R$ ${track.price.toFixed(2)}`;
-            
-            atualizarTotalInvestimento();
-            modal.show();
-        }
-
-        function atualizarTotalInvestimento() {
-            const quantidade = document.getElementById('invest-quantidade').value;
-            const precoUnitario = playlist[investTrackIndex].price;
-            const total = quantidade * precoUnitario;
-            
-            document.getElementById('modal-total-price').innerText = `R$ ${total.toFixed(2)}`;
-        }
-
-        async function confirmarInvestimento() {
-            if(!currentToken) {
-                alert('Faça login para investir!');
-                return;
-            }
-
-            const quantidade = parseInt(document.getElementById('invest-quantidade').value);
-            const track = playlist[investTrackIndex];
-            const valorTotal = quantidade * track.price;
-
-            showLoading(true);
-            try {
-                // Usar GET em vez de POST
-                const params = new URLSearchParams();
-                params.append('acao', 'adicionar_carteira');
-                params.append('token', currentToken);
-                params.append('ativo', track.title);
-                params.append('quantidade', quantidade);
-                params.append('valor_unitario', track.price);
-                params.append('data_aquisicao', new Date().toISOString().split('T')[0]);
-                
-                const url = `${SCRIPT_URL}?${params.toString()}`;
-                const res = await fetch(url, { method: 'GET', mode: 'no-cors' });
-
-                alert('Investimento simulado com sucesso! (Modo desenvolvimento)');
-                modal.hide();
-                carregarDadosUsuario();
-                
-            } catch(e) {
-                alert('⚠️ Modo desenvolvimento: Investimento simulado');
-                modal.hide();
-                carregarDadosUsuario();
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function investir(index) {
-            abrirModalInvestimento(index);
-        }
-
-        // ========== FUNÇÕES UTILITÁRIAS ==========
-
-        function showLoading(show) {
-            document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
-        }
-
-        function showMessage(elementId, message, type) {
-            const element = document.getElementById(elementId);
-            element.innerText = message;
-            element.style.display = 'block';
-            element.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'}`;
-            
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
-        }
-
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR').slice(0,5);
-            } catch(e) {
-                return dateString;
-            }
-        }
-
-        function toggleReg(show) {
-            document.getElementById('login-fields').style.display = show ? 'none' : 'block';
-            document.getElementById('reg-fields').style.display = show ? 'block' : 'none';
-            
-            // Limpar mensagens
-            document.getElementById('login-message').style.display = 'none';
-            document.getElementById('reg-message').style.display = 'none';
-            
-            // Resetar campos se voltando para login
-            if (!show) {
-                document.getElementById('email').value = 'admin@miv.com';
-                document.getElementById('pass').value = 'admin123';
-            } else {
-                // Limpar campos do registro
-                document.getElementById('reg-nome').value = '';
-                document.getElementById('reg-email').value = '';
-                document.getElementById('reg-pass').value = '';
-                document.getElementById('reg-tipo').value = '';
-                document.getElementById('reg-link').value = '';
-                document.getElementById('artist-fields').style.display = 'none';
-            }
-        }
-
-        function checkArtist() {
-            const tipo = document.getElementById('reg-tipo').value;
-            document.getElementById('artist-fields').style.display = (tipo === 'artista') ? 'block' : 'none';
-        }
-
-        function openNav() { 
-            document.getElementById("mySidebar").style.width = "280px"; 
-        }
-        
-        function closeNav() { 
-            document.getElementById("mySidebar").style.width = "0"; 
-        }
-        
-        function changePage(pageId, btn) {
-            document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            if(btn) btn.classList.add('active');
-            closeNav();
-            
-            // Carregar dados específicos da página
-            if(pageId === 'extrato' && currentToken) {
-                carregarExtrato();
-            }
-        }
-
-        async function carregarExtrato() {
-            try {
-                const url = `${SCRIPT_URL}?acao=get_ledger&token=${currentToken}&limite=50`;
-                const res = await fetch(url, { method: 'GET', mode: 'cors' });
-                if (res.ok) {
-                    const data = await res.json();
-                    if(data.success) {
-                        renderizarExtrato(data.data);
-                    }
-                }
-            } catch(e) {
-                console.error('Erro ao carregar extrato:', e);
-            }
-        }
-
-        function handlePlayerClick(e) {
-            if(e.target.closest('#btn-invest-player')) return;
-            const p = document.getElementById('player-bar');
-            p.classList.toggle('expanded');
-        }
-
-        function togglePlay() {
-            if(!player) return;
-            player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
-        }
-
-        function playNext(dir) {
-            if(playlist.length === 0) return;
-            currentIndex = (currentIndex + dir + playlist.length) % playlist.length;
-            tocarMusica(currentIndex);
-        }
-
-        function seekTrack(e) {
-            if(!player || !player.getDuration) return;
-            const rect = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const width = rect.width;
-            const seekTime = player.getDuration() * (x / width);
-            player.seekTo(seekTime, true);
-        }
-
-        function logout() {
-            localStorage.removeItem('miv_token');
-            localStorage.removeItem('miv_user');
-            localStorage.removeItem('temp_user');
-            location.reload();
-        }
-
-        // ========== INICIALIZAÇÃO ==========
-
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 MIV Music Pro iniciando...');
-            
-            // Testar conexão com o servidor
-            testarConexao();
-            
-            // Tentar login automático com token salvo
-            const savedToken = localStorage.getItem('miv_token');
-            const savedUser = localStorage.getItem('miv_user');
-            
-            if(savedToken && savedUser) {
-                try {
-                    currentToken = savedToken;
-                    currentUser = JSON.parse(savedUser);
-                    console.log('🔑 Sessão restaurada:', currentUser);
-                    startApp();
-                } catch(e) {
-                    console.error('Erro ao restaurar sessão:', e);
-                    localStorage.clear();
-                }
-            }
-            
-            // Event listener para quantidade de investimento
-            document.getElementById('invest-quantidade').addEventListener('input', atualizarTotalInvestimento);
-        });
-
-        // Função de teste para verificar conexão com o servidor
-        async function testarConexao() {
-            try {
-                console.log('🌐 Testando conexão com o servidor...');
-                const res = await fetch(`${SCRIPT_URL}?acao=health_check`, {
-                    method: 'GET',
-                    mode: 'cors',
-                    cache: 'no-cache'
-                });
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    console.log('✅ Servidor online:', data);
-                    return true;
-                } else {
-                    console.log('⚠️ Servidor offline ou em manutenção');
-                    return false;
-                }
-            } catch (e) {
-                console.log('❌ Não foi possível conectar ao servidor');
-                return false;
-            }
-        }
-    </script>
-</body>
-</html>
+                container.innerHTML = '<
