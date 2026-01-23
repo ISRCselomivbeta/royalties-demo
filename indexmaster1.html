@@ -13,7 +13,7 @@
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg-dark); color: #ffffff; margin: 0; padding-bottom: 110px; overflow-x: hidden; }
         
         /* Telas de Acesso */
-        #auth-screen { position: fixed; inset: 0; z-index: 3000; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; p: 20px; }
+        #auth-screen { position: fixed; inset: 0; z-index: 3000; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; padding: 20px; }
         .glass-card { background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; }
         .loading { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 3100; }
 
@@ -63,22 +63,23 @@
             <div id="auth-forms">
                 <div id="login-fields">
                     <div id="login-message" class="alert alert-success" style="display: none;"></div>
-                    <input type="email" id="email" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Seu E-mail">
-                    <input type="password" id="pass" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Sua Senha">
+                    <input type="email" id="email" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Seu E-mail" value="admin@miv.com">
+                    <input type="password" id="pass" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Sua Senha" value="admin123">
                     <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
                     <p class="text-center small text-secondary">Novo aqui? <a href="#" class="text-success" onclick="toggleReg(true)">Criar Conta MIV</a></p>
                 </div>
 
                 <div id="reg-fields" style="display: none;">
                     <div id="reg-message" class="alert alert-success" style="display: none;"></div>
-                    <input type="text" id="reg-nome" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Nome Completo">
-                    <input type="email" id="reg-email" class="form-control bg-dark text-white border-secondary mb-2" placeholder="E-mail">
-                    <input type="password" id="reg-pass" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Senha">
+                    <input type="text" id="reg-nome" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Nome Completo" required>
+                    <input type="email" id="reg-email" class="form-control bg-dark text-white border-secondary mb-2" placeholder="E-mail" required>
+                    <input type="password" id="reg-pass" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Senha" required>
                     <select id="reg-tipo" class="form-select bg-dark text-white border-secondary mb-2" onchange="checkArtist()">
+                        <option value="">Selecione seu perfil</option>
                         <option value="ouvinte">Perfil: Ouvinte</option>
                         <option value="artista">Perfil: Artista</option>
                     </select>
-                    <input type="url" id="reg-link" class="form-control bg-dark text-info border-info mb-3" style="display:none;" placeholder="Link do seu último trabalho (Obrigatório)">
+                    <input type="url" id="reg-link" class="form-control bg-dark text-info border-info mb-3" style="display:none;" placeholder="Link do seu último trabalho (Obrigatório para artistas)">
                     
                     <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleRegister()">SOLICITAR ACESSO</button>
                     <p class="text-center small text-secondary">Já tem conta? <a href="#" class="text-success" onclick="toggleReg(false)">Fazer Login</a></p>
@@ -206,13 +207,14 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // CONFIGURAÇÕES
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWAsAyhd2Ltnra7fsRnPIcE4TSs7QbC4R4u95RA87usOclyg2Jc4-A1lpFjkBOOTg/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWAsAyhd2Ltnra7fsRnPIcE4TSs7QbC4R4u95RA87usOclyg2Jc4-A1lpFjkBOOTg/exec/dev";
         const YT_PLAYLIST_ID = 'PLvteL0_9cu8oE_N4Qfz5JJucTTkY2czcN';
         const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
 
         let player, playlist = [], currentIndex = 0, currentUser = null, currentToken = null;
         let valorizou30s = false;
         let investTrackIndex = null;
+        let musicaJaValorizou = {}; // Controla quais músicas já valorizaram por usuário
         const modal = new bootstrap.Modal(document.getElementById('investModal'));
 
         // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
@@ -224,21 +226,29 @@
 
             showLoading(true);
             try {
-                const res = await fetch(`${SCRIPT_URL}?acao=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`);
+                console.log('Tentando login com:', email);
+                const url = `${SCRIPT_URL}?acao=login&email=${encodeURIComponent(email)}&pass=${encodeURIComponent(pass)}`;
+                console.log('URL do login:', url);
+                
+                const res = await fetch(url);
+                console.log('Resposta do servidor:', res.status);
+                
                 const data = await res.json();
+                console.log('Dados recebidos:', data);
                 
                 if(data.success) {
                     currentUser = data.data;
                     currentToken = data.data.token;
                     localStorage.setItem('miv_token', currentToken);
                     localStorage.setItem('miv_user', JSON.stringify(currentUser));
-                    startApp();
+                    showMessage('login-message', 'Login realizado com sucesso!', 'success');
+                    setTimeout(() => startApp(), 1000);
                 } else {
                     showMessage('login-message', data.message || 'Credenciais inválidas!', 'error');
                 }
             } catch(e) {
-                showMessage('login-message', 'Erro de conexão com o servidor.', 'error');
-                console.error('Login error:', e);
+                console.error('Erro detalhado no login:', e);
+                showMessage('login-message', 'Erro de conexão com o servidor. Verifique sua internet.', 'error');
             } finally {
                 showLoading(false);
             }
@@ -270,6 +280,7 @@
                     workLink: link || ''
                 };
 
+                console.log('Enviando registro:', payload);
                 const res = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -277,17 +288,25 @@
                 });
 
                 const data = await res.json();
+                console.log('Resposta do registro:', data);
                 
                 if(data.success) {
                     showMessage('reg-message', 'Conta criada com sucesso! Aguarde aprovação dos administradores.', 'success');
-                    document.getElementById('reg-fields').querySelectorAll('input').forEach(input => input.value = '');
+                    // Limpar campos
+                    document.getElementById('reg-nome').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-pass').value = '';
+                    document.getElementById('reg-tipo').value = '';
+                    document.getElementById('reg-link').value = '';
+                    document.getElementById('reg-link').style.display = 'none';
+                    
                     setTimeout(() => toggleReg(false), 3000);
                 } else {
                     showMessage('reg-message', data.message || 'Erro ao criar conta.', 'error');
                 }
             } catch(e) {
+                console.error('Erro no registro:', e);
                 showMessage('reg-message', 'Erro de conexão com o servidor.', 'error');
-                console.error('Register error:', e);
             } finally {
                 showLoading(false);
             }
@@ -299,22 +318,33 @@
             document.getElementById('badge-tipo').innerText = currentUser.tipo || 'Ouvinte';
             document.getElementById('badge-tipo').className = `badge rounded-pill ${currentUser.tipo === 'admin' ? 'bg-danger' : 'bg-secondary'} text-uppercase`;
             
+            // Inicializar controle de valorização
+            musicaJaValorizou = {};
+            
             carregarDadosUsuario();
             loadYT();
             
             if(currentUser.tipo === 'admin') {
                 const sidebar = document.getElementById('mySidebar');
+                const hr = sidebar.querySelector('hr');
                 const adminLink = `<a href="#" onclick="changePage('admin')"><i class="bi bi-shield-check me-2"></i> Painel Admin</a>`;
-                sidebar.querySelector('hr').insertAdjacentHTML('beforebegin', adminLink);
+                hr.insertAdjacentHTML('beforebegin', adminLink);
             }
         }
 
         async function carregarDadosUsuario() {
+            if (!currentToken) {
+                console.error('Token não disponível');
+                return;
+            }
+            
             showLoading(true);
             try {
                 // Carregar resumo financeiro
+                console.log('Carregando resumo...');
                 const resResumo = await fetch(`${SCRIPT_URL}?acao=get_resumo&token=${currentToken}`);
                 const dataResumo = await resResumo.json();
+                console.log('Resumo:', dataResumo);
                 
                 if(dataResumo.success) {
                     document.getElementById('saldo-display').innerText = `R$ ${dataResumo.data.saldo_total.toFixed(2)}`;
@@ -322,20 +352,25 @@
                 }
 
                 // Carregar carteira
+                console.log('Carregando carteira...');
                 const resCarteira = await fetch(`${SCRIPT_URL}?acao=get_carteira&token=${currentToken}`);
                 const dataCarteira = await resCarteira.json();
+                console.log('Carteira:', dataCarteira);
                 if(dataCarteira.success) {
                     renderizarCarteira(dataCarteira.data);
                 }
 
                 // Carregar extrato
+                console.log('Carregando extrato...');
                 const resExtrato = await fetch(`${SCRIPT_URL}?acao=get_ledger&token=${currentToken}&limite=50`);
                 const dataExtrato = await resExtrato.json();
+                console.log('Extrato:', dataExtrato);
                 if(dataExtrato.success) {
                     renderizarExtrato(dataExtrato.data);
                 }
             } catch(e) {
                 console.error('Erro ao carregar dados:', e);
+                showMessage('login-message', 'Erro ao carregar dados do usuário', 'error');
             } finally {
                 showLoading(false);
             }
@@ -370,24 +405,44 @@
 
         async function carregarPlaylist() {
             try {
+                console.log('Carregando playlist do YouTube...');
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${YT_PLAYLIST_ID}&key=${YT_API_KEY}`);
                 const data = await res.json();
+                console.log('Playlist carregada:', data.items.length, 'itens');
+                
                 playlist = data.items.map((item, index) => ({
                     id: item.snippet.resourceId.videoId,
                     title: item.snippet.title,
-                    thumb: item.snippet.thumbnails.high.url,
+                    thumb: item.snippet.thumbnails.high ? item.snippet.thumbnails.high.url : item.snippet.thumbnails.default.url,
                     price: 10.00 + (index * 2.5),
-                    description: item.snippet.description
+                    description: item.snippet.description,
+                    alreadyValorized: false // Nova propriedade para controlar valorização
                 }));
+                
+                // Inicializar controle de valorização para cada música
+                playlist.forEach((track, index) => {
+                    const key = `${currentUser.id}_${track.id}`;
+                    if (!musicaJaValorizou[key]) {
+                        musicaJaValorizou[key] = false;
+                    }
+                });
+                
                 renderizarMercado();
             } catch(e) {
                 console.error('Erro ao carregar playlist:', e);
+                // Fallback para músicas de exemplo se a API falhar
+                playlist = [
+                    { id: 'dQw4w9WgXcQ', title: 'Música Exemplo 1', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', price: 10.00, alreadyValorized: false },
+                    { id: 'dQw4w9WgXcQ', title: 'Música Exemplo 2', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', price: 15.00, alreadyValorized: false },
+                    { id: 'dQw4w9WgXcQ', title: 'Música Exemplo 3', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', price: 20.00, alreadyValorized: false }
+                ];
+                renderizarMercado();
             }
         }
 
         function renderizarMercado() {
             const container = document.getElementById('lista-musicas');
-            if(playlist.length === 0) {
+            if(!playlist || playlist.length === 0) {
                 container.innerHTML = '<p class="text-center text-secondary">Carregando músicas...</p>';
                 return;
             }
@@ -399,6 +454,7 @@
                         <div class="flex-grow-1 overflow-hidden">
                             <h6 class="text-truncate mb-0">${track.title}</h6>
                             <span class="text-success fw-bold">R$ ${track.price.toFixed(2)}</span>
+                            ${track.alreadyValorized ? '<span class="badge bg-success ms-2">✓ Valorizada</span>' : ''}
                         </div>
                         <button class="btn btn-miv btn-sm" onclick="abrirModalInvestimento(${index})">INVESTIR</button>
                     </div>
@@ -449,8 +505,11 @@
             if(!playlist[index]) return;
             
             currentIndex = index;
-            valorizou30s = false;
             const track = playlist[index];
+            
+            // Resetar flag de valorização apenas se a música não foi valorizada ainda
+            const valorizouKey = `${currentUser.id}_${track.id}`;
+            valorizou30s = musicaJaValorizou[valorizouKey] || false;
             
             document.getElementById('player-bar').style.display = 'block';
             document.getElementById('track-title').innerText = track.title;
@@ -485,18 +544,63 @@
                     const pct = (cur / dur) * 100;
                     document.getElementById('p-bar').style.width = pct + '%';
                     
-                    // Valorização simbólica após 30 segundos
-                    if (cur >= 30 && !valorizou30s && dur > 30) {
+                    // VALORIZAÇÃO FIXADA: Usuário ganha R$ 0,0000001 após 30 segundos, APENAS UMA VEZ por música
+                    if (cur >= 30 && !valorizou30s && dur > 30 && currentUser) {
                         valorizou30s = true;
-                        playlist[currentIndex].price += 0.05;
-                        document.getElementById('track-price').innerText = `Cota: R$ ${playlist[currentIndex].price.toFixed(2)}`;
+                        const track = playlist[currentIndex];
+                        const valorizouKey = `${currentUser.id}_${track.id}`;
+                        
+                        // Marcar que esta música já valorizou para este usuário
+                        musicaJaValorizou[valorizouKey] = true;
+                        track.alreadyValorized = true;
+                        
+                        // Aplicar valorização mínima (0,0000001)
+                        const valorizacao = 0.0000001;
+                        playlist[currentIndex].price += valorizacao;
+                        
+                        // Atualizar exibição
+                        document.getElementById('track-price').innerText = `Cota: R$ ${playlist[currentIndex].price.toFixed(8)}`;
                         renderizarMercado();
+                        
+                        // Mostrar notificação para o usuário
+                        showMessage('login-message', `🎵 +R$ ${valorizacao.toFixed(8)} por ouvir 30s de "${track.title}"!`, 'success');
+                        
+                        // Aqui você pode integrar com o backend para salvar a valorização
+                        salvarValorizacaoUsuario(valorizacao, track.title);
                     }
                 }
                 
                 if(player.getPlayerState() === YT.PlayerState.PLAYING) {
                     setTimeout(updateUI, 1000);
                 }
+            }
+        }
+
+        async function salvarValorizacaoUsuario(valor, nomeMusica) {
+            try {
+                if (!currentToken) return;
+                
+                const payload = {
+                    acao: 'adicionar_saldo',
+                    token: currentToken,
+                    valor: valor,
+                    descricao: `Valorização por ouvir: ${nomeMusica}`
+                };
+
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    console.log('Valorização salva no backend:', valor);
+                    // Atualizar saldo na interface
+                    carregarDadosUsuario();
+                }
+            } catch (e) {
+                console.error('Erro ao salvar valorização:', e);
             }
         }
 
@@ -563,6 +667,10 @@
             }
         }
 
+        function investir(index) {
+            abrirModalInvestimento(index);
+        }
+
         // ========== FUNÇÕES UTILITÁRIAS ==========
 
         function showLoading(show) {
@@ -573,7 +681,7 @@
             const element = document.getElementById(elementId);
             element.innerText = message;
             element.style.display = 'block';
-            element.className = `alert alert-${type === 'error' ? 'danger' : type} mt-3`;
+            element.className = `alert alert-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'success'} mt-3`;
             
             setTimeout(() => {
                 element.style.display = 'none';
@@ -596,15 +704,33 @@
             // Limpar mensagens
             document.getElementById('login-message').style.display = 'none';
             document.getElementById('reg-message').style.display = 'none';
+            
+            // Resetar campos se voltando para login
+            if (!show) {
+                document.getElementById('email').value = 'admin@miv.com';
+                document.getElementById('pass').value = 'admin123';
+            }
         }
 
         function checkArtist() {
             const tipo = document.getElementById('reg-tipo').value;
             document.getElementById('reg-link').style.display = (tipo === 'artista') ? 'block' : 'none';
+            
+            // Tornar obrigatório se for artista
+            if (tipo === 'artista') {
+                document.getElementById('reg-link').required = true;
+            } else {
+                document.getElementById('reg-link').required = false;
+            }
         }
 
-        function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        function openNav() { 
+            document.getElementById("mySidebar").style.width = "280px"; 
+        }
+        
+        function closeNav() { 
+            document.getElementById("mySidebar").style.width = "0"; 
+        }
         
         function changePage(pageId, btn) {
             document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
@@ -676,13 +802,39 @@
                     currentUser = JSON.parse(savedUser);
                     startApp();
                 } catch(e) {
+                    console.error('Erro ao restaurar sessão:', e);
                     localStorage.clear();
                 }
             }
             
+            // Preencher campos de login com valores padrão para testes
+            document.getElementById('email').value = 'admin@miv.com';
+            document.getElementById('pass').value = 'admin123';
+            
             // Event listener para quantidade de investimento
             document.getElementById('invest-quantidade').addEventListener('input', atualizarTotalInvestimento);
+            
+            // Adicionar validação ao formulário de registro
+            document.getElementById('reg-fields').querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('invalid', function(e) {
+                    e.preventDefault();
+                    showMessage('reg-message', 'Por favor, preencha todos os campos corretamente.', 'warning');
+                });
+            });
         });
+
+        // Função de teste para verificar conexão com o servidor
+        async function testarConexao() {
+            try {
+                const res = await fetch(`${SCRIPT_URL}?acao=health_check`);
+                const data = await res.json();
+                console.log('Teste de conexão:', data);
+                return data.success;
+            } catch (e) {
+                console.error('Falha no teste de conexão:', e);
+                return false;
+            }
+        }
     </script>
 </body>
 </html>
