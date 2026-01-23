@@ -9,88 +9,376 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        :root { --neon-green: #00ff88; --miv-blue: #0072ff; --bg-dark: #07090c; --bg-card: #111418; --border: #1e2329; }
-        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-dark); color: #ffffff; margin: 0; padding-bottom: 110px; overflow-x: hidden; }
+        :root { 
+            --neon-green: #00ff88; 
+            --miv-blue: #0072ff; 
+            --bg-dark: #07090c; 
+            --bg-card: #111418; 
+            --border: #1e2329; 
+        }
         
-        /* Telas de Acesso */
-        #auth-screen { position: fixed; inset: 0; z-index: 3000; background: var(--bg-dark); display: flex; align-items: center; justify-content: center; p: 20px; }
-        .glass-card { background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: 25px; width: 100%; max-width: 400px; }
-        .loading { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 3100; }
+        body { 
+            font-family: 'Outfit', sans-serif; 
+            background-color: var(--bg-dark); 
+            color: #ffffff; 
+            margin: 0; 
+            padding: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Telas de Acesso - CORRIGIDO */
+        #auth-screen { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            bottom: 0; 
+            z-index: 9999; 
+            background: var(--bg-dark); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .glass-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            padding: 30px; 
+            border-radius: 25px; 
+            width: 100%; 
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .loading { 
+            position: absolute; 
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10000; 
+        }
 
         /* Sidebar e Layout */
-        .sidebar { height: 100%; width: 0; position: fixed; z-index: 2000; top: 0; left: 0; background-color: #000; overflow-x: hidden; transition: 0.5s; padding-top: 60px; border-right: 1px solid var(--border); }
-        .sidebar a { padding: 15px 32px; text-decoration: none; font-size: 1.2rem; color: #818181; display: block; transition: 0.3s; }
-        .sidebar .closebtn { position: absolute; top: 10px; right: 25px; font-size: 36px; }
-
-        .miv-header { background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--bg-dark) 100%); padding: 20px; border-bottom: 1px solid var(--border); }
-        .miv-player { position: fixed; bottom: 75px; left: 0; width: 100%; background: rgba(17, 20, 24, 0.98); backdrop-filter: blur(20px); border-top: 1px solid var(--border); padding: 12px; z-index: 1500; }
-        .video-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; display: none; margin-bottom: 20px; }
-        .expanded .video-container { display: block; }
-        .miv-player.expanded { height: 100vh; bottom: 0; padding-top: 40px; }
-
-        .progress-container { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; cursor: pointer; margin: 10px 0; }
-        .progress-bar { height: 100%; background: var(--neon-green); width: 0%; border-radius: 10px; }
+        .sidebar { 
+            height: 100%; 
+            width: 0; 
+            position: fixed; 
+            z-index: 2000; 
+            top: 0; 
+            left: 0; 
+            background-color: #000; 
+            overflow-x: hidden; 
+            transition: 0.5s; 
+            padding-top: 60px; 
+            border-right: 1px solid var(--border); 
+        }
         
-        .music-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; padding: 12px; transition: 0.3s; }
-        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #000; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--border); z-index: 1600; }
-        .nav-item { color: #888; border: none; background: none; font-size: 0.75rem; }
-        .nav-item.active { color: var(--neon-green); }
-        .section-page { display: none; }
-        .section-page.active { display: block; }
-        .btn-miv { background: var(--neon-green); color: #000; font-weight: 700; border: none; border-radius: 8px; padding: 8px 16px; }
-        .alert-success { background: rgba(0, 255, 136, 0.1); border-color: var(--neon-green); color: var(--neon-green); }
+        .sidebar a { 
+            padding: 15px 32px; 
+            text-decoration: none; 
+            font-size: 1.2rem; 
+            color: #818181; 
+            display: block; 
+            transition: 0.3s; 
+        }
+        
+        .sidebar .closebtn { 
+            position: absolute; 
+            top: 10px; 
+            right: 25px; 
+            font-size: 36px; 
+        }
+
+        .miv-header { 
+            background: linear-gradient(180deg, rgba(0,255,136,0.1) 0%, var(--bg-dark) 100%); 
+            padding: 20px; 
+            border-bottom: 1px solid var(--border); 
+        }
+        
+        .miv-player { 
+            position: fixed; 
+            bottom: 75px; 
+            left: 0; 
+            width: 100%; 
+            background: rgba(17, 20, 24, 0.98); 
+            backdrop-filter: blur(20px); 
+            border-top: 1px solid var(--border); 
+            padding: 12px; 
+            z-index: 1500; 
+        }
+        
+        .video-container { 
+            width: 100%; 
+            aspect-ratio: 16/9; 
+            background: #000; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            display: none; 
+            margin-bottom: 20px; 
+        }
+        
+        .expanded .video-container { 
+            display: block; 
+        }
+        
+        .miv-player.expanded { 
+            height: 100vh; 
+            bottom: 0; 
+            padding-top: 40px; 
+        }
+
+        .progress-container { 
+            height: 6px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 10px; 
+            cursor: pointer; 
+            margin: 10px 0; 
+        }
+        
+        .progress-bar { 
+            height: 100%; 
+            background: var(--neon-green); 
+            width: 0%; 
+            border-radius: 10px; 
+        }
+        
+        .music-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: 15px; 
+            padding: 12px; 
+            transition: 0.3s; 
+        }
+        
+        .bottom-nav { 
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: #000; 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 12px 0; 
+            border-top: 1px solid var(--border); 
+            z-index: 1600; 
+        }
+        
+        .nav-item { 
+            color: #888; 
+            border: none; 
+            background: none; 
+            font-size: 0.75rem; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 5px 0;
+        }
+        
+        .nav-item.active { 
+            color: var(--neon-green); 
+        }
+        
+        .section-page { 
+            display: none; 
+        }
+        
+        .section-page.active { 
+            display: block; 
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .btn-miv { 
+            background: var(--neon-green); 
+            color: #000; 
+            font-weight: 700; 
+            border: none; 
+            border-radius: 8px; 
+            padding: 8px 16px; 
+            transition: all 0.3s ease;
+        }
+        
+        .btn-miv:hover {
+            background: #00cc6a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 136, 0.2);
+        }
+        
+        .alert-success { 
+            background: rgba(0, 255, 136, 0.1); 
+            border-color: var(--neon-green); 
+            color: var(--neon-green); 
+        }
+        
+        /* Animações */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Correção para inputs em modo escuro */
+        .form-control.bg-dark, .form-select.bg-dark {
+            background-color: #0d1117 !important;
+            border-color: #30363d !important;
+            color: #ffffff !important;
+        }
+        
+        .form-control.bg-dark:focus, .form-select.bg-dark:focus {
+            background-color: #0d1117 !important;
+            border-color: var(--neon-green) !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 136, 0.25);
+        }
+        
+        /* Melhorias para o modal de autenticação */
+        #auth-forms input, #auth-forms select {
+            margin-bottom: 15px;
+        }
+        
+        #auth-forms .form-control, #auth-forms .form-select {
+            padding: 12px 15px;
+            font-size: 16px;
+        }
+        
+        /* Correção para o select */
+        .form-select {
+            appearance: auto;
+            -webkit-appearance: auto;
+            -moz-appearance: auto;
+        }
+        
+        /* Estilo para links */
+        .text-success {
+            color: var(--neon-green) !important;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .text-success:hover {
+            text-decoration: underline;
+        }
+        
+        /* Badges */
+        .badge {
+            font-size: 0.7rem !important;
+            padding: 4px 8px;
+        }
+        
+        /* Container principal */
+        .container {
+            padding-bottom: 80px;
+        }
     </style>
 </head>
 <body>
 
     <div id="loading-screen" class="loading" style="display: none;">
         <div class="text-center">
-            <div class="spinner-border text-success mb-3"></div>
-            <p class="text-success">Conectando ao MIV Ledger...</p>
+            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;"></div>
+            <p class="text-success fs-5">Conectando ao MIV Ledger...</p>
         </div>
     </div>
 
+    <!-- TELA DE AUTENTICAÇÃO - VISÍVEL INICIALMENTE -->
     <div id="auth-screen">
         <div class="glass-card">
             <div class="text-center mb-4">
-                <div class="d-inline-block p-3 rounded-4 bg-success mb-3" style="--bs-bg-opacity: .2;">
+                <div class="d-inline-block p-3 rounded-4 mb-3" style="background: rgba(0, 255, 136, 0.1);">
                     <i class="bi bi-shield-lock text-success fs-1"></i>
                 </div>
-                <h3 class="fw-bold">MIV LEDGER</h3>
+                <h3 class="fw-bold text-white">MIV LEDGER</h3>
                 <p class="text-secondary small">Autenticação de Segurança Obrigatória</p>
             </div>
             
             <div id="auth-forms">
+                <!-- FORMULÁRIO DE LOGIN (VISÍVEL INICIALMENTE) -->
                 <div id="login-fields">
-                    <div id="login-message" class="alert alert-success" style="display: none;"></div>
-                    <input type="email" id="email" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Seu E-mail">
-                    <input type="password" id="pass" class="form-control bg-dark text-white border-secondary mb-3 p-3" placeholder="Sua Senha">
-                    <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleLogin()">ENTRAR NO SISTEMA</button>
-                    <p class="text-center small text-secondary">Novo aqui? <a href="#" class="text-success" onclick="toggleReg(true)">Criar Conta MIV</a></p>
+                    <div id="login-message" class="alert" style="display: none; background: rgba(0, 255, 136, 0.1); border-color: var(--neon-green); color: var(--neon-green);"></div>
+                    
+                    <div class="mb-3">
+                        <input type="email" id="email" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="Seu E-mail" required autocomplete="email">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="password" id="pass" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="Sua Senha" required autocomplete="current-password">
+                    </div>
+                    
+                    <button class="btn btn-miv w-100 py-3 mb-3" onclick="handleLogin()">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>ENTRAR NO SISTEMA
+                    </button>
+                    
+                    <p class="text-center small text-secondary">
+                        Novo aqui? 
+                        <a href="javascript:void(0)" class="text-success fw-bold" onclick="toggleReg(true)">
+                            Criar Conta MIV
+                        </a>
+                    </p>
                 </div>
 
+                <!-- FORMULÁRIO DE REGISTRO (OCULTO INICIALMENTE) -->
                 <div id="reg-fields" style="display: none;">
-                    <div id="reg-message" class="alert alert-success" style="display: none;"></div>
-                    <input type="text" id="reg-nome" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Nome Completo">
-                    <input type="email" id="reg-email" class="form-control bg-dark text-white border-secondary mb-2" placeholder="E-mail">
-                    <input type="password" id="reg-pass" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Senha">
-                    <select id="reg-tipo" class="form-select bg-dark text-white border-secondary mb-2" onchange="checkArtist()">
-                        <option value="ouvinte">Perfil: Ouvinte</option>
-                        <option value="artista">Perfil: Artista</option>
-                    </select>
-                    <input type="url" id="reg-link" class="form-control bg-dark text-info border-info mb-3" style="display:none;" placeholder="Link do seu último trabalho (Obrigatório)">
+                    <div id="reg-message" class="alert" style="display: none; background: rgba(0, 255, 136, 0.1); border-color: var(--neon-green); color: var(--neon-green);"></div>
                     
-                    <button class="btn btn-miv w-100 p-3 mb-3" onclick="handleRegister()">SOLICITAR ACESSO</button>
-                    <p class="text-center small text-secondary">Já tem conta? <a href="#" class="text-success" onclick="toggleReg(false)">Fazer Login</a></p>
+                    <div class="mb-3">
+                        <input type="text" id="reg-nome" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="Nome Completo" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="email" id="reg-email" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="E-mail" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <input type="password" id="reg-pass" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="Senha" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <select id="reg-tipo" class="form-select bg-dark text-white border-secondary" onchange="checkArtist()" required>
+                            <option value="">Selecione seu perfil...</option>
+                            <option value="ouvinte">Ouvinte</option>
+                            <option value="artista">Artista</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="reg-link-container" style="display:none;">
+                        <input type="url" id="reg-link" class="form-control bg-dark text-white border-info" 
+                               placeholder="Link do seu último trabalho (YouTube, Spotify, etc.)">
+                        <small class="text-info">Para artistas: informe um link do seu trabalho</small>
+                    </div>
+                    
+                    <button class="btn btn-miv w-100 py-3 mb-3" onclick="handleRegister()">
+                        <i class="bi bi-person-plus me-2"></i>SOLICITAR ACESSO
+                    </button>
+                    
+                    <p class="text-center small text-secondary">
+                        Já tem conta? 
+                        <a href="javascript:void(0)" class="text-success fw-bold" onclick="toggleReg(false)">
+                            Fazer Login
+                        </a>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- APLICAÇÃO PRINCIPAL (OCULTA INICIALMENTE) -->
     <div id="main-app" style="display: none;">
+        <!-- SIDEBAR -->
         <div id="mySidebar" class="sidebar">
-            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-            <h4 class="text-white px-4 mb-4 font-black italic">MIV PRO</h4>
+            <a href="javascript:void(0)" class="closebtn text-white" onclick="closeNav()">&times;</a>
+            <h4 class="text-white px-4 mb-4 fw-bold">MIV PRO</h4>
             <a href="#" onclick="changePage('explorar')"><i class="bi bi-house me-2"></i> Início</a>
             <a href="#" onclick="changePage('carteira')"><i class="bi bi-graph-up me-2"></i> Investimentos</a>
             <a href="#" onclick="changePage('extrato')"><i class="bi bi-receipt me-2"></i> Extrato Ledger</a>
@@ -100,49 +388,76 @@
             <a href="#" onclick="logout()" class="text-danger"><i class="bi bi-box-arrow-right me-2"></i> Sair</a>
         </div>
 
+        <!-- HEADER -->
         <header class="miv-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <button class="btn text-white fs-3 me-2" onclick="openNav()"><i class="bi bi-list"></i></button>
+                <button class="btn text-white fs-3 me-2" onclick="openNav()" style="background: none; border: none;">
+                    <i class="bi bi-list"></i>
+                </button>
                 <div>
-                    <small class="text-secondary uppercase fw-bold" style="font-size: 0.6rem;">CRÉDITO INTERNO</small>
+                    <small class="text-secondary" style="font-size: 0.6rem;">CRÉDITO INTERNO</small>
                     <h4 class="fw-bold mb-0 text-success" id="saldo-display">R$ 0,00</h4>
                 </div>
             </div>
             <div class="text-end">
-                <span id="badge-tipo" class="badge rounded-pill bg-secondary text-uppercase" style="font-size: 0.5rem;">Ouvinte</span>
+                <span id="badge-tipo" class="badge rounded-pill bg-secondary">Ouvinte</span>
             </div>
         </header>
 
+        <!-- CONTEÚDO PRINCIPAL -->
         <div class="container mt-4">
+            <!-- MARKETPLACE -->
             <section id="explorar" class="section-page active">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0 italic">MARKETPLACE</h5>
+                    <h5 class="fw-bold mb-0">MARKETPLACE</h5>
                     <span class="text-secondary small">Regra: 0% Taxa Compra</span>
                 </div>
-                <div id="lista-musicas" class="row g-3"></div>
+                <div id="lista-musicas" class="row g-3">
+                    <div class="col-12 text-center">
+                        <div class="spinner-border text-success"></div>
+                        <p class="text-secondary mt-2">Carregando músicas...</p>
+                    </div>
+                </div>
             </section>
 
+            <!-- CARTEIRA -->
             <section id="carteira" class="section-page">
                 <div class="card bg-dark border-secondary p-4 text-center mb-4">
                     <h6 class="text-secondary">PATRIMÔNIO CUSTODIADO</h6>
                     <h2 id="valor-ativos" class="text-success">R$ 0,00</h2>
                 </div>
                 <h6 class="mb-3">MEUS ATIVOS</h6>
-                <div id="meus-ativos" class="row g-3"></div>
+                <div id="meus-ativos" class="row g-3">
+                    <div class="col-12 text-center">
+                        <p class="text-secondary">Nenhum ativo na carteira</p>
+                    </div>
+                </div>
             </section>
 
+            <!-- EXTRATO -->
             <section id="extrato" class="section-page">
-                <h5 class="fw-bold mb-4 italic text-uppercase">Log de Auditoria</h5>
+                <h5 class="fw-bold mb-4">Log de Auditoria</h5>
                 <div class="table-responsive">
                     <table class="table table-dark table-hover small">
-                        <thead><tr class="text-secondary"><th>DATA</th><th>EVENTO</th><th class="text-end">VALOR</th></tr></thead>
-                        <tbody id="ledger-list"></tbody>
+                        <thead>
+                            <tr class="text-secondary">
+                                <th>DATA</th>
+                                <th>EVENTO</th>
+                                <th class="text-end">VALOR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-list">
+                            <tr>
+                                <td colspan="3" class="text-center text-secondary">Nenhuma transação</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </section>
 
+            <!-- PAINEL ARTISTA -->
             <section id="artistas" class="section-page">
-                <h5 class="fw-bold mb-3 italic">PAINEL ARTISTA</h5>
+                <h5 class="fw-bold mb-3">PAINEL ARTISTA</h5>
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <div class="card bg-dark border-success h-100">
@@ -174,18 +489,27 @@
                 </div>
                 
                 <div class="mt-4">
-                    <button class="btn btn-miv mb-3" onclick="abrirModalCadastroMusica()"><i class="bi bi-plus-circle me-2"></i> Cadastrar Nova Música</button>
-                    <div id="lista-musicas-artista" class="row g-3"></div>
+                    <button class="btn btn-miv mb-3" onclick="abrirModalCadastroMusica()">
+                        <i class="bi bi-plus-circle me-2"></i> Cadastrar Nova Música
+                    </button>
+                    <div id="lista-musicas-artista" class="row g-3">
+                        <div class="col-12 text-center">
+                            <p class="text-secondary">Nenhuma música cadastrada</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
 
+        <!-- PLAYER DE MÚSICA -->
         <div id="player-bar" class="miv-player" style="display: none;">
             <div class="container">
-                <div class="video-container" id="video-box"><div id="yt-placeholder"></div></div>
+                <div class="video-container" id="video-box">
+                    <div id="yt-placeholder"></div>
+                </div>
                 <div class="row align-items-center" onclick="handlePlayerClick(event)">
                     <div class="col-8 d-flex align-items-center" style="cursor: pointer;">
-                        <img src="" id="track-img" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover;">
+                        <img src="" id="track-img" style="width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: #222;">
                         <div class="ms-3 overflow-hidden">
                             <div class="fw-bold text-truncate" id="track-title" style="font-size: 0.9rem;">---</div>
                             <div class="text-success small fw-bold" id="track-price">Cota: R$ 0,00</div>
@@ -196,35 +520,48 @@
                         <i class="bi bi-chevron-up ms-2 text-secondary" id="expand-icon"></i>
                     </div>
                 </div>
-                <div class="progress-container" onclick="seekTrack(event)"><div class="progress-bar" id="p-bar"></div></div>
+                <div class="progress-container" onclick="seekTrack(event)">
+                    <div class="progress-bar" id="p-bar"></div>
+                </div>
                 <div class="d-flex justify-content-center gap-4 mt-2">
-                    <i class="bi bi-skip-start-fill h2" onclick="playNext(-1)"></i>
-                    <i class="bi bi-play-circle-fill h1" id="btn-play-pause" onclick="togglePlay()"></i>
-                    <i class="bi bi-skip-end-fill h2" onclick="playNext(1)"></i>
+                    <i class="bi bi-skip-start-fill h2 text-white" onclick="playNext(-1)"></i>
+                    <i class="bi bi-play-circle-fill h1 text-success" id="btn-play-pause" onclick="togglePlay()"></i>
+                    <i class="bi bi-skip-end-fill h2 text-white" onclick="playNext(1)"></i>
                 </div>
             </div>
         </div>
 
+        <!-- NAVEGAÇÃO INFERIOR -->
         <nav class="bottom-nav">
-            <button class="nav-item active" onclick="changePage('explorar', this)"><i class="bi bi-search d-block fs-4"></i>Market</button>
-            <button class="nav-item" onclick="changePage('carteira', this)"><i class="bi bi-briefcase d-block fs-4"></i>Carteira</button>
-            <button class="nav-item" onclick="changePage('extrato', this)"><i class="bi bi-receipt d-block fs-4"></i>Extrato</button>
+            <button class="nav-item active" onclick="changePage('explorar', this)">
+                <i class="bi bi-search d-block fs-4 mb-1"></i>
+                <span>Market</span>
+            </button>
+            <button class="nav-item" onclick="changePage('carteira', this)">
+                <i class="bi bi-briefcase d-block fs-4 mb-1"></i>
+                <span>Carteira</span>
+            </button>
+            <button class="nav-item" onclick="changePage('extrato', this)">
+                <i class="bi bi-receipt d-block fs-4 mb-1"></i>
+                <span>Extrato</span>
+            </button>
         </nav>
     </div>
 
-    <!-- Modal de Investimento -->
-    <div class="modal fade" id="investModal" tabindex="-1">
+    <!-- MODAL DE INVESTIMENTO -->
+    <div class="modal fade" id="investModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border border-success">
                 <div class="modal-header border-secondary">
                     <h5 class="modal-title text-success">INVESTIR EM MÚSICA</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="modal-track-title" class="fw-bold"></p>
+                    <p id="modal-track-title" class="fw-bold text-white mb-3"></p>
                     <div class="input-group mb-3">
                         <span class="input-group-text bg-dark text-white border-secondary">Quantidade</span>
-                        <input type="number" id="invest-quantidade" class="form-control bg-dark text-white border-secondary" value="1" min="1" step="1">
+                        <input type="number" id="invest-quantidade" class="form-control bg-dark text-white border-secondary" 
+                               value="1" min="1" step="1">
                     </div>
                     <div class="d-flex justify-content-between mb-3">
                         <span class="text-secondary">Preço unitário:</span>
@@ -234,7 +571,7 @@
                         <span class="text-secondary">Total:</span>
                         <span id="modal-total-price" class="text-success fw-bold">R$ 0,00</span>
                     </div>
-                    <div class="alert alert-info small">
+                    <div class="alert alert-info small" style="background: rgba(13, 110, 253, 0.1); border-color: #0d6efd; color: #0d6efd;">
                         <i class="bi bi-info-circle me-2"></i>
                         Cada ação representa 0.01% de participação nos royalties
                     </div>
@@ -246,22 +583,24 @@
         </div>
     </div>
 
-    <!-- Modal Cadastro Música -->
-    <div class="modal fade" id="modalCadastroMusica" tabindex="-1">
+    <!-- MODAL CADASTRO MÚSICA -->
+    <div class="modal fade" id="modalCadastroMusica" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content bg-dark border border-info">
                 <div class="modal-header border-secondary">
                     <h5 class="modal-title text-info">CADASTRAR NOVA MÚSICA</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label text-secondary">Título da Música</label>
-                        <input type="text" id="cad-titulo" class="form-control bg-dark text-white border-secondary" placeholder="Ex: Minha Nova Música">
+                        <input type="text" id="cad-titulo" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="Ex: Minha Nova Música" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Gênero Musical</label>
-                        <select id="cad-genero" class="form-select bg-dark text-white border-secondary">
+                        <select id="cad-genero" class="form-select bg-dark text-white border-secondary" required>
+                            <option value="">Selecione um gênero...</option>
                             <option value="POP">POP</option>
                             <option value="HIPHOP_RAP">HIP HOP / RAP</option>
                             <option value="ROCK">ROCK</option>
@@ -274,24 +613,30 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Duração (segundos)</label>
-                        <input type="number" id="cad-duracao" class="form-control bg-dark text-white border-secondary" placeholder="180" min="30" max="600">
+                        <input type="number" id="cad-duracao" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="180" min="30" max="600" value="180">
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Link do YouTube</label>
-                        <input type="url" id="cad-youtube" class="form-control bg-dark text-white border-secondary" placeholder="https://youtube.com/...">
+                        <input type="url" id="cad-youtube" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="https://youtube.com/..." required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Link da Capa</label>
-                        <input type="url" id="cad-capa" class="form-control bg-dark text-white border-secondary" placeholder="https://imagem.com/capa.jpg">
+                        <input type="url" id="cad-capa" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="https://imagem.com/capa.jpg">
+                        <small class="text-secondary">(Opcional)</small>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Valor por Ação</label>
-                        <input type="number" id="cad-valor-acao" class="form-control bg-dark text-white border-secondary" placeholder="10.00" min="1" step="0.01">
+                        <input type="number" id="cad-valor-acao" class="form-control bg-dark text-white border-secondary" 
+                               placeholder="10.00" min="1" step="0.01" value="10.00" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-secondary">Percentual Disponível para Venda</label>
                         <div class="input-group">
-                            <input type="number" id="cad-percentual" class="form-control bg-dark text-white border-secondary" value="20" min="1" max="100">
+                            <input type="number" id="cad-percentual" class="form-control bg-dark text-white border-secondary" 
+                                   value="20" min="1" max="100" required>
                             <span class="input-group-text bg-dark text-white border-secondary">%</span>
                         </div>
                         <small class="text-secondary">(Você mantém os royalties sobre esta porcentagem)</small>
@@ -311,18 +656,28 @@
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBczyTkiqYCGcFlPhdwRpi2aF4SInn7QBa0VhkIM30Ndv9XR7bj26XAAT2a2eDMTJw/exec";
         const YT_API_KEY = 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM';
 
-        let player, playlist = [], currentIndex = 0, currentUser = null, currentToken = null;
+        // VARIÁVEIS GLOBAIS
+        let player = null;
+        let playlist = [];
+        let currentIndex = 0;
+        let currentUser = null;
+        let currentToken = null;
         let valorizou30s = false;
         let investTrackIndex = null;
-        const modalInvest = new bootstrap.Modal(document.getElementById('investModal'));
-        const modalCadastro = new bootstrap.Modal(document.getElementById('modalCadastroMusica'));
+        
+        // MODAIS
+        let modalInvest = null;
+        let modalCadastro = null;
 
         // ========== FUNÇÕES DE AUTENTICAÇÃO ==========
 
         async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            if(!email || !pass) return showMessage('login-message', 'Preencha todos os campos!', 'warning');
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            
+            if(!email || !pass) {
+                return showMessage('login-message', 'Preencha todos os campos!', 'warning');
+            }
 
             showLoading(true);
             try {
@@ -332,8 +687,12 @@
                 if(data.success) {
                     currentUser = data.data;
                     currentToken = data.data.token;
+                    
+                    // Salvar no localStorage
                     localStorage.setItem('miv_token', currentToken);
                     localStorage.setItem('miv_user', JSON.stringify(currentUser));
+                    
+                    // Iniciar aplicação
                     startApp();
                 } else {
                     showMessage('login-message', data.message || 'Credenciais inválidas!', 'error');
@@ -347,18 +706,23 @@
         }
 
         async function handleRegister() {
-            const nome = document.getElementById('reg-nome').value;
-            const email = document.getElementById('reg-email').value;
-            const pass = document.getElementById('reg-pass').value;
+            const nome = document.getElementById('reg-nome').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value.trim();
             const tipo = document.getElementById('reg-tipo').value;
-            const link = document.getElementById('reg-link').value;
+            const link = document.getElementById('reg-link').value.trim();
 
+            // Validação
             if(!nome || !email || !pass || !tipo) {
                 return showMessage('reg-message', 'Preencha todos os campos obrigatórios!', 'warning');
             }
 
             if(tipo === 'artista' && !link) {
                 return showMessage('reg-message', 'Artistas devem fornecer link do trabalho!', 'warning');
+            }
+
+            if(!validateEmail(email)) {
+                return showMessage('reg-message', 'Digite um e-mail válido!', 'warning');
             }
 
             showLoading(true);
@@ -382,7 +746,15 @@
                 
                 if(data.success) {
                     showMessage('reg-message', 'Conta criada com sucesso! Aguarde aprovação dos administradores.', 'success');
-                    document.getElementById('reg-fields').querySelectorAll('input').forEach(input => input.value = '');
+                    
+                    // Limpar campos
+                    document.getElementById('reg-nome').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-pass').value = '';
+                    document.getElementById('reg-tipo').value = '';
+                    document.getElementById('reg-link').value = '';
+                    
+                    // Voltar para login após 3 segundos
                     setTimeout(() => toggleReg(false), 3000);
                 } else {
                     showMessage('reg-message', data.message || 'Erro ao criar conta.', 'error');
@@ -396,33 +768,52 @@
         }
 
         function startApp() {
+            // Esconder tela de autenticação
             document.getElementById('auth-screen').style.display = 'none';
+            
+            // Mostrar aplicação principal
             document.getElementById('main-app').style.display = 'block';
             
             // Configurar badge do usuário
             const tipo = currentUser.tipo || 'ouvinte';
-            document.getElementById('badge-tipo').innerText = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            const tipoFormatado = tipo.charAt(0).toUpperCase() + tipo.slice(1);
+            document.getElementById('badge-tipo').innerText = tipoFormatado;
             
+            // Definir cor do badge
             let badgeClass = 'bg-secondary';
             if(tipo === 'admin') badgeClass = 'bg-danger';
             else if(tipo === 'artista') badgeClass = 'bg-info';
             
-            document.getElementById('badge-tipo').className = `badge rounded-pill ${badgeClass} text-uppercase`;
+            document.getElementById('badge-tipo').className = `badge rounded-pill ${badgeClass}`;
             
             // Mostrar link do painel artista se for artista
             if(tipo === 'artista' || tipo === 'admin') {
                 document.getElementById('artista-link').style.display = 'block';
+                
+                // Adicionar botão no bottom-nav
                 const bottomNav = document.querySelector('.bottom-nav');
-                bottomNav.innerHTML += `
-                    <button class="nav-item" onclick="changePage('artistas', this)" id="artista-nav-btn">
-                        <i class="bi bi-mic d-block fs-4"></i>Artista
-                    </button>
-                `;
+                if (!document.getElementById('artista-nav-btn')) {
+                    const artistaBtn = document.createElement('button');
+                    artistaBtn.className = 'nav-item';
+                    artistaBtn.id = 'artista-nav-btn';
+                    artistaBtn.innerHTML = '<i class="bi bi-mic d-block fs-4 mb-1"></i><span>Artista</span>';
+                    artistaBtn.onclick = (e) => changePage('artistas', e.currentTarget);
+                    bottomNav.appendChild(artistaBtn);
+                }
             }
             
+            // Inicializar modais
+            modalInvest = new bootstrap.Modal(document.getElementById('investModal'));
+            modalCadastro = new bootstrap.Modal(document.getElementById('modalCadastroMusica'));
+            
+            // Carregar dados do usuário
             carregarDadosUsuario();
+            
+            // Carregar músicas
             carregarMusicas();
         }
+
+        // ========== FUNÇÕES DE CARREGAMENTO ==========
 
         async function carregarDadosUsuario() {
             showLoading(true);
@@ -432,7 +823,7 @@
                 const dataSaldo = await resSaldo.json();
                 
                 if(dataSaldo.success) {
-                    document.getElementById('saldo-display').innerText = `R$ ${dataSaldo.data.saldo.toFixed(2)}`;
+                    document.getElementById('saldo-display').innerText = `R$ ${parseFloat(dataSaldo.data.saldo || 0).toFixed(2)}`;
                 }
 
                 // Carregar resumo carteira
@@ -440,7 +831,7 @@
                 const dataResumo = await resResumo.json();
                 
                 if(dataResumo.success) {
-                    document.getElementById('valor-ativos').innerText = `R$ ${dataResumo.data.patrimonio.toFixed(2)}`;
+                    document.getElementById('valor-ativos').innerText = `R$ ${parseFloat(dataResumo.data.patrimonio || 0).toFixed(2)}`;
                 }
 
                 // Carregar carteira detalhada
@@ -524,37 +915,48 @@
                 renderizarMercado();
             } catch(e) {
                 console.error('Erro ao carregar playlist:', e);
+                renderizarMercado(); // Renderizar vazio
             }
         }
 
         function renderizarMercado() {
             const container = document.getElementById('lista-musicas');
+            if(!container) return;
+            
             if(playlist.length === 0) {
-                container.innerHTML = '<p class="text-center text-secondary">Nenhuma música disponível para investimento.</p>';
+                container.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">Nenhuma música disponível para investimento.</p></div>';
                 return;
             }
             
             container.innerHTML = playlist.map((track, index) => `
                 <div class="col-12 col-md-6">
                     <div class="music-card d-flex align-items-center">
-                        <img src="${track.thumb || track.LINK_CAPA}" class="rounded me-3" style="width: 65px; height: 65px; object-fit: cover; cursor: pointer" onclick="tocarMusica(${index})">
+                        <img src="${track.thumb || track.LINK_CAPA || 'https://via.placeholder.com/65x65/111418/00ff88?text=MIV'}" 
+                             class="rounded me-3" 
+                             style="width: 65px; height: 65px; object-fit: cover; cursor: pointer" 
+                             onclick="tocarMusica(${index})"
+                             onerror="this.src='https://via.placeholder.com/65x65/111418/00ff88?text=MIV'">
                         <div class="flex-grow-1 overflow-hidden">
-                            <h6 class="text-truncate mb-0">${track.title || track.TITULO}</h6>
+                            <h6 class="text-truncate mb-0 text-white">${track.title || track.TITULO || 'Música Sem Título'}</h6>
                             <small class="text-secondary">${track.artista || track.ARTISTA || "Artista"}</small>
                             <div>
                                 <span class="text-success fw-bold">R$ ${(track.price || track.VALOR_ACAO || 0).toFixed(2)}</span>
                                 <small class="text-info ms-2">${track.percentual || track.PERCENTUAL_DISPONIVEL || 0}% disponível</small>
                             </div>
                         </div>
-                        <button class="btn btn-miv btn-sm" onclick="abrirModalInvestimento(${index})">INVESTIR</button>
+                        <button class="btn btn-miv btn-sm" onclick="abrirModalInvestimento(${index})">
+                            INVESTIR
+                        </button>
                     </div>
                 </div>`).join('');
         }
 
         function renderizarCarteira(ativos) {
             const container = document.getElementById('meus-ativos');
+            if(!container) return;
+            
             if(!ativos || ativos.length === 0) {
-                container.innerHTML = '<p class="text-center text-secondary">Nenhum ativo na carteira</p>';
+                container.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">Nenhum ativo na carteira</p></div>';
                 return;
             }
             
@@ -562,7 +964,7 @@
                 <div class="col-12">
                     <div class="music-card d-flex align-items-center">
                         <div class="flex-grow-1">
-                            <h6 class="mb-1">${ativo.MUSICA_NOME || ativo.ATIVO || 'Ativo'}</h6>
+                            <h6 class="mb-1 text-white">${ativo.MUSICA_NOME || ativo.ATIVO || 'Ativo'}</h6>
                             <div class="d-flex justify-content-between small">
                                 <span>${ativo.QUANTIDADE || ativo.QUANTIDADE_ACOES || 0} cotas</span>
                                 <span class="text-success">R$ ${parseFloat(ativo.VALOR_TOTAL || ativo.VALOR_ATUAL || 0).toFixed(2)}</span>
@@ -578,6 +980,8 @@
 
         function renderizarExtrato(transacoes) {
             const container = document.getElementById('ledger-list');
+            if(!container) return;
+            
             if(!transacoes || transacoes.length === 0) {
                 container.innerHTML = '<tr><td colspan="3" class="text-center text-secondary">Nenhuma transação</td></tr>';
                 return;
@@ -585,7 +989,7 @@
             
             container.innerHTML = transacoes.map(t => `
                 <tr>
-                    <td class="small">${formatDate(t.DATA || t.DATA_HORA)}</td>
+                    <td class="small">${formatDate(t.DATA || t.DATA_HORA || new Date())}</td>
                     <td>${t.DESCRICAO || t.EVENTO || 'Transação'}</td>
                     <td class="text-end ${parseFloat(t.VALOR || t.SALDO || 0) >= 0 ? 'text-success' : 'text-danger'}">
                         R$ ${Math.abs(parseFloat(t.VALOR || t.SALDO || 0)).toFixed(2)}
@@ -595,8 +999,10 @@
 
         function renderizarMusicasArtista(musicas) {
             const container = document.getElementById('lista-musicas-artista');
+            if(!container) return;
+            
             if(!musicas || musicas.length === 0) {
-                container.innerHTML = '<p class="text-center text-secondary">Nenhuma música cadastrada.</p>';
+                container.innerHTML = '<div class="col-12 text-center"><p class="text-secondary">Nenhuma música cadastrada.</p></div>';
                 return;
             }
             
@@ -604,16 +1010,19 @@
                 <div class="col-12 col-md-6">
                     <div class="music-card">
                         <div class="d-flex align-items-start">
-                            <img src="${musica.LINK_CAPA}" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                            <img src="${musica.LINK_CAPA || 'https://via.placeholder.com/60x60/111418/00ff88?text=MIV'}" 
+                                 class="rounded me-3" 
+                                 style="width: 60px; height: 60px; object-fit: cover;"
+                                 onerror="this.src='https://via.placeholder.com/60x60/111418/00ff88?text=MIV'">
                             <div class="flex-grow-1">
-                                <h6 class="mb-1">${musica.TITULO}</h6>
+                                <h6 class="mb-1 text-white">${musica.TITULO || 'Sem Título'}</h6>
                                 <div class="d-flex justify-content-between small">
-                                    <span class="text-secondary">${musica.GÊNERO}</span>
-                                    <span class="text-info">${musica.PERCENTUAL_DISPONIVEL}% disponível</span>
+                                    <span class="text-secondary">${musica.GÊNERO || 'Não informado'}</span>
+                                    <span class="text-info">${musica.PERCENTUAL_DISPONIVEL || 0}% disponível</span>
                                 </div>
                                 <div class="d-flex justify-content-between mt-2">
                                     <div>
-                                        <small class="text-success">R$ ${parseFloat(musica.VALOR_ACAO).toFixed(2)}/ação</small>
+                                        <small class="text-success">R$ ${parseFloat(musica.VALOR_ACAO || 0).toFixed(2)}/ação</small>
                                     </div>
                                     <div>
                                         <small class="text-warning">${musica.AÇÕES_VENDIDAS || 0} vendidas</small>
@@ -637,19 +1046,23 @@
             valorizou30s = false;
             const track = playlist[index];
             
-            document.getElementById('player-bar').style.display = 'block';
-            document.getElementById('track-title').innerText = track.title || track.TITULO;
-            document.getElementById('track-img').src = track.thumb || track.LINK_CAPA;
+            // Mostrar player
+            const playerBar = document.getElementById('player-bar');
+            playerBar.style.display = 'block';
+            
+            // Atualizar informações
+            document.getElementById('track-title').innerText = track.title || track.TITULO || 'Música';
+            document.getElementById('track-img').src = track.thumb || track.LINK_CAPA || 'https://via.placeholder.com/50x50/111418/00ff88?text=MIV';
             document.getElementById('track-price').innerText = `Cota: R$ ${(track.price || track.VALOR_ACAO || 0).toFixed(2)}`;
             
-            // Verificar se tem ID do YouTube ou usar link do vídeo
-            if(track.id) {
-                if(player && player.loadVideoById) {
-                    player.loadVideoById(track.id);
-                }
-            } else if(track.youtube_id || (track.LINK_YOUTUBE && track.LINK_YOUTUBE.includes('youtube.com/watch?v='))) {
-                const videoId = track.youtube_id || track.LINK_YOUTUBE.split('v=')[1];
-                if(player && player.loadVideoById) {
+            // Configurar player do YouTube se disponível
+            if (track.id && player) {
+                player.loadVideoById(track.id);
+            } else if (player) {
+                // Tentar extrair ID do YouTube do link
+                const youtubeLink = track.youtube_id || track.LINK_YOUTUBE || '';
+                const videoId = extractYouTubeId(youtubeLink);
+                if (videoId) {
                     player.loadVideoById(videoId);
                 }
             }
@@ -658,10 +1071,20 @@
         // ========== FUNÇÕES DE INVESTIMENTO ==========
 
         function abrirModalInvestimento(index) {
+            if(!currentToken) {
+                alert('Faça login para investir!');
+                return;
+            }
+            
             investTrackIndex = index;
             const track = playlist[index];
             
-            document.getElementById('modal-track-title').innerText = track.title || track.TITULO;
+            if(!track) {
+                alert('Música não encontrada!');
+                return;
+            }
+            
+            document.getElementById('modal-track-title').innerText = track.title || track.TITULO || 'Música';
             document.getElementById('modal-unit-price').innerText = `R$ ${(track.price || track.VALOR_ACAO || 0).toFixed(2)}`;
             
             atualizarTotalInvestimento();
@@ -670,7 +1093,7 @@
 
         function atualizarTotalInvestimento() {
             const quantidade = document.getElementById('invest-quantidade').value;
-            const precoUnitario = playlist[investTrackIndex].price || playlist[investTrackIndex].VALOR_ACAO || 0;
+            const precoUnitario = playlist[investTrackIndex]?.price || playlist[investTrackIndex]?.VALOR_ACAO || 0;
             const total = quantidade * precoUnitario;
             
             document.getElementById('modal-total-price').innerText = `R$ ${total.toFixed(2)}`;
@@ -679,11 +1102,18 @@
         async function confirmarInvestimento() {
             if(!currentToken) {
                 alert('Faça login para investir!');
+                modalInvest.hide();
                 return;
             }
 
             const quantidade = parseInt(document.getElementById('invest-quantidade').value);
             const track = playlist[investTrackIndex];
+            
+            if(!track) {
+                alert('Música não encontrada!');
+                return;
+            }
+            
             const valorTotal = quantidade * (track.price || track.VALOR_ACAO || 0);
 
             showLoading(true);
@@ -709,7 +1139,9 @@
                 if(data.success) {
                     alert('Investimento realizado com sucesso!');
                     modalInvest.hide();
-                    carregarDadosUsuario(); // Atualizar dados
+                    
+                    // Atualizar dados do usuário
+                    carregarDadosUsuario();
                 } else {
                     alert(data.message || 'Erro ao realizar investimento');
                 }
@@ -731,7 +1163,7 @@
             
             // Limpar campos do modal
             document.getElementById('cad-titulo').value = '';
-            document.getElementById('cad-genero').value = 'POP';
+            document.getElementById('cad-genero').value = '';
             document.getElementById('cad-duracao').value = '180';
             document.getElementById('cad-youtube').value = '';
             document.getElementById('cad-capa').value = '';
@@ -742,16 +1174,27 @@
         }
 
         async function cadastrarMusica() {
-            const titulo = document.getElementById('cad-titulo').value;
+            const titulo = document.getElementById('cad-titulo').value.trim();
             const genero = document.getElementById('cad-genero').value;
             const duracao = parseInt(document.getElementById('cad-duracao').value);
-            const youtube = document.getElementById('cad-youtube').value;
-            const capa = document.getElementById('cad-capa').value;
+            const youtube = document.getElementById('cad-youtube').value.trim();
+            const capa = document.getElementById('cad-capa').value.trim();
             const valorAcao = parseFloat(document.getElementById('cad-valor-acao').value);
             const percentual = parseInt(document.getElementById('cad-percentual').value);
 
-            if(!titulo || !youtube || !capa || !valorAcao) {
+            // Validação
+            if(!titulo || !genero || !youtube || !valorAcao) {
                 alert('Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            if(valorAcao < 1) {
+                alert('O valor por ação deve ser no mínimo R$ 1,00');
+                return;
+            }
+
+            if(percentual < 1 || percentual > 100) {
+                alert('O percentual deve estar entre 1% e 100%');
                 return;
             }
 
@@ -764,7 +1207,7 @@
                     genero: genero,
                     duracao: duracao,
                     link_youtube: youtube,
-                    link_capa: capa,
+                    link_capa: capa || '',
                     valor_acao: valorAcao,
                     percentual_disponivel: percentual
                 };
@@ -780,8 +1223,12 @@
                 if(data.success) {
                     alert('Música cadastrada com sucesso! Aguarde aprovação.');
                     modalCadastro.hide();
+                    
+                    // Atualizar dados do artista
                     carregarDadosArtista();
-                    carregarMusicas(); // Atualizar marketplace
+                    
+                    // Recarregar músicas do marketplace
+                    carregarMusicas();
                 } else {
                     alert(data.message || 'Erro ao cadastrar música');
                 }
@@ -796,15 +1243,27 @@
         // ========== FUNÇÕES UTILITÁRIAS ==========
 
         function showLoading(show) {
-            document.getElementById('loading-screen').style.display = show ? 'flex' : 'none';
+            const loadingScreen = document.getElementById('loading-screen');
+            if(loadingScreen) {
+                loadingScreen.style.display = show ? 'flex' : 'none';
+            }
         }
 
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
+            if(!element) return;
+            
             element.innerText = message;
             element.style.display = 'block';
-            element.className = `alert alert-${type === 'error' ? 'danger' : type} mt-3`;
             
+            // Definir classe baseada no tipo
+            let alertClass = 'alert-success';
+            if(type === 'warning') alertClass = 'alert-warning';
+            else if(type === 'error') alertClass = 'alert-danger';
+            
+            element.className = `alert ${alertClass} mt-3`;
+            
+            // Esconder após 5 segundos
             setTimeout(() => {
                 element.style.display = 'none';
             }, 5000);
@@ -813,15 +1272,33 @@
         function formatDate(dateString) {
             try {
                 const date = new Date(dateString);
-                return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR').slice(0,5);
+                if(isNaN(date.getTime())) return 'Data inválida';
+                
+                return date.toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             } catch(e) {
                 return dateString;
             }
         }
 
         function toggleReg(show) {
-            document.getElementById('login-fields').style.display = show ? 'none' : 'block';
-            document.getElementById('reg-fields').style.display = show ? 'block' : 'none';
+            const loginFields = document.getElementById('login-fields');
+            const regFields = document.getElementById('reg-fields');
+            
+            if(show) {
+                // Mostrar registro
+                loginFields.style.display = 'none';
+                regFields.style.display = 'block';
+            } else {
+                // Mostrar login
+                regFields.style.display = 'none';
+                loginFields.style.display = 'block';
+            }
             
             // Limpar mensagens
             document.getElementById('login-message').style.display = 'none';
@@ -830,17 +1307,61 @@
 
         function checkArtist() {
             const tipo = document.getElementById('reg-tipo').value;
-            document.getElementById('reg-link').style.display = (tipo === 'artista') ? 'block' : 'none';
+            const linkContainer = document.getElementById('reg-link-container');
+            
+            if(tipo === 'artista') {
+                linkContainer.style.display = 'block';
+                document.getElementById('reg-link').required = true;
+            } else {
+                linkContainer.style.display = 'none';
+                document.getElementById('reg-link').required = false;
+            }
         }
 
-        function openNav() { document.getElementById("mySidebar").style.width = "280px"; }
-        function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function extractYouTubeId(url) {
+            if(!url) return null;
+            
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length == 11) ? match[7] : null;
+        }
+
+        function openNav() { 
+            document.getElementById("mySidebar").style.width = "280px"; 
+        }
+        
+        function closeNav() { 
+            document.getElementById("mySidebar").style.width = "0"; 
+        }
         
         function changePage(pageId, btn) {
-            document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            if(btn) btn.classList.add('active');
+            // Esconder todas as páginas
+            document.querySelectorAll('.section-page').forEach(p => {
+                p.classList.remove('active');
+            });
+            
+            // Remover classe active de todos os botões
+            document.querySelectorAll('.nav-item').forEach(b => {
+                b.classList.remove('active');
+            });
+            
+            // Mostrar página selecionada
+            const page = document.getElementById(pageId);
+            if(page) {
+                page.classList.add('active');
+            }
+            
+            // Ativar botão clicado
+            if(btn) {
+                btn.classList.add('active');
+            }
+            
+            // Fechar sidebar
             closeNav();
             
             // Carregar dados específicos da página
@@ -871,7 +1392,12 @@
 
         function togglePlay() {
             if(!player) return;
-            player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo();
+            
+            if(player.getPlayerState() === YT.PlayerState.PLAYING) {
+                player.pauseVideo();
+            } else {
+                player.playVideo();
+            }
         }
 
         function playNext(dir) {
@@ -890,16 +1416,18 @@
         }
 
         function logout() {
-            localStorage.removeItem('miv_token');
-            localStorage.removeItem('miv_user');
-            location.reload();
+            if(confirm('Tem certeza que deseja sair?')) {
+                localStorage.removeItem('miv_token');
+                localStorage.removeItem('miv_user');
+                location.reload();
+            }
         }
 
         // ========== INICIALIZAÇÃO ==========
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar player do YouTube
-            if(window.YT) {
+            // Inicializar player do YouTube quando a API estiver pronta
+            window.onYouTubeIframeAPIReady = function() {
                 player = new YT.Player('yt-placeholder', {
                     height: '100%',
                     width: '100%',
@@ -912,19 +1440,21 @@
                     events: {
                         'onStateChange': function(event) {
                             const playBtn = document.getElementById('btn-play-pause');
+                            if(!playBtn) return;
+                            
                             if (event.data === YT.PlayerState.PLAYING) {
-                                playBtn.className = "bi bi-pause-circle-fill h1";
+                                playBtn.className = "bi bi-pause-circle-fill h1 text-success";
                                 updateUI();
                             } else if (event.data === YT.PlayerState.PAUSED) {
-                                playBtn.className = "bi bi-play-circle-fill h1";
+                                playBtn.className = "bi bi-play-circle-fill h1 text-success";
                             } else if (event.data === YT.PlayerState.ENDED) {
-                                playBtn.className = "bi bi-play-circle-fill h1";
+                                playBtn.className = "bi bi-play-circle-fill h1 text-success";
                                 playNext(1);
                             }
                         }
                     }
                 });
-            }
+            };
 
             // Tentar login automático com token salvo
             const savedToken = localStorage.getItem('miv_token');
@@ -936,12 +1466,28 @@
                     currentUser = JSON.parse(savedUser);
                     startApp();
                 } catch(e) {
+                    console.error('Erro ao restaurar sessão:', e);
                     localStorage.clear();
                 }
             }
             
             // Event listener para quantidade de investimento
-            document.getElementById('invest-quantidade').addEventListener('input', atualizarTotalInvestimento);
+            const investQuantidade = document.getElementById('invest-quantidade');
+            if(investQuantidade) {
+                investQuantidade.addEventListener('input', atualizarTotalInvestimento);
+            }
+            
+            // Event listener para Enter nos formulários
+            document.getElementById('email')?.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') handleLogin();
+            });
+            
+            document.getElementById('pass')?.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') handleLogin();
+            });
+            
+            // Inicializar o campo de link do artista
+            checkArtist();
         });
 
         function updateUI() {
@@ -951,13 +1497,20 @@
                 
                 if(dur > 0) {
                     const pct = (cur / dur) * 100;
-                    document.getElementById('p-bar').style.width = pct + '%';
+                    const progressBar = document.getElementById('p-bar');
+                    if(progressBar) {
+                        progressBar.style.width = pct + '%';
+                    }
                     
                     // Valorização simbólica após 30 segundos
                     if (cur >= 30 && !valorizou30s && dur > 30) {
                         valorizou30s = true;
                         if(playlist[currentIndex]) {
-                            playlist[currentIndex].price = (playlist[currentIndex].price || 0) + 0.05;
+                            // Aumentar preço em 5%
+                            const aumento = (playlist[currentIndex].price || 0) * 0.05;
+                            playlist[currentIndex].price = (playlist[currentIndex].price || 0) + aumento;
+                            
+                            // Atualizar interface
                             document.getElementById('track-price').innerText = `Cota: R$ ${playlist[currentIndex].price.toFixed(2)}`;
                             renderizarMercado();
                         }
@@ -968,6 +1521,10 @@
                     setTimeout(updateUI, 1000);
                 }
             }
+        }
+        
+        function investir(index) {
+            abrirModalInvestimento(index);
         }
     </script>
 </body>
