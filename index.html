@@ -395,7 +395,6 @@
             font-weight: 600;
         }
 
-        /* Player - Estilo Spotify */
         .player-bar {
             position: fixed;
             bottom: 5rem;
@@ -440,7 +439,6 @@
             align-items: center;
             gap: 1rem;
             margin-bottom: 1rem;
-            cursor: pointer;
         }
 
         .player-album-art {
@@ -482,20 +480,14 @@
             background: var(--neon-green);
             border-radius: 3px;
             width: 0%;
-            transition: width 0.1s linear;
-        }
-
-        .player-time {
-            font-size: 0.875rem;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
+            transition: width 0.3s ease;
         }
 
         .player-controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 1.5rem;
+            gap: 2rem;
             margin-top: 1rem;
         }
 
@@ -518,23 +510,6 @@
             font-size: 2.5rem;
         }
 
-        #queueContainer {
-            max-height: 40vh;
-            overflow-y: auto;
-        }
-
-        #queueList .list-group-item {
-            background: transparent;
-            border: none;
-            color: var(--text-light);
-            cursor: pointer;
-        }
-
-        #queueList .list-group-item.active {
-            background: rgba(0, 255, 136, 0.2);
-        }
-
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -575,7 +550,79 @@
             font-size: 0.75rem;
         }
 
-        /* Modals e Toast (mantidos iguais) */
+        .portfolio-summary {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 123, 255, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .portfolio-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            margin: 0.5rem 0;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .ledger-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ledger-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ledger-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .artist-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -1013,7 +1060,7 @@
                 </div>
 
                 <div class="player-info" onclick="togglePlayerExpansion()">
-                    <img id="playerAlbumArt" src="https://via.placeholder.com/60x60/111418/00ff88?text=MIV" class="player-album-art" alt="Capa">
+                    <img id="playerAlbumArt" src="https://via.placeholder.com/60x60/111418/00ff88?text=MIV" class="player-album-art" alt="Album Art">
                     <div class="player-text">
                         <div class="player-title" id="playerTitle">Título da Música</div>
                         <div class="player-artist" id="playerArtist">Artista</div>
@@ -1126,7 +1173,7 @@
         </div>
     </div>
 
-    <!-- Add Music Modal -->
+    <!-- Add Music Modal (com Duração opcional) -->
     <div id="addMusicModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
@@ -1140,12 +1187,12 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="text-muted mb-2 d-block required">Título da Música *</label>
+                    <label class="text-muted mb-2 d-block">Título da Música *</label>
                     <input type="text" id="musicTitle" class="form-control-custom" placeholder="Digite o título da música" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="text-muted mb-2 d-block required">Gênero Musical *</label>
+                    <label class="text-muted mb-2 d-block">Gênero Musical *</label>
                     <select id="musicGenre" class="form-control-custom" required>
                         <option value="">Selecione um gênero</option>
                         <option value="POP">🎵 POP</option>
@@ -1160,7 +1207,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="text-muted mb-2 d-block required">Link do YouTube *</label>
+                    <label class="text-muted mb-2 d-block">Link do YouTube *</label>
                     <input type="url" id="musicYoutube" class="form-control-custom" placeholder="https://youtube.com/watch?v=..." required>
                 </div>
 
@@ -1170,12 +1217,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="text-muted mb-2 d-block required">Valor por Ação *</label>
+                    <label class="text-muted mb-2 d-block">Valor por Ação *</label>
                     <input type="number" id="musicPrice" class="form-control-custom" value="10.00" min="1" step="0.01" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="text-muted mb-2 d-block required">Percentual Disponível *</label>
+                    <label class="text-muted mb-2 d-block">Percentual Disponível *</label>
                     <div class="input-group">
                         <input type="number" id="musicPercent" class="form-control-custom" value="20" min="1" max="100" required>
                         <span class="input-group-text bg-dark text-white border-secondary">%</span>
@@ -1196,7 +1243,7 @@
     <script>
         // ========== CONFIGURAÇÃO ==========
         const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbxVoPKB9DApWdGxOdp6Az0RoQwuPAduqDCoj5DpySf_xY14QKDcWTZkTEj7BZYUY9kh/exec'
+            API_URL: 'https://script.google.com/macros/s/AKfycby786DuRj4q2rsG-PpHKQsZbTbbTNGLR6OtkllAnWQ0hstX7_dlNMJ-ARcQdIclA3Bv/exec'  // Substitua pelo seu URL de deployment se necessário
         };
 
         // ========== ESTADO GLOBAL ==========
@@ -1255,18 +1302,21 @@
         }
 
         function formatCurrency(value) {
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(value);
         }
 
         function formatDate(dateString) {
             const date = new Date(dateString);
-            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-        }
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         }
 
         // ========== AUTENTICAÇÃO ==========
@@ -1275,7 +1325,7 @@
             const password = document.getElementById('loginPassword').value.trim();
 
             if (!email || !password) {
-                showToast('Preencha email e senha', 'error');
+                showToast('Preencha todos os campos', 'error');
                 return;
             }
 
@@ -1299,7 +1349,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showToast('Erro de conexão com o servidor', 'error');
+                showToast('Erro de conexão', 'error');
             } finally {
                 hideLoading();
             }
@@ -1383,6 +1433,7 @@
             loadUserData();
             loadMarketplace();
 
+            // Inicializa YouTube Player
             initYouTubePlayer();
         }
 
@@ -1462,7 +1513,7 @@
                     <div class="empty-state">
                         <i class="bi bi-music-note-slash empty-icon"></i>
                         <h5 class="text-muted">Nenhuma música disponível</h5>
-                        <p class="text-muted">Cadastre e aprove músicas no painel artista</p>
+                        <p class="text-muted">As músicas serão carregadas em breve</p>
                     </div>
                 `;
                 return;
@@ -1511,180 +1562,4 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="bi bi-briefcase empty-icon"></i>
-                        <h5 class="text-muted">Nenhum ativo na carteira</h5>
-                        <p class="text-muted">Comece investindo em músicas no Marketplace</p>
-                    </div>
-                `;
-                countElement.textContent = '0 ativos';
-                return;
-            }
-
-            container.innerHTML = assets.map(asset => `
-                <div class="music-card">
-                    <div class="music-info">
-                        <h6 class="music-title">${asset.MUSICA_NOME || 'Ativo'}</h6>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">${asset.QUANTIDADE_ACOES || 0} ações</span>
-                            <span class="text-success fw-bold">${formatCurrency(asset.VALOR_TOTAL || 0)}</span>
-                        </div>
-                        <div class="d-flex justify-content-between small">
-                            <span class="text-info">${asset.PERCENTUAL_PARTICIPACAO || 0}% participação</span>
-                            <span class="text-warning">${formatCurrency(asset.ROYALTIES_ACUMULADOS || 0)} royalties</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            countElement.textContent = `${assets.length} ativo${assets.length !== 1 ? 's' : ''}`;
-        }
-
-        async function loadLedger() {
-            if (!state.currentToken) return;
-
-            showLoading('Carregando extrato...');
-
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?acao=get_ledger&token=${state.currentToken}&limite=50`);
-                const data = await response.json();
-                renderLedger(data.data || []);
-            } catch (error) {
-                console.error('Error loading ledger:', error);
-                renderLedger([]);
-            } finally {
-                hideLoading();
-            }
-        }
-
-        function renderLedger(transactions) {
-            const container = document.getElementById('ledgerContent');
-
-            if (!transactions || transactions.length === 0) {
-                container.innerHTML = `
-                    <tr>
-                        <td colspan="3" class="text-center text-muted py-4">
-                            <i class="bi bi-receipt fs-4 d-block mb-2"></i>
-                            Nenhuma transação encontrada
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            container.innerHTML = transactions.map(transaction => {
-                const amount = parseFloat(transaction.VALOR || 0);
-                const isPositive = amount >= 0;
-
-                return `
-                    <tr>
-                        <td>${formatDate(transaction.DATA)}</td>
-                        <td>
-                            <i class="bi ${isPositive ? 'bi-arrow-down-circle text-success' : 'bi-arrow-up-circle text-danger'} me-2"></i>
-                            ${transaction.DESCRICAO || 'Transação'}
-                        </td>
-                        <td class="text-end ${isPositive ? 'text-success' : 'text-danger'} fw-bold">
-                            ${isPositive ? '+' : ''}${formatCurrency(Math.abs(amount))}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        async function loadArtistData() {
-            if (!state.currentToken) return;
-
-            try {
-                const response = await fetch(`${CONFIG.API_URL}?acao=get_dados_artista&token=${state.currentToken}`);
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('artistMusicCount').textContent = data.data.musicas_cadastradas || 0;
-                    document.getElementById('artistRoyalties').textContent = formatCurrency(data.data.royalties_acumulados || 0);
-                    document.getElementById('artistSharesSold').textContent = data.data.acoes_vendidas || 0;
-
-                    renderArtistMusic(data.data.musicas || []);
-                }
-            } catch (error) {
-                console.error('Error loading artist data:', error);
-            }
-        }
-
-        function renderArtistMusic(musicas) {
-            const container = document.getElementById('artistMusicContent');
-
-            if (!musicas || musicas.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="bi bi-music-note-list empty-icon"></i>
-                        <h5 class="text-muted">Nenhuma música cadastrada</h5>
-                        <p class="text-muted">Cadastre sua primeira música para começar</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = musicas.map(musica => `
-                <div class="music-card">
-                    <img src="${musica.LINK_CAPA || 'https://via.placeholder.com/300x180/111418/00ff88?text=MIV'}" class="music-cover" alt="${musica.TITULO}" onerror="this.src='https://via.placeholder.com/300x180/111418/00ff88?text=MIV'">
-                    <div class="music-info">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="music-title mb-0">${musica.TITULO || 'Sem título'}</h6>
-                            <span class="badge ${musica.STATUS === 'ATIVO' ? 'bg-success' : 'bg-warning'}">
-                                ${musica.STATUS || 'PENDENTE'}
-                            </span>
-                        </div>
-                        <p class="music-artist">${musica.GÊNERO || 'Gênero não informado'}</p>
-                        <div class="music-meta">
-                            <span class="music-price">${formatCurrency(musica.VALOR_ACAO || 0)}</span>
-                            <span class="music-percent">${musica.AÇÕES_VENDIDAS || 0} vendidas</span>
-                        </div>
-                        <div class="mt-2">
-                            <small class="text-info">Royalties: ${formatCurrency(musica.VALOR_TOTAL_ROYALTIES || 0)}</small>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // ========== PLAYER SPOTIFY-LIKE ==========
-        function initYouTubePlayer() {
-            if (window.YT && YT.Player) {
-                state.youtubePlayer = new YT.Player('youtubePlayer', {
-                    height: '100%',
-                    width: '100%',
-                    playerVars: {
-                        'controls': 1,
-                        'modestbranding': 1,
-                        'rel': 0
-                    },
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange,
-                        'onError': (event) => console.error('YouTube Player error:', event.data)
-                    }
-                });
-            }
-        }
-
-        function onPlayerReady(event) {
-            event.target.setVolume(state.volume);
-            console.log('YouTube Player ready');
-        }
-
-        function onPlayerStateChange(event) {
-            const playBtn = document.getElementById('playButton');
-            if (event.data === YT.PlayerState.PLAYING) {
-                state.isPlaying = true;
-                playBtn.innerHTML = '<i class="bi bi-pause-circle-fill"></i>';
-                startProgress();
-            } else if (event.data === YT.PlayerState.PAUSED) {
-                state.isPlaying = false;
-                playBtn.innerHTML = '<i class="bi bi-play-circle-fill"></i>';
-                stopProgress();
-            } else if (event.data === YT.PlayerState.ENDED) {
-                state.isPlaying = false;
-                playBtn.innerHTML = '<i class="bi bi-play-circle-fill"></i>';
-                stopProgress();
-                if (state.repeat) {
-                    state.youtubePlayer.playVideo();
-                } else {
-                    play
+                        <h5 class="text-muted">Nenhum ativo na carteira</
