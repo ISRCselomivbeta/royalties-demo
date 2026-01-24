@@ -1078,42 +1078,58 @@
         </main>
 
         <!-- Music Player -->
-        <div id="playerBar" class="player-bar">
-            <div class="player-content">
-                <div class="video-container" id="videoContainer">
-                    <div id="youtubePlayer"></div>
-                </div>
-                
-                <div class="player-info" onclick="togglePlayerExpansion()">
-                    <img id="playerAlbumArt" src="https://via.placeholder.com/60x60/111418/00ff88?text=MIV" 
-                         class="player-album-art" alt="Album Art">
-                    <div class="player-text">
-                        <div class="player-title" id="playerTitle">Título da Música</div>
-                        <div class="player-artist" id="playerArtist">Artista</div>
-                        <div class="player-price" id="playerPrice">R$ 0,00 por ação</div>
-                    </div>
-                    <button class="btn-miv btn-sm" onclick="event.stopPropagation(); openInvestModal(currentTrackIndex)">
-                        <i class="bi bi-currency-dollar"></i> Investir
-                    </button>
-                </div>
-                
-                <div class="progress-container" onclick="seekMusic(event)">
-                    <div class="progress-bar" id="musicProgress"></div>
-                </div>
-                
-                <div class="player-controls">
-                    <button class="control-btn" onclick="playPrevious()">
-                        <i class="bi bi-skip-start-fill"></i>
-                    </button>
-                    <button class="control-btn play-btn" id="playButton" onclick="togglePlay()">
-                        <i class="bi bi-play-circle-fill"></i>
-                    </button>
-                    <button class="control-btn" onclick="playNext()">
-                        <i class="bi bi-skip-end-fill"></i>
-                    </button>
-                </div>
-            </div>
+     <div id="playerBar" class="player-bar">
+    <div class="player-content">
+        <div class="video-container" id="videoContainer">
+            <div id="youtubePlayer"></div>
         </div>
+        
+        <div class="player-info" onclick="togglePlayerExpansion()">
+            <img id="playerAlbumArt" src="https://via.placeholder.com/60x60/111418/00ff88?text=MIV" class="player-album-art" alt="Capa">
+            <div class="player-text">
+                <div class="player-title" id="playerTitle">Título</div>
+                <div class="player-artist" id="playerArtist">Artista</div>
+                <div class="player-price" id="playerPrice">R$ 0,00/ação</div>
+            </div>
+            <button class="btn-miv btn-sm" onclick="event.stopPropagation(); openInvestModal(state.currentTrackIndex)">
+                <i class="bi bi-currency-dollar"></i> Investir
+            </button>
+        </div>
+        
+        <div class="progress-container" onclick="seekMusic(event)">
+            <div class="progress-bar" id="musicProgress"></div>
+        </div>
+        
+        <div class="player-time d-flex justify-content-between mt-1">
+            <span id="currentTime">0:00</span>
+            <span id="durationTime">0:00</span>
+        </div>
+        
+        <div class="player-controls mt-2">
+            <button class="control-btn" onclick="toggleShuffle()">
+                <i class="bi bi-shuffle" id="shuffleIcon"></i>
+            </button>
+            <button class="control-btn" onclick="playPrevious()">
+                <i class="bi bi-skip-start-fill"></i>
+            </button>
+            <button class="control-btn play-btn" id="playButton" onclick="togglePlay()">
+                <i class="bi bi-play-circle-fill"></i>
+            </button>
+            <button class="control-btn" onclick="playNext()">
+                <i class="bi bi-skip-end-fill"></i>
+            </button>
+            <button class="control-btn" onclick="toggleRepeat()">
+                <i class="bi bi-repeat" id="repeatIcon"></i>
+            </button>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100" class="ms-3" oninput="setVolume(this.value)" style="width: 100px;">
+        </div>
+        
+        <div id="queueContainer" class="mt-3" style="display:none;">
+            <h6>Próximas na fila</h6>
+            <ul id="queueList" class="list-group list-group-flush"></ul>
+        </div>
+    </div>
+</div>
 
         <!-- Bottom Navigation -->
         <nav class="bottom-nav">
