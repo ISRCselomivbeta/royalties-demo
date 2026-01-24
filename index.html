@@ -1804,6 +1804,11 @@
             
             state.currentTrackIndex = index;
             const track = state.playlist[index];
+const videoId = extractYouTubeId(track.LINK_YOUTUBE);
+if (videoId && state.youtubePlayer) {
+    state.youtubePlayer.loadVideoById(videoId);
+    state.youtubePlayer.playVideo();
+}
             
             // Mostrar player
             document.getElementById('playerBar').style.display = 'block';
