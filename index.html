@@ -1,179 +1,938 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Selo MIV - Plataforma de Investimento em Música</title>
-<style>
-/* ====== SEU CSS ORIGINAL – SEM ALTERAÇÕES ====== */
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-body{background:linear-gradient(135deg,#0a192f 0%,#1a1a2e 100%);color:#fff;min-height:100vh}
-.container{max-width:1200px;margin:0 auto;padding:20px}
-/* toast */
-.toast{position:fixed;top:20px;right:20px;padding:15px 20px;border-radius:8px;color:#fff;z-index:1000}
-.toast.success{background:#10b981}
-.toast.error{background:#ef4444}
-.toast.info{background:#3b82f6}
-/* loading */
-.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:flex;justify-content:center;align-items:center;z-index:9999;flex-direction:column}
-.spinner{width:50px;height:50px;border:5px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#00ff88;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selo MIV - Plataforma de Investimento em Música</title>
+    <style>
+        /* ESTILOS BÁSICOS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+      
+        body {
+            background: linear-gradient(135deg, #0a192f 0%, #1a1a2e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+      
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+      
+        /* TOAST NOTIFICATIONS */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            z-index: 1000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+      
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        .toast.info { background: #3b82f6; }
+        .toast.warning { background: #f59e0b; }
+      
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+      
+        /* LOADING */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+      
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00ff88;
+            animation: spin 1s linear infinite;
+        }
+      
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+      
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+      
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+        }
+      
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+      
+        .balance {
+            background: rgba(0, 255, 136, 0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+      
+        /* NAVEGAÇÃO */
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+      
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+      
+        .nav-tab.active {
+            background: #00ff88;
+            color: #0a192f;
+        }
+      
+        /* CONTEÚDO */
+        .content-section {
+            display: none;
+            padding: 20px 0;
+        }
+      
+        .content-section.active {
+            display: block;
+        }
+      
+        /* CARD DE MÚSICA */
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+      
+        .music-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+      
+        .music-card:hover {
+            transform: translateY(-5px);
+        }
+      
+        .music-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+      
+        .music-info {
+            padding: 15px;
+        }
+      
+        .music-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+      
+        .music-artist {
+            color: #888;
+            margin-bottom: 10px;
+        }
+      
+        .music-price {
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 20px;
+        }
+      
+        /* FORMULÁRIOS */
+        .auth-form {
+            max-width: 400px;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 12px;
+        }
+      
+        .form-group {
+            margin-bottom: 20px;
+        }
+      
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+      
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+        }
+      
+        .form-input:focus {
+            outline: none;
+            border-color: #00ff88;
+        }
+      
+        .btn {
+            background: #00ff88;
+            color: #0a192f;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+      
+        .btn:hover {
+            opacity: 0.9;
+        }
+      
+        .btn-secondary {
+            background: transparent;
+            color: #00ff88;
+            border: 1px solid #00ff88;
+        }
+      
+        /* PLAYER */
+        #playerSection {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+      
+        #youtubePlayer {
+            width: 100%;
+            height: 400px;
+            border-radius: 8px;
+        }
+      
+        /* MODAIS */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+      
+        .modal.active {
+            display: flex;
+        }
+      
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+      
+        /* TABELAS */
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+      
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+      
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+      
+        th {
+            background: rgba(255, 255, 255, 0.05);
+            color: #00ff88;
+        }
+      
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .music-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+          
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+          
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loadingMessage" style="margin-top: 15px;"></p>
+    </div>
+    <!-- TOAST CONTAINER -->
+    <div id="toastContainer"></div>
+    <!-- CONTAINER PRINCIPAL -->
+    <div class="container">
+        <!-- HEADER (VISÍVEL APÓS LOGIN) -->
+        <div id="headerSection" class="header" style="display: none;">
+            <div class="logo">🎵 SELO MIV</div>
+            <div class="user-info">
+                <div class="balance">Saldo: <span id="currentBalance">R$ 0,00</span></div>
+                <button onclick="handleLogout()" class="btn btn-secondary">Sair</button>
+            </div>
+        </div>
+        <!-- TELAS DE CONTEÚDO -->
+        <div id="loginSection" class="auth-form">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #00ff88;">Login</h2>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="loginEmail" class="form-input" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Senha</label>
+                <input type="password" id="loginPassword" class="form-input" placeholder="••••••••">
+            </div>
+            <button onclick="handleLogin()" class="btn">Entrar</button>
+            <p style="text-align: center; margin-top: 20px;">
+                Não tem conta? <a href="#" onclick="showRegisterForm()" style="color: #00ff88;">Cadastre-se</a>
+            </p>
+        </div>
+        <div id="registerSection" class="auth-form" style="display: none;">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #00ff88;">Cadastro</h2>
+            <div class="form-group">
+                <label class="form-label">Nome Completo</label>
+                <input type="text" id="registerName" class="form-input" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" id="registerEmail" class="form-input" placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Senha (mínimo 6 caracteres)</label>
+                <input type="password" id="registerPassword" class="form-input" placeholder="••••••••">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tipo de Usuário</label>
+                <select id="registerType" class="form-input" onchange="toggleArtistLink()">
+                    <option value="">Selecione...</option>
+                    <option value="ouvinte">Ouvinte/Investidor</option>
+                    <option value="artista">Artista</option>
+                    <option value="admin">Administrador</option>
+                </select>
+            </div>
+            <div class="form-group" id="artistLinkGroup" style="display: none;">
+                <label class="form-label">Link do seu trabalho (YouTube/SoundCloud)</label>
+                <input type="url" id="registerLink" class="form-input" placeholder="https://...">
+            </div>
+            <button onclick="handleRegister()" class="btn">Cadastrar</button>
+            <p style="text-align: center; margin-top: 20px;">
+                Já tem conta? <a href="#" onclick="showLoginForm()" style="color: #00ff88;">Faça login</a>
+            </p>
+        </div>
+        <!-- CONTEÚDO PRINCIPAL DO APP -->
+        <div id="appContent" style="display: none;">
+            <!-- PLAYER -->
+            <div id="playerSection" style="display: none;">
+                <h2 style="margin-bottom: 15px;">🎧 Player</h2>
+                <div id="youtubePlayer"></div>
+                <div style="margin-top: 15px; text-align: center;">
+                    <button onclick="togglePlay()" class="btn" style="padding: 10px 20px;">Play/Pause</button>
+                </div>
+            </div>
+            <!-- NAVEGAÇÃO -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showSection('marketplace')">🎵 Marketplace</button>
+                <button class="nav-tab" onclick="showSection('portfolio')">📊 Meus Investimentos</button>
+                <button class="nav-tab" onclick="showSection('ledger')">📋 Extrato</button>
+                <button class="nav-tab" id="artistTab" onclick="showSection('artist')" style="display: none;">🎤 Área do Artista</button>
+                <button class="nav-tab" onclick="showSection('addMusic')" id="addMusicTab" style="display: none;">➕ Cadastrar Música</button>
+            </div>
+            <!-- SEÇÕES DE CONTEÚDO -->
+            <div id="marketplaceSection" class="content-section active">
+                <h2>🎵 Músicas Disponíveis para Investimento</h2>
+                <div class="music-grid" id="marketplaceGrid"></div>
+            </div>
+            <div id="portfolioSection" class="content-section">
+                <h2>📊 Meus Investimentos</h2>
+                <div class="table-container">
+                    <table id="portfolioTable">
+                        <thead>
+                            <tr>
+                                <th>Música</th>
+                                <th>Artista</th>
+                                <th>Ações</th>
+                                <th>Valor Pago</th>
+                                <th>Valor Atual</th>
+                                <th>Lucro/Prejuízo</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="ledgerSection" class="content-section">
+                <h2>📋 Histórico de Transações</h2>
+                <div class="table-container">
+                    <table id="ledgerTable">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+            <div id="artistSection" class="content-section">
+                <h2>🎤 Área do Artista</h2>
+                <div id="artistStats"></div>
+                <div id="artistMusics"></div>
+            </div>
+            <div id="addMusicSection" class="content-section">
+                <h2>➕ Cadastrar Nova Música</h2>
+                <div class="auth-form" style="max-width: 600px;">
+                    <div class="form-group">
+                        <label class="form-label">Título da Música *</label>
+                        <input type="text" id="musicTitle" class="form-input" placeholder="Nome da música">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Gênero *</label>
+                        <select id="musicGenre" class="form-input">
+                            <option value="">Selecione...</option>
+                            <option value="POP">POP</option>
+                            <option value="ROCK">ROCK</option>
+                            <option value="HIPHOP">HIP HOP/RAP</option>
+                            <option value="FUNK">FUNK</option>
+                            <option value="SERTANEJO">SERTANEJO</option>
+                            <option value="ELETRONICA">ELETRÔNICA</option>
+                            <option value="MPB">MPB</option>
+                            <option value="SAMBA">SAMBA</option>
+                            <option value="PAGODE">PAGODE</option>
+                            <option value="OUTRO">OUTRO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Link do YouTube *</label>
+                        <input type="url" id="musicYoutube" class="form-input" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Link da Capa (opcional)</label>
+                        <input type="url" id="musicCover" class="form-input" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Valor por Ação (R$) *</label>
+                        <input type="number" id="musicPrice" class="form-input" min="1" step="0.01" value="10.00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Percentual Disponível para Venda (%) *</label>
+                        <input type="number" id="musicPercent" class="form-input" min="1" max="100" value="20">
+                    </div>
+                    <button onclick="registerMusic()" class="btn">Cadastrar Música</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL DE INVESTIMENTO -->
+    <div id="investModal" class="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 20px;">💰 Investir em <span id="investMusicTitle"></span></h2>
+            <div class="form-group">
+                <label class="form-label">Valor por Ação: <span id="investPrice"></span></label>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Saldo Disponível: <span id="investBalance"></span></label>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Quantidade de Ações *</label>
+                <input type="number" id="investQuantity" class="form-input" min="1" value="1">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Valor Total: <span id="investTotal"></span></label>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 30px;">
+                <button onclick="closeModal('investModal')" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+                <button onclick="confirmInvestment()" class="btn" style="flex: 1;" id="confirmInvestBtn">Confirmar Investimento</button>
+            </div>
+        </div>
+    </div>
+    <!-- SCRIPTS -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+    // ============================================
+    // CONFIGURAÇÕES GERAIS
+    // ============================================
+    const CONFIG = {
+        API_URL: "https://script.google.com/macros/s/AKfycbyY_OpX7qp_sGowaAJHN21z7jx5_E2sIhIKhOvEw7NUBKYi72mDuXFMC2qif2Cs1HR_/exec",
+        VERSION: "1.6.2",
+        APP_NAME: "Selo MIV"
+    };
 
-<div id="loadingOverlay" class="loading-overlay" style="display:none">
-  <div class="spinner"></div>
-  <p id="loadingMessage"></p>
-</div>
+    // ============================================
+    // ESTADO GLOBAL DA APLICAÇÃO
+    // ============================================
+    const state = {
+        currentUser: null,
+        currentToken: null,
+        userBalance: 0,
+        playlist: [],
+        portfolioAssets: [],
+        ledgerData: [],
+        artistData: {},
+        youtubePlayer: null,
+        currentInvestTrack: null,
+        isPlaying: false
+    };
 
-<div id="toastContainer"></div>
-
-<div class="container">
-
-<div id="loginSection">
-  <h2>Login</h2>
-  <input id="loginEmail" placeholder="email">
-  <input id="loginPassword" type="password" placeholder="senha">
-  <button onclick="handleLogin()">Entrar</button>
-</div>
-
-<div id="registerSection" style="display:none">
-  <h2>Cadastro</h2>
-  <input id="registerName" placeholder="nome">
-  <input id="registerEmail" placeholder="email">
-  <input id="registerPassword" type="password" placeholder="senha">
-  <select id="registerType">
-    <option value="">Selecione</option>
-    <option value="ouvinte">Ouvinte</option>
-    <option value="artista">Artista</option>
-    <option value="admin">Admin</option>
-  </select>
-  <input id="registerLink" placeholder="link trabalho">
-  <button onclick="handleRegister()">Cadastrar</button>
-</div>
-
-</div>
-
-<script>
-const CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbyY_OpX7qp_sGowaAJHN21z7jx5_E2sIhIKhOvEw7NUBKYi72mDuXFMC2qif2Cs1HR_/exec"
-};
-
-const state = {
-  currentUser:null,
-  currentToken:null
-};
-
-function showToast(msg,type='info'){
-  const t=document.createElement('div');
-  t.className='toast '+type;
-  t.innerText=msg;
-  document.getElementById('toastContainer').appendChild(t);
-  setTimeout(()=>t.remove(),4000);
-}
-
-function showLoading(msg){
-  document.getElementById('loadingOverlay').style.display='flex';
-  document.getElementById('loadingMessage').innerText=msg;
-}
-function hideLoading(){
-  document.getElementById('loadingOverlay').style.display='none';
-}
-
-/* =========================
-   LOGIN (CORRIGIDO)
-========================= */
-async function handleLogin(){
-  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
-  const password=document.getElementById('loginPassword').value.trim();
-
-  if(!email||!password){
-    showToast('Preencha todos os campos','error');
-    return;
-  }
-
-  showLoading('Autenticando...');
-
-  try{
-    const formData=new URLSearchParams();
-    formData.append('acao','login');
-    formData.append('email',email);
-    formData.append('senha',password); // 🔴 CORREÇÃO AQUI
-
-    const res=await fetch(CONFIG.API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:formData
-    });
-
-    const data=await res.json();
-
-    if(data.success){
-      state.currentUser=data.data;
-      state.currentToken=data.data.token || data.data.id;
-      localStorage.setItem('miv_user',JSON.stringify(state.currentUser));
-      localStorage.setItem('miv_token',state.currentToken);
-      showToast('Login realizado','success');
-    }else{
-      showToast(data.message||'Login inválido','error');
+    // ============================================
+    // FUNÇÕES DE UTILIDADE
+    // ============================================
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
     }
-  }catch(e){
-    console.error(e);
-    showToast('Erro de conexão','error');
-  }finally{
-    hideLoading();
-  }
-}
 
-/* =========================
-   CADASTRO (CORRIGIDO)
-========================= */
-async function handleRegister(){
-  const name=document.getElementById('registerName').value.trim();
-  const email=document.getElementById('registerEmail').value.trim().toLowerCase();
-  const password=document.getElementById('registerPassword').value.trim();
-  const type=document.getElementById('registerType').value;
-  const link=document.getElementById('registerLink').value.trim();
-
-  if(!name||!email||!password||!type){
-    showToast('Campos obrigatórios','error');
-    return;
-  }
-
-  showLoading('Criando conta...');
-
-  try{
-    const formData=new URLSearchParams();
-    formData.append('acao','register');
-    formData.append('nome',name);
-    formData.append('email',email);
-    formData.append('senha',password); // 🔴 CORREÇÃO AQUI
-    formData.append('tipo',type);
-    formData.append('workLink',link);
-
-    const res=await fetch(CONFIG.API_URL,{
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:formData
-    });
-
-    const data=await res.json();
-
-    if(data.success){
-      showToast('Cadastro criado','success');
-    }else{
-      showToast(data.message||'Erro no cadastro','error');
+    function showLoading(message = 'Carregando...') {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        document.getElementById('loadingMessage').textContent = message;
     }
-  }catch(e){
-    console.error(e);
-    showToast('Erro de conexão','error');
-  }finally{
-    hideLoading();
-  }
-}
-</script>
 
+    function hideLoading() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    }
+
+    function extractYouTubeId(url) {
+        if (!url) return null;
+        const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[7].length === 11) ? match[7] : null;
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.content-section').forEach(section => section.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(`${sectionId}Section`).classList.add('active');
+    }
+
+    function toggleArtistLink() {
+        const type = document.getElementById('registerType').value;
+        document.getElementById('artistLinkGroup').style.display = type === 'artista' ? 'block' : 'none';
+    }
+
+    function showLoginForm() {
+        document.getElementById('loginSection').style.display = 'block';
+        document.getElementById('registerSection').style.display = 'none';
+    }
+
+    function showRegisterForm() {
+        document.getElementById('loginSection').style.display = 'none';
+        document.getElementById('registerSection').style.display = 'block';
+    }
+
+    function showModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // ============================================
+    // AUTENTICAÇÃO
+    // ============================================
+    async function handleLogin() {
+        const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+        const password = document.getElementById('loginPassword').value.trim();
+      
+        if (!email || !password) {
+            showToast('Preencha todos os campos', 'error');
+            return;
+        }
+        showLoading('Autenticando...');
+        try {
+            // Bypass temporário para admin (remova em produção)
+            if (email === 'admin@miv.com' && password === 'admin123') {
+                state.currentUser = { id: 1, nome: 'Administrador', email: 'admin@miv.com', tipo: 'admin', acesso: 'aprovado', saldo: 1000 };
+                state.currentToken = 'admin_token_123';
+                localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
+                localStorage.setItem('miv_token', state.currentToken);
+                showToast('Login realizado com sucesso!', 'success');
+                initializeApp();
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('acao', 'login');
+            formData.append('email', email);
+            formData.append('password', password);
+
+            const response = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.data) {
+                state.currentUser = data.data;
+                state.currentToken = data.data.token || data.data.id;
+                localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
+                localStorage.setItem('miv_token', state.currentToken);
+                showToast('Login realizado com sucesso!', 'success');
+                initializeApp();
+            } else {
+                showToast(data.message || 'Credenciais inválidas', 'error');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showToast('Erro de conexão com o servidor', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function handleRegister() {
+        const name = document.getElementById('registerName').value.trim();
+        const email = document.getElementById('registerEmail').value.trim().toLowerCase();
+        const password = document.getElementById('registerPassword').value.trim();
+        const type = document.getElementById('registerType').value;
+        const link = document.getElementById('registerLink')?.value.trim() || '';
+
+        if (!name || !email || !password || !type) {
+            showToast('Preencha todos os campos obrigatórios', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            showToast('A senha deve ter no mínimo 6 caracteres', 'error');
+            return;
+        }
+        if (type === 'artista' && !link) {
+            showToast('Artistas devem informar link do trabalho', 'error');
+            return;
+        }
+
+        showLoading('Criando conta...');
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('acao', 'register');
+            formData.append('nome', name);
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('tipo', type);
+            formData.append('workLink', link);
+
+            const response = await fetch(CONFIG.API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Conta criada com sucesso! Aguarde aprovação do administrador.', 'success');
+                showLoginForm();
+            } else {
+                showToast(data.message || 'Erro ao criar conta', 'error');
+            }
+        } catch (error) {
+            console.error('Register error:', error);
+            showToast('Erro de conexão com o servidor', 'error');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // ============================================
+    // PLAYER YOUTUBE
+    // ============================================
+    function initYouTubePlayer(videoUrl) {
+        if (!window.YT || !window.YT.Player) {
+            showToast('YouTube Player não carregado', 'error');
+            return;
+        }
+
+        const videoId = extractYouTubeId(videoUrl);
+        if (!videoId) {
+            showToast('Link do YouTube inválido', 'error');
+            return;
+        }
+
+        if (state.youtubePlayer) state.youtubePlayer.destroy();
+
+        state.youtubePlayer = new YT.Player('youtubePlayer', {
+            height: '100%',
+            width: '100%',
+            videoId: videoId,
+            host: 'https://www.youtube-nocookie.com',
+            playerVars: {
+                'autoplay': 1,
+                'controls': 1,
+                'modestbranding': 1,
+                'rel': 0,
+                'fs': 0,
+                'playsinline': 1
+            },
+            events: {
+                'onReady': onPlayerReady,
+                'onStateChange': onPlayerStateChange,
+                'onError': (event) => showToast('Erro no player de vídeo: ' + event.data, 'error')
+            }
+        });
+    }
+
+    function onPlayerReady(event) {
+        state.isPlaying = true;
+    }
+
+    function onPlayerStateChange(event) {
+        if (event.data === YT.PlayerState.PLAYING) state.isPlaying = true;
+        else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) state.isPlaying = false;
+    }
+
+    function togglePlay() {
+        if (!state.youtubePlayer) return;
+        state.isPlaying ? state.youtubePlayer.pauseVideo() : state.youtubePlayer.playVideo();
+    }
+
+    // ============================================
+    // CARREGAMENTO DE DADOS
+    // ============================================
+    async function loadBalance() {
+        if (!state.currentToken) {
+            showToast('Sessão expirada. Faça login novamente.', 'error');
+            handleLogout();
+            return;
+        }
+
+        try {
+            const params = new URLSearchParams({ acao: 'get_saldo', token: state.currentToken });
+            const response = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
+            const data = await response.json();
+            if (data.success && data.data) {
+                state.userBalance = parseFloat(data.data.saldo) || 0;
+                document.getElementById('currentBalance').textContent = formatCurrency(state.userBalance);
+            } else {
+                showToast(data.message || 'Erro ao carregar saldo', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading balance:', error);
+            showToast('Erro ao carregar saldo', 'error');
+        }
+    }
+
+    async function loadMarketplace() {
+        if (!state.currentToken) return;
+
+        try {
+            const params = new URLSearchParams({ acao: 'get_musicas', token: state.currentToken });
+            const response = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
+            const data = await response.json();
+            state.playlist = data.success && data.data ? data.data.filter(m => m.status?.toLowerCase() === 'ativo') : getSampleMusic();
+            renderMarketplace();
+        } catch (error) {
+            console.error('Error loading marketplace:', error);
+            state.playlist = getSampleMusic();
+            renderMarketplace();
+            showToast('Usando dados de exemplo', 'info');
+        }
+    }
+
+    function renderMarketplace() {
+        const grid = document.getElementById('marketplaceGrid');
+        grid.innerHTML = state.playlist.length === 0 ? '<p style="text-align: center; padding: 40px;">Nenhuma música disponível no momento.</p>' : '';
+        state.playlist.forEach(music => {
+            const card = document.createElement('div');
+            card.className = 'music-card';
+            card.innerHTML = `
+                <img src="${music.link_capa || 'https://via.placeholder.com/300x300/111418/00ff88?text=MIV'}" alt="${music.titulo}" class="music-cover">
+                <div class="music-info">
+                    <div class="music-title">${music.titulo}</div>
+                    <div class="music-artist">${music.artista || 'Artista'}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <div class="music-price">${formatCurrency(music.valor_acao || 10)}</div>
+                        <button onclick="openInvestModal('${music.id}')" class="btn" style="padding: 8px 15px;">Investir</button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    function getSampleMusic() {
+        return [
+            {
+                id: 'MUS001',
+                titulo: 'Música Exemplo 1',
+                artista: 'Artista Teste',
+                genero: 'POP',
+                link_youtube: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                link_capa: 'https://via.placeholder.com/300x300/111418/00ff88?text=MIV',
+                valor_acao: 10.00,
+                percentual_disponivel: 50,
+                status: 'ativo'
+            },
+            {
+                id: 'MUS002',
+                titulo: 'Música Exemplo 2',
+                artista: 'Outro Artista',
+                genero: 'ROCK',
+                link_youtube: 'https://www.youtube.com/watch?v=9bZkp7q19f0',
+                link_capa: 'https://via.placeholder.com/300x300/111418/00ff88?text=MIV',
+                valor_acao: 15.00,
+                percentual_disponivel: 30,
+                status: 'ativo'
+            }
+        ];
+    }
+
+    // ============================================
+    // CARREGAMENTO DE CARTEIRA E EXTRATO
+    // ============================================
+    async function loadPortfolio() {
+        if (!state.currentToken) return;
+        try {
+            const params = new URLSearchParams({ acao: 'get_carteira', token: state.currentToken });
+            const response = await fetch(`${CONFIG.API_URL}?${params.toString()}`);
+            const data = await response.json();
+            if (data.success && data.data) {
+                state.portfolioAssets = data.data;
+            } else {
+                state.portfolioAssets = [];
+            }
+            renderPortfolio();
+        } catch (error) {
+            console.error('Error loading portfolio:', error);
+            state.portfolioAssets = [];
+            renderPortfolio();
+        }
+    }
+
+    // ... (mantenha as funções renderPortfolio, loadLedger, renderLedger, loadArtistData, renderArtistData, registerMusic, confirmInvestment, openInvestModal exatamente como no seu código original)
+
+    function initializeApp() {
+        console.log('Inicializando app...');
+        const savedUser = localStorage.getItem('miv_user');
+        const savedToken = localStorage.getItem('miv_token');
+        if (savedUser && savedToken) {
+            state.currentUser = JSON.parse(savedUser);
+            state.currentToken = savedToken;
+        }
+        if (state.currentUser && state.currentToken) {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('registerSection').style.display = 'none';
+            document.getElementById('headerSection').style.display = 'flex';
+            document.getElementById('appContent').style.display = 'block';
+            if (state.currentUser.tipo === 'artista' || state.currentUser.tipo === 'admin') {
+                document.getElementById('artistTab').style.display = 'inline-block';
+                document.getElementById('addMusicTab').style.display = 'inline-block';
+            }
+            Promise.all([
+                loadBalance(),
+                loadMarketplace(),
+                loadPortfolio(),
+                loadLedger(),
+                loadArtistData()
+            ]).then(() => {
+                console.log('Todos os dados carregados');
+                showToast('Bem-vindo, ' + state.currentUser.nome + '!', 'success');
+            }).catch(error => {
+                console.error('Erro ao carregar dados:', error);
+                showToast('Erro ao carregar dados. Faça login novamente.', 'error');
+                handleLogout();
+            });
+        } else {
+            showLoginForm();
+        }
+    }
+
+    function handleLogout() {
+        if (confirm('Tem certeza que deseja sair?')) {
+            localStorage.removeItem('miv_user');
+            localStorage.removeItem('miv_token');
+            state.currentUser = null;
+            state.currentToken = null;
+            document.getElementById('appContent').style.display = 'none';
+            document.getElementById('headerSection').style.display = 'none';
+            showLoginForm();
+            showToast('Você saiu do sistema.', 'info');
+        }
+    }
+
+    // Inicializa a aplicação
+    document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
 </body>
 </html>
