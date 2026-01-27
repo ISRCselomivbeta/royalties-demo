@@ -1,0 +1,2954 @@
+# **CÓDIGO COMPLETO ATUALIZADO - SELO MIV**
+
+## **1. CÓDIGO DO GOOGLE APPS SCRIPT (backend.gs)**
+
+```javascript
+// ========== CONFIGURAÇÃO DO WEB APP ========== 
+const SPREADSHEET_ID = '1CwF9hf-lsjYkol-V7r3WOT5ld3dQFqKRTQ8nHcV45Wo';
+
+// ========== FUNÇÕES PRINCIPAIS ==========
+function doGet(e) {
+  console.log('📥 GET Recebido');
+  
+  const params = e?.parameter || {};
+  const action = params.action || params.acao;
+  
+  // Se for uma chamada de API
+  if (action) {
+    console.log(`🎯 API GET: ${action}`, params);
+    
+    try {
+      let result;
+      
+      switch(action) {
+        case 'test':
+          result = {
+            success: true,
+            message: '🎵 MIV API ONLINE v1.0',
+            timestamp: new Date().toISOString(),
+            endpoints: ['test', 'login', 'register', 'get_musicas', 'get_saldo', 'setup']
+          };
+          break;
+          
+        case 'get_musicas':
+          result = getMusicas();
+          break;
+          
+        case 'login':
+          result = handleLogin(params);
+          break;
+          
+        case 'register':
+          result = handleRegister(params);
+          break;
+          
+        case 'get_saldo':
+          result = getSaldo(params);
+          break;
+          
+        case 'get_carteira':
+          result = getCarteira(params);
+          break;
+          
+        case 'get_extrato':
+          result = getExtrato(params);
+          break;
+          
+        case 'get_historico_financeiro':
+          result = getHistoricoFinanceiro(params.user_id);
+          break;
+          
+        case 'get_resumo':
+          result = getResumoPortfolio(params);
+          break;
+          
+        case 'get_artist_data':
+          result = getArtistData(params);
+          break;
+          
+        case 'setup':
+          result = setupSpreadsheet();
+          break;
+          
+        case 'ping':
+          result = { success: true, pong: Date.now() };
+          break;
+          
+        default:
+          result = {
+            success: false,
+            message: `Ação '${action}' não suportada via GET`,
+            supported: ['test', 'get_musicas', 'login', 'register', 'get_saldo', 'get_carteira', 'get_extrato', 'setup', 'ping']
+          };
+      }
+      
+      console.log('✅ Resultado:', JSON.stringify(result).substring(0, 200));
+      return ContentService
+        .createTextOutput(JSON.stringify(result))
+        .setMimeType(ContentService.MimeType.JSON);
+        
+    } catch (error) {
+      console.error('❌ Erro no GET:', error);
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          success: false,
+          message: 'Erro interno',
+          error: error.message
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  
+  // Se não for API, retorna página HTML básica
+  return HtmlService.createHtmlOutput(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>🎵 SELO MIV - Backend</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; background: #07090c; color: white; }
+        h1 { color: #00ff88; margin-bottom: 20px; }
+        .card { background: #111418; padding: 30px; border-radius: 15px; max-width: 600px; margin: 0 auto; border: 1px solid #1e2329; }
+        code { background: #000; color: #00ff88; padding: 5px 10px; border-radius: 5px; }
+        .endpoint { text-align: left; margin: 20px 0; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; }
+      </style>
+    </head>
+    <body>
+      <h1>🎵 SELO MIV - Backend</h1>
+      <div class="card">
+        <h3>✅ API Funcionando</h3>
+        <p>Sistema de investimento em música</p>
+        
+        <div class="endpoint">
+          <h4>📡 Endpoints Disponíveis:</h4>
+          <p><code>GET ?action=test</code> - Testar API</p>
+          <p><code>GET ?action=get_musicas</code> - Listar músicas</p>
+          <p><code>GET ?action=login&email=...&password=...</code> - Login</p>
+          <p><code>GET ?action=setup</code> - Configurar banco de dados</p>
+        </div>
+        
+        <p><strong>Frontend:</strong> <a href="https://selomivplay.vercel.app" target="_blank">selomivplay.vercel.app</a></p>
+        <p><small>${new Date().toLocaleString('pt-BR')}</small></p>
+      </div>
+    </body>
+    </html>
+  `).setTitle('SELO MIV - Backend');
+}
+
+function doPost(e) {
+  console.log('📨 POST Recebido');
+  
+  // Se for chamada vazia (do Vercel)
+  if (!e) {
+    console.log('📭 POST vazio - retornando status');
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: true,
+        message: 'MIV API POST endpoint',
+        note: 'Para API use GET: ?action=nome',
+        timestamp: new Date().toISOString()
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  console.log('📦 Dados POST:', JSON.stringify(e).substring(0, 500));
+  
+  let params = {};
+  
+  // Pega dados do FormData
+  if (e.parameter) {
+    params = e.parameter;
+    console.log('📋 Parâmetros URL:', params);
+  }
+  
+  // Pega dados do JSON body
+  if (e.postData && e.postData.contents) {
+    try {
+      const jsonData = JSON.parse(e.postData.contents);
+      params = { ...params, ...jsonData };
+      console.log('📦 JSON Body:', jsonData);
+    } catch (error) {
+      console.log('⚠️ Não é JSON válido:', error.message);
+    }
+  }
+  
+  const action = params.action || params.acao;
+  
+  if (!action) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: 'Parâmetro "action" é obrigatório',
+        usage: 'Use ?action=test ou envie JSON com {"action": "nome"}'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  console.log(`🎯 Processando ação POST: ${action}`);
+  
+  try {
+    let result;
+    
+    switch(action) {
+      case 'login':
+        result = handleLogin(params);
+        break;
+      case 'register':
+        result = handleRegister(params);
+        break;
+      case 'get_musicas':
+        result = getMusicas();
+        break;
+      case 'get_saldo':
+        result = getSaldo(params);
+        break;
+      case 'get_carteira':
+        result = getCarteira(params);
+        break;
+      case 'get_extrato':
+        result = getExtrato(params);
+        break;
+      case 'get_historico_financeiro':
+        result = getHistoricoFinanceiro(params.user_id);
+        break;
+      case 'get_resumo':
+        result = getResumoPortfolio(params);
+        break;
+      case 'buy':
+        result = buyShares(params);
+        break;
+      case 'uploadMusic':
+        result = uploadMusic(params);
+        break;
+      case 'get_artist_data':
+        result = getArtistData(params);
+        break;
+      case 'confirmar_deposito':
+        result = confirmarDepositoPix(params.user_id, params.valor, params.referencia);
+        break;
+      case 'solicitar_saque':
+        result = solicitarSaque(params.user_id, params.valor);
+        break;
+      case 'confirmar_saque':
+        result = confirmarSaque(params.user_id, params.valor, params.referencia);
+        break;
+      case 'test':
+        result = { 
+          success: true, 
+          message: 'API POST funcionando',
+          action: action,
+          params: params,
+          timestamp: new Date().toISOString()
+        };
+        break;
+      default:
+        result = {
+          success: false,
+          message: `Ação '${action}' não implementada`
+        };
+    }
+    
+    console.log('✅ Resultado POST:', JSON.stringify(result).substring(0, 200));
+    return ContentService
+      .createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    console.error('💥 Erro no POST:', error);
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        success: false,
+        message: error.message,
+        stack: error.stack
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ========== FUNÇÕES DO BANCO DE DADOS ==========
+function getSpreadsheet() {
+  return SpreadsheetApp.openById(SPREADSHEET_ID);
+}
+
+// ========== FUNÇÕES DE USUÁRIO ==========
+function handleLogin(params) {
+  console.log('🔐 handleLogin chamado:', params);
+  
+  if (!params || typeof params !== 'object') {
+    return { success: false, message: 'Parâmetros inválidos' };
+  }
+  
+  const email = params.email || params.loginEmail || '';
+  const password = params.pass || params.password || params.loginPassword || '';
+  
+  console.log('Tentando login:', { email: email.substring(0, 10) + '...', password: '***' });
+  
+  if (!email || !password) {
+    return { success: false, message: 'Email e senha são obrigatórios' };
+  }
+  
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName('USUARIOS');
+    
+    if (!sheet) {
+      return { 
+        success: false, 
+        message: 'Sistema não configurado. Execute ?action=setup primeiro.',
+        tip: 'Acesse: ' + ScriptApp.getService().getUrl() + '?action=setup'
+      };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { success: false, message: 'Nenhum usuário cadastrado. Execute setup.' };
+    }
+    
+    const headers = data[0];
+    const emailIndex = headers.indexOf('EMAIL');
+    const senhaIndex = headers.indexOf('SENHA');
+    const nomeIndex = headers.indexOf('NOME');
+    const tipoIndex = headers.indexOf('TIPO');
+    const saldoIndex = headers.indexOf('SALDO');
+    const idIndex = headers.indexOf('ID');
+    const acessoIndex = headers.indexOf('ACESSO');
+    
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      const userEmail = String(row[emailIndex] || '').trim();
+      const userSenha = String(row[senhaIndex] || '').trim();
+      
+      if (userEmail === email && userSenha === password) {
+        console.log('✅ Login bem-sucedido para:', email);
+        
+        const user = {
+          id: row[idIndex] || i,
+          nome: row[nomeIndex] || '',
+          email: userEmail,
+          tipo: row[tipoIndex] || 'ouvinte',
+          saldo: parseFloat(row[saldoIndex]) || 0,
+          acesso: row[acessoIndex] || 'pendente',
+          token: 'miv_' + Date.now() + '_' + (row[idIndex] || i)
+        };
+        
+        if (user.acesso !== 'aprovado') {
+          return {
+            success: false,
+            message: 'Conta aguardando aprovação administrativa'
+          };
+        }
+        
+        return {
+          success: true,
+          data: user
+        };
+      }
+    }
+    
+    return { success: false, message: 'Email ou senha incorretos' };
+    
+  } catch (error) {
+    console.error('Erro em handleLogin:', error);
+    return { success: false, message: 'Erro interno: ' + error.message };
+  }
+}
+
+function handleRegister(params) {
+  console.log('📝 handleRegister chamado:', params);
+  
+  if (!params || typeof params !== 'object') {
+    return { success: false, message: 'Parâmetros inválidos' };
+  }
+  
+  const nome = params.nome || params.registerName || '';
+  const email = params.email || params.registerEmail || '';
+  const password = params.pass || params.password || params.registerPassword || '';
+  const tipo = params.tipo || params.registerType || '';
+  const workLink = params.workLink || params.registerLink || '';
+  
+  if (!nome || !email || !password || !tipo) {
+    return { success: false, message: 'Preencha todos os campos obrigatórios' };
+  }
+  
+  if (password.length < 6) {
+    return { success: false, message: 'Senha deve ter pelo menos 6 caracteres' };
+  }
+  
+  if (tipo === 'artista' && !workLink) {
+    return { success: false, message: 'Artistas devem informar link do trabalho' };
+  }
+  
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName('USUARIOS');
+    
+    if (!sheet) {
+      return { success: false, message: 'Sistema não configurado' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const emailIndex = headers.indexOf('EMAIL');
+    
+    // Verifica se email já existe
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][emailIndex]).trim() === email) {
+        return { success: false, message: 'Email já cadastrado' };
+      }
+    }
+    
+    // Gera novo ID
+    const lastId = data[data.length - 1][0] || 0;
+    const newId = lastId + 1;
+    
+    // Adiciona novo usuário
+    sheet.appendRow([
+      newId,
+      nome,
+      email,
+      password,
+      tipo,
+      workLink,
+      0, // saldo inicial
+      'pendente', // acesso
+      new Date().toISOString() // data_cadastro
+    ]);
+    
+    logEvent('REGISTRO', `Novo usuário: ${nome} (${email}) - Tipo: ${tipo}`);
+    
+    console.log('✅ Usuário registrado com sucesso:', { id: newId, email });
+    
+    return {
+      success: true,
+      message: 'Conta criada com sucesso! Aguarde aprovação.',
+      data: { id: newId, nome: nome }
+    };
+    
+  } catch (error) {
+    console.error('Erro em handleRegister:', error);
+    return { success: false, message: 'Erro ao criar conta: ' + error.message };
+  }
+}
+
+// ========== FUNÇÕES DE MÚSICAS ==========
+function getMusicas() {
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName('MUSICAS');
+    
+    if (!sheet) {
+      console.log('📭 Sheet MUSICAS não encontrada');
+      return { success: true, data: [], message: 'Nenhuma música cadastrada' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    if (data.length <= 1) {
+      return { success: true, data: [] };
+    }
+    
+    const headers = data[0];
+    
+    const musicas = data.slice(1).map((row, index) => {
+      const obj = {};
+      headers.forEach((header, i) => {
+        obj[header.toLowerCase()] = row[i];
+      });
+      obj.id = obj.id || (index + 1);
+      return obj;
+    }).filter(m => !m.status || m.status === 'ativo');
+    
+    console.log(`✅ Retornando ${musicas.length} músicas`);
+    return {
+      success: true,
+      data: musicas
+    };
+    
+  } catch (error) {
+    console.error('Erro em getMusicas:', error);
+    return {
+      success: false,
+      message: 'Erro ao carregar músicas: ' + error.message,
+      data: []
+    };
+  }
+}
+
+function uploadMusic(params) {
+  console.log('🎶 uploadMusic chamado:', params);
+  
+  if (!params || typeof params !== 'object') {
+    return { success: false, message: 'Parâmetros inválidos' };
+  }
+  
+  const user_id = params.user_id || '';
+  const titulo = params.titulo || params.musicTitle || '';
+  const artista = params.artista || params.musicArtist || '';
+  const genero = params.genero || params.musicGenre || '';
+  const link_youtube = params.link_youtube || params.musicYoutube || '';
+  const link_capa = params.link_capa || params.musicCover || '';
+  const valor_acao = params.valor_acao || params.musicPrice || '10';
+  const percentual_disponivel = params.percentual_disponivel || params.musicPercent || '20';
+  
+  if (!titulo || !genero || !link_youtube) {
+    return { success: false, message: 'Preencha título, gênero e link do YouTube' };
+  }
+  
+  try {
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName('MUSICAS');
+    
+    if (!sheet) {
+      return { success: false, message: 'Erro no servidor' };
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const lastId = data[data.length - 1][0] || 0;
+    const newId = lastId + 1;
+    
+    sheet.appendRow([
+      newId,
+      titulo,
+      artista,
+      genero,
+      link_youtube,
+      link_capa || '',
+      parseFloat(valor_acao) || 10.00,
+      parseFloat(percentual_disponivel) || 20.00,
+      0, // acoes_vendidas inicial
+      'ativo',
+      new Date().toISOString()
+    ]);
+    
+    logEvent('UPLOAD_MUSICA', `Usuário ${user_id} cadastrou música: ${titulo}`);
+    
+    return {
+      success: true,
+      message: 'Música cadastrada com sucesso!',
+      data: { id: newId, titulo: titulo }
+    };
+    
+  } catch (error) {
+    console.error('Erro em uploadMusic:', error);
+    return { success: false, message: 'Erro ao cadastrar música: ' + error.message };
+  }
+}
+
+// ========== FUNÇÕES FINANCEIRAS ==========
+function criarSheetTransacoes() {
+  try {
+    const ss = getSpreadsheet();
+    let sheet = ss.getSheetByName('TRANSACOES');
+
+    if (!sheet) {
+      sheet = ss.insertSheet('TRANSACOES');
+      sheet.appendRow([
+        'ID',
+        'USER_ID',
+        'TIPO',
+        'VALOR',
+        'SALDO_ANTES',
+        'SALDO_DEPOIS',
+        'REFERENCIA',
+        'STATUS',
+        'DATA'
+      ]);
+      
+      sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#f0f0f0');
+      sheet.setFrozenRows(1);
+      sheet.autoResizeColumns(1, 9);
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Erro ao criar sheet TRANSACOES:', error);
+    return false;
+  }
+}
+
+function registrarTransacao(userId, tipo, valor, saldoAntes, saldoDepois, referencia, status) {
+  try {
+    criarSheetTransacoes();
+    
+    const ss = getSpreadsheet();
+    const sheet = ss.getSheetByName('TRANSACOES');
+    
+    const data = sheet.getDataRange().getValues();
+    const lastId = data.length > 1 ? Number(data[data.length - 1][0]) || 0 : 0;
+
+    sheet.appendRow([
+      lastId + 1,
+      userId,
+      tipo,
+      valor,
+      saldoAntes,
+      saldoDepois,
+      referencia || '',
+      status || 'CONFIRMADO',
+      new Date().toISOString()
+    ]);
+    
+    return true;
+  } catch (error) {
+    console.error('Erro em registrarTransacao:', error);
+    return false;
+  }
+}
+
+function getSaldo(params) {
+  console.log('💰 getSaldo chamado com:', params);
+  
+  if (!params || !params.token) {
+    return { success: false, message: 'Token não fornecido' };
+  }
+  
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('USUARIOS');
+  
+  if (!sheet) {
+    return { success: false, message: 'Erro no servidor' };
+  }
+  
+  try {
+    const data = sheet.getDataRange().getValues();
+    const headers = data[0];
+    const idIndex = headers.indexOf('ID');
+    const saldoIndex = headers.indexOf('SALDO');
+    
+    // Extrai user_id do token (formato: miv_TIMESTAMP_USERID)
+    const tokenParts = params.token.split('_');
+    const user_id = tokenParts.length >= 3 ? tokenParts[2] : params.token;
+    
+    console.log('Buscando saldo para user_id:', user_id);
+    
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][idIndex]) === String(user_id)) {
+        const saldo = parseFloat(data[i][saldoIndex]) || 0;
+        console.log('✅ Saldo encontrado:', saldo);
+        return {
+          success: true,
+          data: { saldo: saldo }
+        };
+      }
+    }
+    
+    console.log('❌ Usuário não encontrado para token');
+    return { success: false, message: 'Usuário não encontrado' };
+    
+  } catch (error) {
+    console.error('Erro em getSaldo:', error);
+    return { success: false, message: 'Erro ao buscar saldo: ' + error.message };
+  }
+}
+
+function getResumoPortfolio(params) {
+  console.log('📊 getResumoPortfolio chamado com:', params);
+  
+  if (!params || !params.token) {
+    return { success: false, message: 'Token não fornecido' };
+  }
+  
+  try {
+    // Obtém saldo
+    const saldoRes = getSaldo(params);
+    if (!saldoRes.success) {
+      return saldoRes;
+    }
+    
+    const saldo = saldoRes.data.saldo;
+    
+    // Extrai user_id do token
+    const tokenParts = params.token.split('_');
+    const user_id = tokenParts.length >= 3 ? tokenParts[2] : params.token;
+    
+    // Obtém valor da carteira
+    const carteiraRes = getCarteira({ user_id: user_id });
+    let patrimonio = 0;
+    
+    if (carteiraRes.success && carteiraRes.data) {
+      patrimonio = carteiraRes.data.reduce((total, item) => {
+        return total + (parseFloat(item.valor_total) || 0);
+      }, 0);
+    }
+    
+    const total = saldo + patrimonio;
+    
+    console.log('✅ Resumo portfolio:', { saldo, patrimonio, total });
+    
+    return {
+      success: true,
+      data: {
+        saldo: saldo,
+        patrimonio: patrimonio,
+        total: total
+      }
+    };
+    
+  } catch (error) {
+    console.error('Erro em getResumoPortfolio:', error);
+    return {
+      success: false,
+      message: 'Erro ao carregar resumo: ' + error.message,
+      data: { saldo: 0, patrimonio: 0, total: 0 }
+    };
+  }
+}
+
+function buyShares(params) {
+  console.log('💳 buyShares chamado com:', params);
+  
+  if (!params || !params.user_id || !params.music_id || !params.quantidade || !params.valor_total) {
+    return { success: false, message: 'Parâmetros incompletos' };
+  }
+  
+  const user_id = params.user_id;
+  const music_id = params.music_id;
+  const quantidadeNum = parseInt(params.quantidade) || 0;
+  const valorTotalNum = parseFloat(params.valor_total) || 0;
+  
+  if (quantidadeNum <= 0) {
+    return { success: false, message: 'Quantidade inválida' };
+  }
+  
+  if (valorTotalNum <= 0) {
+    return { success: false, message: 'Valor inválido' };
+  }
+  
+  const ss = getSpreadsheet();
+  
+  try {
+    // 1. Verifica saldo do usuário
+    const usersSheet = ss.getSheetByName('USUARIOS');
+    const usersData = usersSheet.getDataRange().getValues();
+    const userHeaders = usersData[0];
+    
+    let userRow = -1;
+    let userSaldo = 0;
+    let userNome = '';
+    
+    for (let i = 1; i < usersData.length; i++) {
+      if (String(usersData[i][userHeaders.indexOf('ID')]) === String(user_id)) {
+        userRow = i + 1;
+        userSaldo = parseFloat(usersData[i][userHeaders.indexOf('SALDO')]) || 0;
+        userNome = usersData[i][userHeaders.indexOf('NOME')] || '';
+        break;
+      }
+    }
+    
+    if (userRow === -1) {
+      return { success: false, message: 'Usuário não encontrado' };
+    }
+    
+    if (userSaldo < valorTotalNum) {
+      return {
+        success: false,
+        message: `Saldo insuficiente. Disponível: R$ ${userSaldo.toFixed(2)}`
+      };
+    }
+    
+    // 2. Verifica disponibilidade da música
+    const musicSheet = ss.getSheetByName('MUSICAS');
+    const musicData = musicSheet.getDataRange().getValues();
+    const musicHeaders = musicData[0];
+    
+    let musicRow = -1;
+    let musicObj = {};
+    
+    for (let i = 1; i < musicData.length; i++) {
+      if (String(musicData[i][musicHeaders.indexOf('ID')]) === String(music_id)) {
+        musicRow = i + 1;
+        musicHeaders.forEach((header, index) => {
+          musicObj[header.toLowerCase()] = musicData[i][index];
+        });
+        break;
+      }
+    }
+    
+    if (musicRow === -1) {
+      return { success: false, message: 'Música não encontrada' };
+    }
+    
+    const percentualDisponivel = parseFloat(musicObj.percentual_disponivel) || 0;
+    const acoesVendidas = parseFloat(musicObj.acoes_vendidas) || 0;
+    const totalAcoes = (percentualDisponivel / 0.01);
+    const acoesDisponiveis = totalAcoes - acoesVendidas;
+    
+    if (quantidadeNum > acoesDisponiveis) {
+      return {
+        success: false,
+        message: `Apenas ${acoesDisponiveis} ações disponíveis`
+      };
+    }
+    
+    // 3. Processa a compra
+    const novoSaldo = userSaldo - valorTotalNum;
+    usersSheet.getRange(userRow, userHeaders.indexOf('SALDO') + 1).setValue(novoSaldo);
+    
+    const novasAcoesVendidas = acoesVendidas + quantidadeNum;
+    musicSheet.getRange(musicRow, musicHeaders.indexOf('ACOES_VENDIDAS') + 1)
+      .setValue(novasAcoesVendidas);
+    
+    // 4. Registro financeiro LEDGER
+    registrarTransacao(
+      user_id,
+      'COMPRA_ACOES',
+      -valorTotalNum,
+      userSaldo,
+      novoSaldo,
+      'COMPRA_MUSICA_' + music_id,
+      'CONFIRMADO'
+    );
+    
+    // 5. Adiciona à carteira
+    const carteiraSheet = ss.getSheetByName('CARTEIRA');
+    const carteiraData = carteiraSheet.getDataRange().getValues();
+    const lastCarteiraId = carteiraData.length > 1 ? carteiraData[carteiraData.length - 1][0] || 0 : 0;
+    const novoCarteiraId = lastCarteiraId + 1;
+    
+    const valorPorAcao = valorTotalNum / quantidadeNum;
+    
+    carteiraSheet.appendRow([
+      novoCarteiraId,
+      user_id,
+      music_id,
+      quantidadeNum,
+      valorPorAcao,
+      valorTotalNum,
+      new Date().toISOString()
+    ]);
+    
+    // 6. Adiciona ao extrato
+    const extratoSheet = ss.getSheetByName('EXTRATO');
+    if (extratoSheet) {
+      const extratoData = extratoSheet.getDataRange().getValues();
+      const lastExtratoId = extratoData.length > 1 ? extratoData[extratoData.length - 1][0] || 0 : 0;
+      const novoExtratoId = lastExtratoId + 1;
+      
+      extratoSheet.appendRow([
+        novoExtratoId,
+        user_id,
+        'COMPRA_ACOES',
+        `Compra de ${quantidadeNum} ação(ões) de "${musicObj.titulo}" - ${musicObj.artista}`,
+        -valorTotalNum,
+        new Date().toISOString()
+      ]);
+    }
+    
+    // 7. Log
+    logEvent('COMPRA', `Usuário ${userNome} (${user_id}) comprou ${quantidadeNum} ações da música ${music_id}`);
+    
+    console.log('✅ Compra realizada com sucesso:', {
+      user_id,
+      novo_saldo: novoSaldo,
+      saldo_anterior: userSaldo
+    });
+    
+    return {
+      success: true,
+      message: 'Compra realizada com sucesso!',
+      data: {
+        novo_saldo: novoSaldo,
+        saldo_anterior: userSaldo
+      }
+    };
+    
+  } catch (error) {
+    console.error('Erro em buyShares:', error);
+    return { success: false, message: 'Erro ao processar compra: ' + error.message };
+  }
+}
+
+function confirmarDepositoPix(userId, valor, referenciaMP) {
+  console.log('📥 confirmarDepositoPix chamado:', { userId, valor, referenciaMP });
+  
+  const ss = getSpreadsheet();
+  const usersSheet = ss.getSheetByName('USUARIOS');
+  const data = usersSheet.getDataRange().getValues();
+  const headers = data[0];
+
+  const colId = headers.indexOf('ID');
+  const colSaldo = headers.indexOf('SALDO');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][colId]) === String(userId)) {
+      const saldoAntes = Number(data[i][colSaldo]) || 0;
+      const saldoDepois = saldoAntes + Number(valor);
+
+      usersSheet.getRange(i + 1, colSaldo + 1).setValue(saldoDepois);
+
+      registrarTransacao(
+        userId,
+        'DEPOSITO_CONFIRMADO',
+        Number(valor),
+        saldoAntes,
+        saldoDepois,
+        referenciaMP,
+        'CONFIRMADO'
+      );
+
+      // Adiciona ao extrato
+      const extratoSheet = ss.getSheetByName('EXTRATO');
+      if (extratoSheet) {
+        const extratoData = extratoSheet.getDataRange().getValues();
+        const lastExtratoId = extratoData.length > 1 ? extratoData[extratoData.length - 1][0] || 0 : 0;
+        
+        extratoSheet.appendRow([
+          lastExtratoId + 1,
+          userId,
+          'DEPOSITO',
+          `Depósito via PIX - ${referenciaMP}`,
+          Number(valor),
+          new Date().toISOString()
+        ]);
+      }
+
+      return { success: true, message: 'Depósito confirmado!' };
+    }
+  }
+
+  return { success: false, error: 'Usuário não encontrado' };
+}
+
+function solicitarSaque(userId, valor) {
+  console.log('📤 solicitarSaque chamado:', { userId, valor });
+  
+  const ss = getSpreadsheet();
+  const usersSheet = ss.getSheetByName('USUARIOS');
+  const data = usersSheet.getDataRange().getValues();
+  const headers = data[0];
+
+  const colId = headers.indexOf('ID');
+  const colSaldo = headers.indexOf('SALDO');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][colId]) === String(userId)) {
+      const saldoAtual = Number(data[i][colSaldo]) || 0;
+
+      if (saldoAtual < valor) {
+        return { success: false, error: 'Saldo insuficiente' };
+      }
+
+      registrarTransacao(
+        userId,
+        'SAQUE_SOLICITADO',
+        -valor,
+        saldoAtual,
+        saldoAtual,
+        '',
+        'PENDENTE'
+      );
+
+      return { success: true, message: 'Saque solicitado com sucesso!' };
+    }
+  }
+
+  return { success: false, error: 'Usuário não encontrado' };
+}
+
+function confirmarSaque(userId, valor, referenciaMP) {
+  console.log('✅ confirmarSaque chamado:', { userId, valor, referenciaMP });
+  
+  const ss = getSpreadsheet();
+  const usersSheet = ss.getSheetByName('USUARIOS');
+  const data = usersSheet.getDataRange().getValues();
+  const headers = data[0];
+
+  const colId = headers.indexOf('ID');
+  const colSaldo = headers.indexOf('SALDO');
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][colId]) === String(userId)) {
+      const saldoAntes = Number(data[i][colSaldo]) || 0;
+      const saldoDepois = saldoAntes - Number(valor);
+
+      usersSheet.getRange(i + 1, colSaldo + 1).setValue(saldoDepois);
+
+      registrarTransacao(
+        userId,
+        'SAQUE_PAGO',
+        -valor,
+        saldoAntes,
+        saldoDepois,
+        referenciaMP,
+        'CONFIRMADO'
+      );
+
+      // Adiciona ao extrato
+      const extratoSheet = ss.getSheetByName('EXTRATO');
+      if (extratoSheet) {
+        const extratoData = extratoSheet.getDataRange().getValues();
+        const lastExtratoId = extratoData.length > 1 ? extratoData[extratoData.length - 1][0] || 0 : 0;
+        
+        extratoSheet.appendRow([
+          lastExtratoId + 1,
+          userId,
+          'SAQUE',
+          `Saque realizado - ${referenciaMP}`,
+          -Number(valor),
+          new Date().toISOString()
+        ]);
+      }
+
+      return { success: true, message: 'Saque confirmado!' };
+    }
+  }
+
+  return { success: false, error: 'Usuário não encontrado' };
+}
+
+function getHistoricoFinanceiro(userId) {
+  console.log('📋 getHistoricoFinanceiro chamado:', userId);
+  
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('TRANSACOES');
+  
+  if (!sheet) {
+    return { success: true, data: [], message: 'Nenhuma transação encontrada' };
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  
+  const historico = data.slice(1)
+    .filter(row => row[headers.indexOf('USER_ID')].toString() === String(userId))
+    .map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header.toLowerCase()] = row[index];
+      });
+      return obj;
+    })
+    .sort((a, b) => new Date(b.data) - new Date(a.data));
+  
+  return {
+    success: true,
+    data: historico
+  };
+}
+
+// ========== FUNÇÕES DE PORTFÓLIO E EXTRATO ==========
+function getCarteira(params) {
+  console.log('💼 getCarteira chamado com:', params);
+  
+  if (!params || !params.user_id) {
+    return { success: true, data: [] };
+  }
+  
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('CARTEIRA');
+  
+  if (!sheet) {
+    return { success: true, data: [] };
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  
+  const carteira = data.slice(1)
+    .filter(row => row[headers.indexOf('USER_ID')].toString() === String(params.user_id))
+    .map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header.toLowerCase()] = row[index];
+      });
+      return obj;
+    });
+  
+  console.log(`✅ Retornando ${carteira.length} itens da carteira`);
+  return {
+    success: true,
+    data: carteira
+  };
+}
+
+function getExtrato(params) {
+  console.log('🧾 getExtrato chamado com:', params);
+  
+  if (!params || !params.user_id) {
+    return { success: true, data: [] };
+  }
+  
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName('EXTRATO');
+  
+  if (!sheet) {
+    return { success: true, data: [] };
+  }
+  
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  
+  const extrato = data.slice(1)
+    .filter(row => row[headers.indexOf('USER_ID')].toString() === String(params.user_id))
+    .map(row => {
+      const obj = {};
+      headers.forEach((header, index) => {
+        obj[header.toLowerCase()] = row[index];
+      });
+      return obj;
+    });
+  
+  console.log(`✅ Retornando ${extrato.length} itens do extrato`);
+  return {
+    success: true,
+    data: extrato
+  };
+}
+
+// ========== FUNÇÕES DE ARTISTA ==========
+function getArtistData(params) {
+  console.log('🎤 getArtistData chamado com:', params);
+  
+  if (!params || !params.user_id) {
+    return { success: false, message: 'ID do usuário não fornecido' };
+  }
+  
+  const ss = getSpreadsheet();
+  
+  // Primeiro obtém o nome do artista
+  const usersSheet = ss.getSheetByName('USUARIOS');
+  const usersData = usersSheet.getDataRange().getValues();
+  const userHeaders = usersData[0];
+  
+  let artistaNome = '';
+  let artistaId = '';
+  for (let i = 1; i < usersData.length; i++) {
+    if (String(usersData[i][userHeaders.indexOf('ID')]) === String(params.user_id)) {
+      artistaNome = usersData[i][userHeaders.indexOf('NOME')] || '';
+      artistaId = usersData[i][userHeaders.indexOf('ID')] || '';
+      break;
+    }
+  }
+  
+  if (!artistaNome) {
+    return { success: false, message: 'Artista não encontrado' };
+  }
+  
+  // Obtém músicas do artista
+  const musicasSheet = ss.getSheetByName('MUSICAS');
+  const musicasData = musicasSheet.getDataRange().getValues();
+  const musicasHeaders = musicasData[0];
+  
+  const artistMusics = musicasData.slice(1)
+    .filter(row => row[musicasHeaders.indexOf('ARTISTA')] === artistaNome)
+    .map(row => {
+      const obj = {};
+      musicasHeaders.forEach((header, index) => {
+        obj[header.toLowerCase()] = row[index];
+      });
+      
+      // Calcula estatísticas
+      const percentualDisponivel = parseFloat(obj.percentual_disponivel) || 0;
+      const acoesVendidas = parseFloat(obj.acoes_vendidas) || 0;
+      const valorAcao = parseFloat(obj.valor_acao) || 0;
+      const totalAcoes = (percentualDisponivel / 0.01);
+      obj.percentual_vendido = totalAcoes > 0 ? (acoesVendidas / totalAcoes * 100) : 0;
+      obj.arrecadacao_total = acoesVendidas * valorAcao;
+      obj.acoes_disponiveis = totalAcoes - acoesVendidas;
+      
+      return obj;
+    });
+  
+  // Calcula estatísticas gerais
+  const totalMusicas = artistMusics.length;
+  const totalRoyalties = artistMusics.reduce((sum, music) => sum + (music.arrecadacao_total || 0), 0);
+  const totalAcoesVendidas = artistMusics.reduce((sum, music) => sum + (parseFloat(music.acoes_vendidas) || 0), 0);
+  
+  console.log(`✅ Dados do artista ${artistaNome}:`, {
+    totalMusicas,
+    totalRoyalties,
+    totalAcoesVendidas
+  });
+  
+  return {
+    success: true,
+    data: {
+      artista_id: artistaId,
+      artista: artistaNome,
+      total_musicas: totalMusicas,
+      total_royalties: totalRoyalties,
+      total_acoes_vendidas: totalAcoesVendidas,
+      musicas: artistMusics
+    }
+  };
+}
+
+// ========== FUNÇÃO DE LOG ==========
+function logEvent(tipo, descricao) {
+  try {
+    const ss = getSpreadsheet();
+    let sheet = ss.getSheetByName('LOG');
+    
+    if (!sheet) {
+      sheet = ss.insertSheet('LOG');
+      sheet.appendRow(['ID', 'TIPO', 'DESCRICAO', 'DATA']);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const lastId = data.length > 1 ? data[data.length - 1][0] || 0 : 0;
+    const newId = lastId + 1;
+    
+    sheet.appendRow([
+      newId,
+      tipo,
+      descricao,
+      new Date().toISOString()
+    ]);
+    
+    console.log(`📝 LOG [${tipo}]: ${descricao}`);
+  } catch (error) {
+    console.error('Erro ao registrar log:', error);
+  }
+}
+
+// ========== FUNÇÕES DE TESTE E DEPURAÇÃO ==========
+function testAPI() {
+  return {
+    success: true,
+    message: 'API está funcionando!',
+    timestamp: new Date().toISOString(),
+    sheets: ['USUARIOS', 'MUSICAS', 'CARTEIRA', 'EXTRATO', 'TRANSACOES', 'LOG']
+  };
+}
+
+function testLogin() {
+  const testParams = {
+    email: 'admin@miv.com',
+    password: 'admin123'
+  };
+  
+  return handleLogin(testParams);
+}
+
+function testSetup() {
+  try {
+    const ss = getSpreadsheet();
+    const sheets = ss.getSheets();
+    const sheetNames = sheets.map(s => s.getName());
+    
+    return {
+      success: true,
+      sheets: sheetNames,
+      count: sheetNames.length
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
+// ========== FUNÇÃO PRINCIPAL DE SETUP ==========
+function setupSpreadsheet() {
+  console.log('🔧 Iniciando setup da planilha...');
+  
+  try {
+    const ss = getSpreadsheet();
+    
+    // Remove sheets antigos
+    const sheetsToRemove = ['Sheet1', 'Sheet2', 'Sheet3', 'Planilha1'];
+    sheetsToRemove.forEach(sheetName => {
+      const sheet = ss.getSheetByName(sheetName);
+      if (sheet && sheetName !== 'TRANSACOES' && sheetName !== 'LOG') {
+        ss.deleteSheet(sheet);
+      }
+    });
+    
+    // Sheets necessários com dados de exemplo
+    const sheetsConfig = [
+      {
+        name: 'USUARIOS',
+        headers: ['ID', 'NOME', 'EMAIL', 'SENHA', 'TIPO', 'WORKLINK', 'SALDO', 'ACESSO', 'DATA_CADASTRO'],
+        sampleData: [
+          [1, 'Administrador', 'admin@miv.com', 'admin123', 'admin', '', 10000, 'aprovado', new Date().toISOString()],
+          [2, 'Elzo Henschell', 'elzo@artista.com', 'elzo123', 'artista', 'https://youtube.com/elzo', 5000, 'aprovado', new Date().toISOString()],
+          [3, 'Investidor Teste', 'investidor@teste.com', 'teste123', 'ouvinte', '', 2000, 'aprovado', new Date().toISOString()]
+        ]
+      },
+      {
+        name: 'MUSICAS',
+        headers: ['ID', 'TITULO', 'ARTISTA', 'GENERO', 'LINK_YOUTUBE', 'LINK_CAPA', 'VALOR_ACAO', 'PERCENTUAL_DISPONIVEL', 'ACOES_VENDIDAS', 'STATUS', 'DATA_CADASTRO'],
+        sampleData: [
+          [1, 'EVA', 'Elzo Henschell', 'ROCK', 'https://www.youtube.com/watch?v=bFqLIyxuiMM', 'https://i.ytimg.com/vi/bFqLIyxuiMM/hqdefault.jpg', 15.50, 25, 75, 'ativo', new Date().toISOString()],
+          [2, 'O Máximo', 'Elzo Henschell', 'ROCK', 'https://youtu.be/utoRQzolfqs', 'https://i9.ytimg.com/vi_webp/utoRQzolfqs/mqdefault.webp', 22.00, 40, 60, 'ativo', new Date().toISOString()],
+          [3, 'Som ON', 'Selo MIV', 'INSTRUMENTAL', 'https://youtu.be/O4vSvOLtkuM', 'https://via.placeholder.com/300x300/111418/00ff88?text=MIV', 18.75, 35, 65, 'ativo', new Date().toISOString()]
+        ]
+      },
+      {
+        name: 'CARTEIRA',
+        headers: ['ID', 'USER_ID', 'MUSIC_ID', 'QUANTIDADE', 'VALOR_PAGO_POR_ACAO', 'VALOR_TOTAL', 'DATA_COMPRA'],
+        sampleData: [
+          [1, 3, 1, 5, 15.50, 77.50, new Date().toISOString()],
+          [2, 3, 2, 3, 22.00, 66.00, new Date().toISOString()]
+        ]
+      },
+      {
+        name: 'EXTRATO',
+        headers: ['ID', 'USER_ID', 'TIPO', 'DESCRICAO', 'VALOR', 'DATA'],
+        sampleData: [
+          [1, 3, 'DEPOSITO', 'Depósito inicial', 2000, new Date().toISOString()],
+          [2, 3, 'COMPRA_ACOES', 'Compra de 5 ação(ões) de "EVA" - Elzo Henschell', -77.50, new Date().toISOString()],
+          [3, 3, 'COMPRA_ACOES', 'Compra de 3 ação(ões) de "O Máximo" - Elzo Henschell', -66.00, new Date().toISOString()]
+        ]
+      },
+      {
+        name: 'TRANSACOES',
+        headers: ['ID', 'USER_ID', 'TIPO', 'VALOR', 'SALDO_ANTES', 'SALDO_DEPOIS', 'REFERENCIA', 'STATUS', 'DATA'],
+        sampleData: [
+          [1, 3, 'DEPOSITO_INICIAL', 2000, 0, 2000, 'SISTEMA', 'CONFIRMADO', new Date().toISOString()],
+          [2, 3, 'COMPRA_ACOES', -77.50, 2000, 1922.50, 'COMPRA_MUSICA_1', 'CONFIRMADO', new Date().toISOString()],
+          [3, 3, 'COMPRA_ACOES', -66.00, 1922.50, 1856.50, 'COMPRA_MUSICA_2', 'CONFIRMADO', new Date().toISOString()]
+        ]
+      },
+      {
+        name: 'LOG',
+        headers: ['ID', 'TIPO', 'DESCRICAO', 'DATA'],
+        sampleData: [
+          [1, 'SISTEMA', 'Setup inicial', new Date().toISOString()]
+        ]
+      }
+    ];
+    
+    // Cria ou atualiza cada sheet
+    sheetsConfig.forEach(config => {
+      console.log(`📊 Processando sheet: ${config.name}`);
+      
+      let sheet = ss.getSheetByName(config.name);
+      
+      if (!sheet) {
+        sheet = ss.insertSheet(config.name);
+        console.log(`✅ Sheet ${config.name} criada`);
+      } else {
+        // Limpa apenas se for menor que 100 linhas (para não perder dados grandes)
+        const lastRow = sheet.getLastRow();
+        if (lastRow < 100) {
+          sheet.clear();
+          console.log(`🔄 Sheet ${config.name} limpa`);
+        } else {
+          console.log(`📈 Sheet ${config.name} mantida (${lastRow} linhas)`);
+        }
+      }
+      
+      // Adiciona headers
+      sheet.getRange(1, 1, 1, config.headers.length).setValues([config.headers]);
+      
+      // Adiciona dados de exemplo se fornecidos
+      if (config.sampleData && config.sampleData.length > 0) {
+        sheet.getRange(2, 1, config.sampleData.length, config.headers.length).setValues(config.sampleData);
+        console.log(`📝 Adicionados ${config.sampleData.length} registros de exemplo`);
+      }
+      
+      // Formatação
+      sheet.getRange(1, 1, 1, config.headers.length)
+        .setFontWeight('bold')
+        .setBackground('#f0f0f0')
+        .setHorizontalAlignment('center');
+      
+      sheet.setFrozenRows(1);
+      sheet.autoResizeColumns(1, config.headers.length);
+      
+      // Formata números
+      if (config.name === 'USUARIOS') {
+        sheet.getRange('G:G').setNumberFormat('"R$ "#,##0.00');
+      }
+      if (config.name === 'MUSICAS') {
+        sheet.getRange('G:H').setNumberFormat('0.00');
+        sheet.getRange('I:I').setNumberFormat('0');
+      }
+      if (config.name === 'CARTEIRA') {
+        sheet.getRange('D:F').setNumberFormat('0.00');
+      }
+      if (config.name === 'EXTRATO') {
+        sheet.getRange('E:E').setNumberFormat('"R$ "#,##0.00');
+      }
+      if (config.name === 'TRANSACOES') {
+        sheet.getRange('D:F').setNumberFormat('"R$ "#,##0.00');
+      }
+    });
+    
+    logEvent('SETUP', 'Planilha configurada com sucesso');
+    
+    console.log('✅ Setup completo!');
+    return {
+      success: true,
+      message: '🎉 Planilha MIV configurada com sucesso!',
+      timestamp: new Date().toISOString(),
+      login_test: {
+        email: 'admin@miv.com',
+        password: 'admin123',
+        url: ScriptApp.getService().getUrl() + '?action=login&email=admin@miv.com&password=admin123'
+      }
+    };
+    
+  } catch (error) {
+    console.error('❌ Erro no setup:', error);
+    return {
+      success: false,
+      message: '❌ Erro no setup: ' + error.message,
+      error: error.toString()
+    };
+  }
+}
+
+function runSetup() {
+  return setupSpreadsheet();
+}
+
+// ========== FUNÇÃO DE INICIALIZAÇÃO SIMPLES ==========
+function init() {
+  // Verifica se as sheets básicas existem
+  const ss = getSpreadsheet();
+  const requiredSheets = ['USUARIOS', 'MUSICAS', 'CARTEIRA', 'EXTRATO'];
+  const missingSheets = [];
+  
+  requiredSheets.forEach(sheetName => {
+    if (!ss.getSheetByName(sheetName)) {
+      missingSheets.push(sheetName);
+    }
+  });
+  
+  if (missingSheets.length === 0) {
+    return {
+      success: true,
+      message: 'Sistema já inicializado',
+      sheets: requiredSheets
+    };
+  } else {
+    // Executa setup automático
+    return runSetup();
+  }
+}
+
+// Execute esta função para iniciar o sistema
+function iniciarSistema() {
+  console.log('🚀 Iniciando sistema MIV...');
+  return init();
+}
+```
+
+## **2. CÓDIGO HTML DO FRONTEND (com correções)**
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SELO MIV | Fintech Musical</title>
+
+    <!-- Bootstrap 5.3.0 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ========== VARIÁVEIS CSS ========== */
+        :root {
+            --neon-green: #00ff88;
+            --miv-blue: #0072ff;
+            --bg-dark: #07090c;
+            --bg-card: #111418;
+            --border: #1e2329;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+        }
+
+        /* ========== RESET & BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== LOADING SCREEN ========== */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 0.25rem solid rgba(0, 255, 136, 0.3);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========== AUTH SCREEN ========== */
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0c0e12 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 9998;
+            overflow-y: auto;
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .logo-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--neon-green);
+        }
+
+        .logo-icon i {
+            font-size: 2.5rem;
+            color: var(--neon-green);
+        }
+
+        /* ========== FORMS ========== */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-control-custom {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-light);
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--neon-green);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 136, 0.25);
+        }
+
+        .form-control-custom::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-miv {
+            background: linear-gradient(135deg, var(--neon-green) 0%, #00cc6a 100%);
+            border: none;
+            border-radius: 0.75rem;
+            color: #000;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .btn-miv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-miv:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-link {
+            color: var(--neon-green);
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s ease;
+        }
+
+        .auth-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* ========== MAIN APP ========== */
+        .main-app {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 5rem;
+        }
+
+        /* Header */
+        .app-header {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.1) 0%, rgba(7, 9, 12, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .saldo-display h6 {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .saldo-display h4 {
+            color: var(--neon-green);
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .user-badge {
+            background: var(--neon-green);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: #000;
+            border-right: 1px solid var(--border);
+            z-index: 1100;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--neon-green);
+        }
+
+        .nav-link i {
+            font-size: 1.25rem;
+        }
+
+        /* Content Sections */
+        .section {
+            display: none;
+            padding: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        /* Music Cards */
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .music-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .music-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-green);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.1);
+        }
+
+        .music-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .music-info {
+            padding: 1rem;
+        }
+
+        .music-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-light);
+        }
+
+        .music-artist {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .music-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .music-price {
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .music-percent {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Player - Estilo Spotify */
+        .player-bar {
+            position: fixed;
+            bottom: 5rem;
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            padding: 1rem;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .player-bar.expanded {
+            bottom: 0;
+            height: 100vh;
+            background: rgba(17, 20, 24, 0.98);
+            backdrop-filter: blur(20px);
+        }
+
+        .player-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .player-bar.expanded .video-container {
+            display: block;
+        }
+
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .player-album-art {
+            width: 60px;
+            height: 60px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+        }
+
+        .player-text {
+            flex: 1;
+        }
+
+        .player-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .player-artist {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .player-price {
+            color: var(--neon-green);
+            font-weight: 700;
+        }
+
+        .progress-container {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin: 1rem 0;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--neon-green);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .player-time {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 0.5rem;
+        }
+
+        .control-btn:hover {
+            color: var(--neon-green);
+            transform: scale(1.1);
+        }
+
+        .play-btn {
+            font-size: 2.5rem;
+        }
+
+        #queueContainer {
+            max-height: 40vh;
+            overflow-y: auto;
+        }
+
+        #queueList .list-group-item {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        #queueList .list-group-item.active {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #000;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            z-index: 1001;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            flex: 1;
+        }
+
+        .nav-btn:hover,
+        .nav-btn.active {
+            color: var(--neon-green);
+        }
+
+        .nav-btn i {
+            font-size: 1.25rem;
+        }
+
+        .nav-btn span {
+            font-size: 0.75rem;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: var(--text-light);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--neon-green);
+        }
+
+        .toast.error {
+            border-left: 4px solid #ff4444;
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--neon-green);
+        }
+
+        .toast.error .toast-icon {
+            color: #ff4444;
+        }
+
+        /* Portfolio Stats */
+        .portfolio-summary {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(7, 9, 12, 0.8) 100%);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .portfolio-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            margin: 0.5rem 0;
+        }
+
+        /* Artist Stats */
+        .artist-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        /* Ledger Table */
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ledger-table th {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .ledger-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ledger-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Finance Dashboard */
+        .finance-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .transaction-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .transaction-type.deposit {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--neon-green);
+        }
+
+        .transaction-type.withdraw {
+            background: rgba(255, 68, 68, 0.1);
+            color: #ff4444;
+        }
+
+        .transaction-type.purchase {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+        }
+
+        /* ========== CORREÇÃO DE IMAGENS ========== */
+        .music-cover[src*="via.placeholder.com"],
+        .music-cover:not([src]),
+        #playerAlbumArt[src*="via.placeholder.com"] {
+            background: linear-gradient(135deg, #111418 0%, #0a0d12 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .music-cover[src*="via.placeholder.com"]::after,
+        .music-cover:not([src])::after {
+            content: '♫ MIV';
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #playerAlbumArt[src*="via.placeholder.com"]::after {
+            content: 'M';
+            color: #00ff88;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .music-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .artist-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h4 class="text-success mb-2">Conectando ao SELO MIV</h4>
+            <p class="text-muted" id="loadingMessage">Inicializando sistema...</p>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Authentication Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-card">
+            <div class="logo-header">
+                <div class="logo-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2 class="text-white mb-2">SELO MIV</h2>
+                <p class="text-muted">Plataforma de Investimento em Música</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div id="loginMessage" class="alert d-none"></div>
+
+                <div class="form-group">
+                    <label for="loginEmail" class="text-muted mb-2 d-block">E-mail</label>
+                    <input type="email" id="loginEmail" class="form-control-custom" placeholder="E-mail" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword" class="text-muted mb-2 d-block">Senha</label>
+                    <input type="password" id="loginPassword" class="form-control-custom" placeholder="Senha" required>
+                </div>
+
+                <button class="btn-miv mb-3" onclick="handleLogin()">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    Entrar
+                </button>
+
+                <p class="text-center text-muted">
+                    Novo por aqui?
+                    <a href="javascript:void(0)" class="auth-link" onclick="showRegisterForm()">
+                        Criar conta
+                    </a>
+                </p>
+
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Use: admin@miv.com / admin123
+                    </small>
+                </div>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" style="display: none;">
+                <div id="registerMessage" class="alert d-none"></div>
+
+                <div class="form-group">
+                    <label for="registerName" class="text-muted mb-2 d-block">Nome completo *</label>
+                    <input type="text" id="registerName" class="form-control-custom" placeholder="Nome completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail" class="text-muted mb-2 d-block">E-mail *</label>
+                    <input type="email" id="registerEmail" class="form-control-custom" placeholder="E-mail" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword" class="text-muted mb-2 d-block">Senha (mínimo 6 caracteres) *</label>
+                    <input type="password" id="registerPassword" class="form-control-custom" placeholder="Senha (mínimo 6 caracteres)" required minlength="6">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerType" class="text-muted mb-2 d-block">Perfil *</label>
+                    <select id="registerType" class="form-control-custom" onchange="toggleArtistField()">
+                        <option value="">Selecione seu perfil...</option>
+                        <option value="ouvinte">🎧 Ouvinte/Investidor</option>
+                        <option value="artista">🎸 Artista</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="artistLinkField" style="display: none;">
+                    <label for="registerLink" class="text-muted mb-2 d-block">Link do seu trabalho (YouTube, Spotify, etc.)</label>
+                    <input type="url" id="registerLink" class="form-control-custom" placeholder="Link do seu trabalho (YouTube, Spotify, etc.)">
+                    <small class="text-muted">Para artistas: informe um link do seu portfólio</small>
+                </div>
+
+                <button class="btn-miv mb-3" onclick="handleRegister()">
+                    <i class="bi bi-person-plus"></i>
+                    Solicitar Cadastro
+                </button>
+
+                <p class="text-center text-muted">
+                    Já tem conta?
+                    <a href="javascript:void(0)" class="auth-link" onclick="showLoginForm()">
+                        Fazer login
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="main-app">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h4 class="text-white mb-0">🎵 MIV PRO</h4>
+                <button class="sidebar-close" onclick="toggleSidebar()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="changeSection('marketplace')">
+                        <i class="bi bi-house"></i>
+                        <span>Marketplace</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('portfolio')">
+                        <i class="bi bi-briefcase"></i>
+                        <span>Portfólio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('ledger')">
+                        <i class="bi bi-receipt"></i>
+                        <span>Extrato</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="artistNavItem" style="display: none;">
+                    <a href="#" class="nav-link" onclick="changeSection('artist')">
+                        <i class="bi bi-mic"></i>
+                        <span>Painel Artista</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="https://link.mercadopago.com.br/selomiv" target="_blank" class="nav-link">
+                        <i class="bi bi-plus-circle text-success"></i>
+                        <span class="text-success">Adicionar Saldo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-danger" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Sair</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="d-flex align-items-center">
+                    <button class="btn text-white me-3" onclick="toggleSidebar()">
+                        <i class="bi bi-list fs-3"></i>
+                    </button>
+                    <div class="saldo-display">
+                        <h6>CRÉDITO DISPONÍVEL</h6>
+                        <h4 id="currentBalance">R$ 0,00</h4>
+                    </div>
+                </div>
+                <div class="user-badge" id="userBadge">Ouvinte</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Marketplace Section -->
+            <section id="marketplaceSection" class="section active">
+                <div class="section-header">
+                    <h2 class="section-title">🎵 Marketplace</h2>
+                    <div>
+                        <small class="text-muted">Taxa 0% em compras</small>
+                    </div>
+                </div>
+                <div id="marketplaceContent" class="music-grid">
+                    <!-- Music cards will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Portfolio Section -->
+            <section id="portfolioSection" class="section">
+                <div class="portfolio-summary">
+                    <h6 class="text-muted">VALOR TOTAL DA CARTEIRA</h6>
+                    <div class="portfolio-value" id="portfolioValue">R$ 0,00</div>
+                    <small class="text-muted">Atualizado em tempo real</small>
+                </div>
+
+                <div class="section-header">
+                    <h2 class="section-title">📊 Meus Ativos</h2>
+                    <span class="badge bg-secondary" id="assetsCount">0 ativos</span>
+                </div>
+
+                <div id="portfolioContent">
+                    <!-- Portfolio assets will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Ledger Section -->
+            <section id="ledgerSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Histórico Financeiro</h2>
+                    <button class="btn btn-sm btn-outline-success" onclick="loadLedger()">
+                        <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                </div>
+
+                <div id="ledgerContent" class="finance-card">
+                    <!-- Financial transactions will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Artist Panel Section -->
+            <section id="artistSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🎤 Painel Artista</h2>
+                    <button class="btn-miv btn-sm" onclick="openAddMusicModal()">
+                        <i class="bi bi-plus-circle"></i> Nova Música
+                    </button>
+                </div>
+
+                <div class="artist-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-music-note-beamed"></i>
+                        </div>
+                        <div class="stat-value" id="artistMusicCount">0</div>
+                        <div class="stat-label">Músicas Cadastradas</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <div class="stat-value" id="artistRoyalties">R$ 0,00</div>
+                        <div class="stat-label">Royalties Acumulados</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-bar-chart"></i>
+                        </div>
+                        <div class="stat-value" id="artistSharesSold">0</div>
+                        <div class="stat-label">Ações Vendidas</div>
+                    </div>
+                </div>
+
+                <h5 class="mb-3">Minhas Músicas</h5>
+                <div id="artistMusicContent" class="music-grid">
+                    <!-- Artist's music will be loaded here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Music Player (Spotify-like) -->
+        <div id="playerBar" class="player-bar">
+            <div class="player-content">
+                <div class="video-container" id="videoContainer">
+                    <div id="youtubePlayer"></div>
+                </div>
+
+                <div class="player-info" onclick="togglePlayerExpansion()">
+                    <img id="playerAlbumArt" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzExMTQxOCIvPjxyZWN0IHg9IjEwIiB5PSIxMCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMDBmZjg4IiBvcGFjaXR5PSIwLjIiIHJ4PSI1Ii8+PHBhdGggZD0iTTIwLDIwIEw0MCwzMCBMMjAsNDAgWiIgZmlsbD0iIzAwZmY4OCIvPjx0ZXh0IHg9IjMwIiB5PSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzAwZmY4OCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCI+TUlWPC90ZXh0Pjwvc3ZnPg==" 
+                         class="player-album-art" 
+                         alt="Album Art">
+                    <div class="player-text">
+                        <div class="player-title" id="playerTitle">Título da Música</div>
+                        <div class="player-artist" id="playerArtist">Artista</div>
+                        <div class="player-price" id="playerPrice">R$ 0,00 por ação</div>
+                    </div>
+                    <button class="btn-miv btn-sm" onclick="event.stopPropagation(); openInvestModal(state.currentTrackIndex)">
+                        <i class="bi bi-currency-dollar"></i> Investir
+                    </button>
+                </div>
+
+                <div class="progress-container" onclick="seekMusic(event)">
+                    <div class="progress-bar" id="musicProgress"></div>
+                </div>
+
+                <div class="player-time d-flex justify-content-between mt-1">
+                    <span id="currentTime">0:00</span>
+                    <span id="durationTime">0:00</span>
+                </div>
+
+                <div class="player-controls mt-2">
+                    <button class="control-btn" onclick="toggleShuffle()">
+                        <i class="bi bi-shuffle" id="shuffleIcon"></i>
+                    </button>
+                    <button class="control-btn" onclick="playPrevious()">
+                        <i class="bi bi-skip-start-fill"></i>
+                    </button>
+                    <button class="control-btn play-btn" id="playButton" onclick="togglePlay()">
+                        <i class="bi bi-play-circle-fill"></i>
+                    </button>
+                    <button class="control-btn" onclick="playNext()">
+                        <i class="bi bi-skip-end-fill"></i>
+                    </button>
+                    <button class="control-btn" onclick="toggleRepeat()">
+                        <i class="bi bi-repeat" id="repeatIcon"></i>
+                    </button>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="100" class="ms-3" oninput="setVolume(this.value)" style="width: 100px;">
+                </div>
+
+                <div id="queueContainer" class="mt-3" style="display:none;">
+                    <h6>Próximas na fila</h6>
+                    <ul id="queueList" class="list-group list-group-flush"></ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" onclick="changeSection('marketplace', this)">
+                <i class="bi bi-house"></i>
+                <span>Market</span>
+            </button>
+            <button class="nav-btn" onclick="changeSection('portfolio', this)">
+                <i class="bi bi-briefcase"></i>
+                <span>Carteira</span>
+            </button>
+            <button class="nav-btn" onclick="changeSection('ledger', this)">
+                <i class="bi bi-receipt"></i>
+                <span>Extrato</span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Invest Modal -->
+    <div id="investModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-currency-dollar me-2"></i>
+                    Investir em Música
+                </h5>
+                <button class="modal-close" onclick="closeModal('investModal')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h6 id="investTrackTitle" class="mb-2">Título da Música</h6>
+                <p class="text-muted mb-4" id="investTrackArtist">Artista</p>
+
+                <div class="form-group">
+                    <label for="investQuantity" class="text-muted mb-2 d-block">Quantidade de Ações</label>
+                    <input type="number" id="investQuantity" class="form-control-custom"
+                           value="1" min="1" step="1" oninput="updateInvestmentTotal()">
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="text-muted">Valor por ação:</span>
+                    <span class="text-success fw-bold" id="investUnitPrice">R$ 0,00</span>
+                </div>
+
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="text-muted">Valor total:</span>
+                    <span class="text-success fw-bold fs-4" id="investTotalPrice">R$ 0,00</span>
+                </div>
+
+                <div class="alert alert-info bg-dark border-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Cada ação representa 0.01% de participação nos royalties
+                </div>
+
+                <div class="alert alert-warning bg-dark border-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Saldo disponível: <span id="investAvailableBalance" class="fw-bold">R$ 0,00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('investModal')">Cancelar</button>
+                <button class="btn-miv" id="confirmInvestBtn" onclick="confirmInvestment()">
+                    Confirmar Investimento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Music Modal -->
+    <div id="addMusicModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-music-note-beamed me-2"></i>
+                    Cadastrar Nova Música
+                </h5>
+                <button class="modal-close" onclick="closeModal('addMusicModal')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="musicTitle" class="text-muted mb-2 d-block required">Título da Música *</label>
+                    <input type="text" id="musicTitle" class="form-control-custom" placeholder="Digite o título da música" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="musicGenre" class="text-muted mb-2 d-block required">Gênero Musical *</label>
+                    <select id="musicGenre" class="form-control-custom" required>
+                        <option value="">Selecione um gênero</option>
+                        <option value="POP">🎵 POP</option>
+                        <option value="HIPHOP_RAP">🎸 HIP HOP / RAP</option>
+                        <option value="ROCK">🤘 ROCK</option>
+                        <option value="ELETRONICA">⚡ ELETRÔNICA</option>
+                        <option value="MPB">🎶 MPB</option>
+                        <option value="SERTANEJO">🎺 SERTANEJO</option>
+                        <option value="FUNK">💃 FUNK</option>
+                        <option value="OUTRO">🎼 OUTRO</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="musicYoutube" class="text-muted mb-2 d-block required">Link do YouTube *</label>
+                    <input type="url" id="musicYoutube" class="form-control-custom" placeholder="https://youtube.com/watch?v=..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="musicCover" class="text-muted mb-2 d-block">Link da Capa (opcional)</label>
+                    <input type="url" id="musicCover" class="form-control-custom" placeholder="https://exemplo.com/capa.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="musicPrice" class="text-muted mb-2 d-block required">Valor por Ação *</label>
+                    <input type="number" id="musicPrice" class="form-control-custom" value="10.00" min="1" step="0.01" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="musicPercent" class="text-muted mb-2 d-block required">Percentual Disponível *</label>
+                    <div class="input-group">
+                        <input type="number" id="musicPercent" class="form-control-custom" value="20" min="1" max="100" required>
+                        <span class="input-group-text bg-dark text-white border-secondary">%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addMusicModal')">Cancelar</button>
+                <button class="btn-miv" onclick="registerMusic()">
+                    <i class="bi bi-save me-2"></i>
+                    Cadastrar Música
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Finance Modal -->
+    <div id="financeModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-cash-coin me-2"></i>
+                    Transações Financeiras
+                </h5>
+                <button class="modal-close" onclick="closeModal('financeModal')">
+                    <i class="bi bi-x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="tabs mb-4">
+                    <button class="btn btn-outline-success me-2 active" onclick="showFinanceTab('deposit')">
+                        <i class="bi bi-arrow-down-circle"></i> Depositar
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="showFinanceTab('withdraw')">
+                        <i class="bi bi-arrow-up-circle"></i> Sacar
+                    </button>
+                </div>
+
+                <!-- Deposit Tab -->
+                <div id="depositTab">
+                    <div class="alert alert-info bg-dark border-info mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Faça um PIX para a chave abaixo e depois confirme o depósito
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="depositAmount" class="text-muted mb-2 d-block">Valor do Depósito (R$)</label>
+                        <input type="number" id="depositAmount" class="form-control-custom" value="50" min="10" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="pixKey" class="text-muted mb-2 d-block">Chave PIX (CNPJ)</label>
+                        <div class="input-group">
+                            <input type="text" id="pixKey" class="form-control-custom" value="12.345.678/0001-90" readonly>
+                            <button class="btn btn-outline-success" onclick="copyToClipboard('pixKey')">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="depositReference" class="text-muted mb-2 d-block">Código da Transação</label>
+                        <input type="text" id="depositReference" class="form-control-custom" placeholder="Copie do comprovante">
+                    </div>
+                </div>
+
+                <!-- Withdraw Tab -->
+                <div id="withdrawTab" style="display: none;">
+                    <div class="alert alert-warning bg-dark border-warning mb-3">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Saques são processados em até 48h úteis
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="withdrawAmount" class="text-muted mb-2 d-block">Valor do Saque (R$)</label>
+                        <input type="number" id="withdrawAmount" class="form-control-custom" value="50" min="20" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="withdrawPixKey" class="text-muted mb-2 d-block">Chave PIX para Receber</label>
+                        <input type="text" id="withdrawPixKey" class="form-control-custom" placeholder="CPF, Email, Telefone ou Chave Aleatória">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="withdrawPixType" class="text-muted mb-2 d-block">Tipo de Chave</label>
+                        <select id="withdrawPixType" class="form-control-custom">
+                            <option value="cpf">CPF</option>
+                            <option value="email">Email</option>
+                            <option value="phone">Telefone</option>
+                            <option value="random">Chave Aleatória</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="alert alert-success bg-dark border-success mt-3">
+                    <i class="bi bi-wallet2 me-2"></i>
+                    Saldo disponível: <span id="modalAvailableBalance" class="fw-bold">R$ 0,00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('financeModal')">Cancelar</button>
+                <button class="btn-miv" id="confirmFinanceBtn" onclick="processFinanceTransaction()">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // ========== CONFIGURAÇÃO ==========
+        const CONFIG = {
+            // ✅ URL CORRIGIDA - Use 'password' ao invés de 'pass'
+            API_URL: 'https://script.google.com/macros/library/d/1yIEh_E8oXm3cWxddW3-CVeOmISOXAn2wdGFlbktaaR55LIxsx-mu0GQI/36',
+            YT_API_KEY: 'AIzaSyAPaYGY_MrrNgKdEqTs3Qw7tPNv5p5QwPM'
+        };
+
+        // ========== ESTADO GLOBAL ==========
+        const state = {
+            currentUser: null,
+            currentToken: null,
+            userBalance: 0,
+            portfolioValue: 0,
+            playlist: [],
+            currentTrackIndex: -1,
+            youtubePlayer: null,
+            isPlaying: false,
+            isPlayerExpanded: false,
+            currentInvestTrack: null,
+            shuffle: false,
+            repeat: false,
+            volume: 100,
+            progressInterval: null
+        };
+
+        // ========== FUNÇÕES DE UTILIDADE ==========
+        function showLoading(message = 'Carregando...') {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            document.getElementById('loadingMessage').textContent = message;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="bi ${type === 'success' ? 'bi-check-circle' : 'bi-exclamation-circle'} toast-icon"></i>
+                <div class="toast-message">${message}</div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            element.select();
+            element.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(element.value);
+            showToast('Copiado para a área de transferência!');
+        }
+
+        // ========== AUTENTICAÇÃO ==========
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (!email || !password) {
+                showToast('Preencha email e senha', 'error');
+                return;
+            }
+
+            showLoading('Autenticando...');
+
+            try {
+                // ✅ CORREÇÃO: Use 'password' ao invés de 'pass'
+                const url = `${CONFIG.API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURI
