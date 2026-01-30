@@ -2843,10 +2843,14 @@ function iniciarSistema() {
             </div>
         </div>
     </div>
-// Na parte do JavaScript do frontend, substitua o CONFIG.API_URL:
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbz3zhxMT6PJBwgQZjJ-M-ukMrxNWM8QUamKdsojoRfT9ANPq6_xyF8O5fdGKcYoYsI/exec',
-    // Use esta URL exata do seu Apps Script
+    // URL DO SEU APPS SCRIPT ATUAL (OBTIDA NO PASSO 1)
+    API_URL: 'https://script.google.com/macros/s/AKfycbymxN90sRm1FfB7-QdIJRwacUgtHxpjptPSXtjkLWuKOZKHQNKhyT7dA2ikSbvMPZE/exec',
+    
+    LOCAL_STORAGE_KEY: 'selo_miv_data',
+    VERSION: '2.0.0',
+    AUTO_REFRESH_INTERVAL: 60000,
+    DEFAULT_BALANCE: 1000
 };
 
 // CORREÇÃO DA FUNÇÃO handleLogin:
