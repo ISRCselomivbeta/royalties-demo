@@ -2843,405 +2843,181 @@ function iniciarSistema() {
             </div>
         </div>
     </div>
+// Na parte do JavaScript do frontend, substitua o CONFIG.API_URL:
+const CONFIG = {
+    API_URL: 'https://script.google.com/macros/s/AKfycbz3zhxMT6PJBwgQZjJ-M-ukMrxNWM8QUamKdsojoRfT9ANPq6_xyF8O5fdGKcYoYsI/exec',
+    // Use esta URL exata do seu Apps Script
+};
 
-    <!-- JavaScript -->
-    <script>
-               // ========== CONFIGURAÇÃO ==========
-        const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbymxN90sRm1FfB7-QdIJRwacUgtHxpjptPSXtjkLWuKOZKHQNKhyT7dA2ikSbvMPZE/exec',
-            YT_API_KEY: 'AIzaSyB3g82a5n2U4FzUZcM-GF7m-4r1i2L3v4Q' // Substitua pela sua chave YouTube se necessário
-        };
+// CORREÇÃO DA FUNÇÃO handleLogin:
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
 
-        // ========== ESTADO GLOBAL ==========
-        const state = {
-            currentUser: null,
-            currentToken: null,
-            userBalance: 0,
-            portfolioValue: 0,
-            playlist: [],
-            currentTrackIndex: -1,
-            youtubePlayer: null,
-            isPlaying: false,
-            isPlayerExpanded: false,
-            currentInvestTrack: null,
-            shuffle: false,
-            repeat: false,
-            volume: 100,
-            progressInterval: null
-        };
+    if (!email || !password) {
+        showToast('Preencha email e senha', 'error');
+        return;
+    }
 
-        // ========== INICIALIZAÇÃO ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
-            setupEventListeners();
+    showLoading('Autenticando...');
+
+    try {
+        // ✅ Use URL direta do Google Apps Script
+        const url = `${CONFIG.API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+        console.log('📡 Enviando login para:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors', // Importante para CORS
+            cache: 'no-cache'
         });
+        
+        const result = await response.json();
+        console.log('📥 Resposta do login:', result);
+        
+        hideLoading();
 
-        function setupEventListeners() {
-            // Enter key listeners for forms
-            document.getElementById('loginPassword')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') handleLogin();
-            });
+        if (result.success) {
+            state.currentUser = result.data;
+            state.currentToken = result.data.token || result.data.id;
             
-            document.getElementById('registerPassword')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') handleRegister();
-            });
+            // Salva no localStorage
+            localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
+            localStorage.setItem('miv_token', state.currentToken);
             
-            document.getElementById('investQuantity')?.addEventListener('input', updateInvestmentTotal);
-            
-            // Escape key to close modals
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closeAllModals();
-                }
-            });
+            showToast(`Bem-vindo, ${result.data.nome}!`);
+            initializeApp();
+        } else {
+            showToast(result.message || 'Erro no login', 'error');
         }
+    } catch (error) {
+        hideLoading();
+        console.error('❌ Erro no login:', error);
+        showToast('Erro de conexão com o servidor. Verifique a URL da API.', 'error');
+    }
+}
 
-        function closeAllModals() {
-            const modals = ['investModal', 'addMusicModal', 'financeModal'];
-            modals.forEach(modalId => {
-                closeModal(modalId);
-            });
+// CORREÇÃO DA FUNÇÃO loadMarketplace:
+async function loadMarketplace() {
+    try {
+        showLoading('Carregando músicas...');
+        
+        // ✅ URL direta - SEM parâmetros extras
+        const url = `${CONFIG.API_URL}?action=get_musicas`;
+        console.log('📡 Buscando músicas em:', url);
+        
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        const result = await response.json();
+        console.log('📥 Resultado músicas:', result);
+        
+        hideLoading();
+
+        if (result.success) {
+            state.playlist = result.data || [];
+            renderMarketplace(state.playlist);
+        } else {
+            showEmptyState('marketplaceContent', 'Nenhuma música disponível no momento.');
         }
+    } catch (error) {
+        hideLoading();
+        console.error('❌ Erro ao carregar marketplace:', error);
+        showEmptyState('marketplaceContent', 'Erro ao carregar músicas. Verifique conexão.');
+    }
+}
 
-        // ========== AUTENTICAÇÃO ==========
-        async function handleLogin() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value.trim();
-
-            if (!email || !password) {
-                showToast('Preencha email e senha', 'error');
-                return;
-            }
-
-            showLoading('Autenticando...');
-
-            try {
-                // ✅ Use GET para login
-                const url = `${CONFIG.API_URL}?action=login&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
-                
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                hideLoading();
-
-                if (result.success) {
-                    state.currentUser = result.data;
-                    state.currentToken = result.data.token || result.data.id;
-                    
-                    // Salva no localStorage
-                    localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
-                    localStorage.setItem('miv_token', state.currentToken);
-                    
-                    showToast(`Bem-vindo, ${result.data.nome}!`);
-                    initializeApp();
-                } else {
-                    showToast(result.message || 'Erro no login', 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                console.error('Erro no login:', error);
-                showToast('Erro de conexão com o servidor', 'error');
-            }
+// CORREÇÃO DA FUNÇÃO testConnection (adicione esta função):
+async function testConnection() {
+    try {
+        console.log('🔍 Testando conexão com API...');
+        const testUrl = `${CONFIG.API_URL}?action=test`;
+        
+        const response = await fetch(testUrl, {
+            method: 'GET',
+            mode: 'cors'
+        });
+        
+        const result = await response.json();
+        console.log('✅ Teste de conexão:', result);
+        
+        if (result.success) {
+            showToast('✅ Conexão com API estabelecida!', 'success');
+            return true;
+        } else {
+            showToast('⚠️ API respondeu com erro', 'warning');
+            return false;
         }
+    } catch (error) {
+        console.error('❌ Falha no teste de conexão:', error);
+        showToast('❌ Não foi possível conectar à API. Verifique a URL.', 'error');
+        return false;
+    }
+}
 
-        async function handleRegister() {
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value.trim();
-            const type = document.getElementById('registerType').value;
-            const workLink = document.getElementById('registerLink')?.value.trim() || '';
+// Adicione este código após o DOMContentLoaded:
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 SELO MIV Frontend Iniciado');
+    
+    // Testa conexão automaticamente
+    setTimeout(() => {
+        testConnection();
+    }, 1000);
+    
+    checkAuth();
+    setupEventListeners();
+});
 
-            if (!name || !email || !password || !type) {
-                showToast('Preencha todos os campos obrigatórios', 'error');
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast('Senha deve ter pelo menos 6 caracteres', 'error');
-                return;
-            }
-
-            if (type === 'artista' && !workLink) {
-                showToast('Artistas devem informar link do trabalho', 'error');
-                return;
-            }
-
-            showLoading('Criando conta...');
-
-            try {
-                const params = new URLSearchParams({
-                    action: 'register',
-                    nome: name,
-                    email: email,
-                    password: password,
-                    tipo: type,
-                    workLink: workLink
-                });
-
-                const response = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: params.toString()
-                });
-
-                const result = await response.json();
-                hideLoading();
-
-                if (result.success) {
-                    showToast('Conta criada! Aguarde aprovação.', 'success');
-                    showLoginForm();
-                    // Limpa formulário
-                    document.getElementById('registerName').value = '';
-                    document.getElementById('registerEmail').value = '';
-                    document.getElementById('registerPassword').value = '';
-                    document.getElementById('registerType').value = '';
-                    document.getElementById('registerLink').value = '';
-                } else {
-                    showToast(result.message || 'Erro ao criar conta', 'error');
-                }
-            } catch (error) {
-                hideLoading();
-                console.error('Erro no registro:', error);
-                showToast('Erro de conexão', 'error');
-            }
-        }
-
-        function showLoginForm() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
-        }
-
-        function showRegisterForm() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        }
-
-        function toggleArtistField() {
-            const type = document.getElementById('registerType').value;
-            const field = document.getElementById('artistLinkField');
-            field.style.display = type === 'artista' ? 'block' : 'none';
-        }
-
-        function checkAuth() {
-            const savedUser = localStorage.getItem('miv_user');
-            const savedToken = localStorage.getItem('miv_token');
-            
-            if (savedUser && savedToken) {
-                try {
-                    state.currentUser = JSON.parse(savedUser);
-                    state.currentToken = savedToken;
-                    initializeApp();
-                } catch (e) {
-                    showAuthScreen();
-                }
-            } else {
-                showAuthScreen();
-            }
-        }
-
-        function showAuthScreen() {
-            document.getElementById('authScreen').style.display = 'flex';
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loadingScreen').style.display = 'none';
-        }
-
-        function showApp() {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-        }
-
-        async function initializeApp() {
-            showLoading('Carregando dados...');
-            showApp();
-            
-            try {
-                // Atualiza UI do usuário
-                updateUserUI();
-                
-                // Carrega dados iniciais
-                await Promise.all([
-                    loadBalance(),
-                    loadMarketplace(),
-                    loadPortfolio(),
-                    loadArtistData()
-                ]);
-                
-                // Configura navegação
-                setupNavigation();
-                
-                hideLoading();
-                
-                // Mostra boas-vindas
-                setTimeout(() => {
-                    showToast(`Bem-vindo de volta, ${state.currentUser.nome}!`);
-                }, 500);
-                
-            } catch (error) {
-                console.error('Erro na inicialização:', error);
-                hideLoading();
-                showToast('Erro ao carregar dados do app', 'error');
-            }
-        }
-
-        function updateUserUI() {
-            if (!state.currentUser) return;
-            
-            // Atualiza badge do usuário
-            const badge = document.getElementById('userBadge');
-            if (badge) {
-                badge.textContent = state.currentUser.tipo === 'artista' ? '🎤 Artista' : 
-                                  state.currentUser.tipo === 'admin' ? '👑 Admin' : '🎧 Ouvinte';
-                badge.className = state.currentUser.tipo === 'artista' ? 'user-badge bg-info' :
-                                 state.currentUser.tipo === 'admin' ? 'user-badge bg-warning' :
-                                 'user-badge bg-secondary';
-            }
-            
-            // Mostra/oculta item do artista
-            const artistNav = document.getElementById('artistNavItem');
-            if (artistNav) {
-                artistNav.style.display = state.currentUser.tipo === 'artista' ? 'block' : 'none';
-            }
-        }
-
-        function logout() {
-            if (confirm('Deseja realmente sair?')) {
-                localStorage.removeItem('miv_user');
-                localStorage.removeItem('miv_token');
-                state.currentUser = null;
-                state.currentToken = null;
-                state.playlist = [];
-                state.currentTrackIndex = -1;
-                
-                if (state.youtubePlayer) {
-                    state.youtubePlayer.stopVideo();
-                    state.youtubePlayer.destroy();
-                    state.youtubePlayer = null;
-                }
-                
-                showAuthScreen();
-                showToast('Você saiu da conta');
-            }
-        }
-
-        // ========== DADOS FINANCEIROS ==========
-        async function loadBalance() {
-            if (!state.currentToken) return;
-            
-            try {
-                const url = `${CONFIG.API_URL}?action=get_saldo&token=${encodeURIComponent(state.currentToken)}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.success) {
-                    state.userBalance = parseFloat(result.data.saldo) || 0;
-                    updateBalanceUI();
-                }
-            } catch (error) {
-                console.error('Erro ao carregar saldo:', error);
-            }
-        }
-
-        async function loadPortfolio() {
-            if (!state.currentUser) return;
-            
-            try {
-                const url = `${CONFIG.API_URL}?action=get_resumo&token=${encodeURIComponent(state.currentToken)}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.success) {
-                    state.portfolioValue = parseFloat(result.data.patrimonio) || 0;
-                    updatePortfolioUI();
-                }
-            } catch (error) {
-                console.error('Erro ao carregar portfólio:', error);
-            }
-        }
-
-        async function loadArtistData() {
-            if (!state.currentUser || state.currentUser.tipo !== 'artista') return;
-            
-            try {
-                const url = `${CONFIG.API_URL}?action=get_artist_data&user_id=${state.currentUser.id}`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.success) {
-                    updateArtistUI(result.data);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar dados do artista:', error);
-            }
-        }
-
-        function updateBalanceUI() {
-            const balanceElement = document.getElementById('currentBalance');
-            const modalBalance = document.getElementById('modalAvailableBalance');
-            const investBalance = document.getElementById('investAvailableBalance');
-            
-            if (balanceElement) balanceElement.textContent = formatCurrency(state.userBalance);
-            if (modalBalance) modalBalance.textContent = formatCurrency(state.userBalance);
-            if (investBalance) investBalance.textContent = formatCurrency(state.userBalance);
-        }
-
-        function updatePortfolioUI() {
-            const portfolioElement = document.getElementById('portfolioValue');
-            if (portfolioElement) {
-                portfolioElement.textContent = formatCurrency(state.portfolioValue);
-            }
-        }
-
-        function updateArtistUI(artistData) {
-            // Atualiza estatísticas do artista
-            const musicCount = document.getElementById('artistMusicCount');
-            const royalties = document.getElementById('artistRoyalties');
-            const sharesSold = document.getElementById('artistSharesSold');
-            
-            if (musicCount) musicCount.textContent = artistData.total_musicas || 0;
-            if (royalties) royalties.textContent = formatCurrency(artistData.total_royalties || 0);
-            if (sharesSold) sharesSold.textContent = artistData.total_acoes_vendidas || 0;
-            
-            // Carrega músicas do artista
-            loadArtistMusics(artistData.musicas || []);
-        }
-
-        // ========== MARKETPLACE ==========
-        async function loadMarketplace() {
-            try {
-                const url = `${CONFIG.API_URL}?action=get_musicas`;
-                const response = await fetch(url);
-                const result = await response.json();
-                
-                if (result.success) {
-                    state.playlist = result.data || [];
-                    renderMarketplace(state.playlist);
-                } else {
-                    showEmptyState('marketplaceContent', 'Nenhuma música disponível no momento.');
-                }
-            } catch (error) {
-                console.error('Erro ao carregar marketplace:', error);
-                showEmptyState('marketplaceContent', 'Erro ao carregar músicas.');
-            }
-        }
-
-        function renderMarketplace(musicas) {
-            const container = document.getElementById('marketplaceContent');
-            if (!container) return;
-            
-            if (!musicas || musicas.length === 0) {
-                showEmptyState('marketplaceContent', 'Nenhuma música disponível no momento.');
-                return;
-            }
-            
-            container.innerHTML = '';
-            
-            musicas.forEach((musica, index) => {
-                const card = createMusicCard(musica, index);
-                container.appendChild(card);
-            });
-        }
+// CORREÇÃO DA FUNÇÃO renderMarketplace:
+function renderMarketplace(musicas) {
+    const container = document.getElementById('marketplaceContent');
+    if (!container) return;
+    
+    if (!musicas || musicas.length === 0) {
+        showEmptyState('marketplaceContent', 'Nenhuma música disponível no momento.');
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    musicas.forEach((musica, index) => {
+        // Garante que os campos existam
+        const titulo = musica.titulo || musica.TITULO || 'Título desconhecido';
+        const artista = musica.artista || musica.ARTISTA || 'Artista desconhecido';
+        const valorAcao = parseFloat(musica.valor_acao || musica.VALOR_ACAO || 0);
+        const percentual = musica.percentual_disponivel || musica.PERCENTUAL_DISPONIVEL || 0;
+        const cover = musica.link_capa || musica.LINK_CAPA || 'https://via.placeholder.com/300x300/111418/00ff88?text=MIV';
+        const youtubeLink = musica.link_youtube || musica.LINK_YOUTUBE || '';
+        
+        const card = document.createElement('div');
+        card.className = 'music-card';
+        card.innerHTML = `
+            <img src="${cover}" 
+                 class="music-cover" 
+                 alt="${titulo}"
+                 onerror="this.src='https://via.placeholder.com/300x300/111418/00ff88?text=MIV'">
+            <div class="music-info">
+                <h5 class="music-title">${titulo}</h5>
+                <p class="music-artist">${artista}</p>
+                <div class="music-meta">
+                    <span class="music-price">R$ ${valorAcao.toFixed(2)}</span>
+                    <span class="badge bg-primary">${percentual}% disp.</span>
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-sm btn-outline-success" onclick="playTrack(${index})">
+                        <i class="bi bi-play-fill"></i> Ouvir
+                    </button>
+                    <button class="btn btn-sm btn-miv" onclick="openInvestModal(${index})">
+                        <i class="bi bi-currency-dollar"></i> Investir
+                    </button>
+                </div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
 
         function createMusicCard(musica, index) {
             const card = document.createElement('div');
