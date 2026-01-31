@@ -1,247 +1,420 @@
-// ========== SISTEMA DE AUTENTICAÇÃO ==========
-
-// Toggle entre login e registro
-function showRegisterForm() {
-    document.getElementById('loginForm').style.display = 'none';
-    document.getElementById('registerForm').style.display = 'block';
-    document.getElementById('artistLinkField').style.display = 'none';
-}
-
-function showLoginForm() {
-    document.getElementById('registerForm').style.display = 'none';
-    document.getElementById('loginForm').style.display = 'block';
-}
-
-// Mostrar/ocultar campo de link para artistas
-function toggleArtistField() {
-    const type = document.getElementById('registerType').value;
-    const field = document.getElementById('artistLinkField');
-    field.style.display = type === 'artista' ? 'block' : 'none';
-}
-
-// Login
-async function handleLogin() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    const loginBtn = document.getElementById('loginBtn');
-
-    if (!email || !password) {
-        showToast('Preencha todos os campos', 'error');
-        return;
-    }
-
-    if (!validateEmailField(document.getElementById('loginEmail'))) {
-        showToast('Digite um e-mail válido', 'error');
-        return;
-    }
-
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Autenticando...';
-    showLoading('Autenticando...');
-
+// Substitua TODO o conteúdo por:
+class MarketplaceManager {
+  constructor() {
+    this.musicas = [];
+    this.currentFilter = 'all';
+    this.init();
+  }
+  
+  init() {
+    this.loadMusicas();
+    this.setupEventListeners();
+  }
+  
+  async loadMusicas() {
     try {
-        const result = await dataManager.login(email, password);
-
-        if (result.success && result.data) {
-            // Sucesso no login
-            state.currentUser = result.data;
-            state.userBalance = parseFloat(result.data.saldo) || 0;
-            
-            // Salvar sessão
-            localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
-            localStorage.setItem('miv_session', Date.now().toString());
-            
-            showToast('Login realizado com sucesso!', 'success');
-            
-            // Limpar campos
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            
-            // Inicializar app
-            initializeApp();
-        } else {
-            showToast(result.message || 'Credenciais inválidas', 'error');
-        }
+      showLoading('Carregando músicas...');
+      
+      const result = await callApi('get_musicas');
+      
+      if (result.success && result.data) {
+        this.musicas = result.data;
+        console.log(`✅ ${this.musicas.length} músicas carregadas`);
+        this.renderMusicas();
+        this.renderTopInvestments();
+      } else {
+        throw new Error('Nenhuma música encontrada');
+      }
     } catch (error) {
-        console.error('Erro no login:', error);
-        
-        // Modo de demonstração (fallback)
-        if (email === 'admin@miv.com' && password === 'admin123') {
-            state.currentUser = {
-                id: 1,
-                nome: 'Administrador',
-                email: 'admin@miv.com',
-                tipo: 'admin',
-                saldo: 1500,
-                acesso: 'aprovado'
-            };
-            state.userBalance = 1500;
-            
-            localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
-            showToast('Modo de demonstração ativado', 'info');
-            initializeApp();
-        } else {
-            showToast('Erro de conexão. Tente novamente.', 'error');
-        }
+      console.error('❌ Erro ao carregar músicas:', error);
+      this.showEmptyState();
     } finally {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = '<i class="bi bi-box-arrow-in-right"></i> Entrar';
-        hideLoading();
+      hideLoading();
     }
-}
-
-// Registro
-async function handleRegister() {
-    const name = document.getElementById('registerName').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value.trim();
-    const type = document.getElementById('registerType').value;
-    const link = document.getElementById('registerLink')?.value.trim() || '';
-    const registerBtn = document.getElementById('registerBtn');
-
-    // Validações
-    if (!name || !email || !password || !type) {
-        showToast('Preencha todos os campos obrigatórios', 'error');
-        return;
+  }
+  
+  renderMusicas(filter = 'all') {
+    this.currentFilter = filter;
+    const container = document.getElementById('musicas-container') || 
+                     document.querySelector('.marketplace-grid, .music-grid');
+    
+    if (!container) {
+      console.error('❌ Container de músicas não encontrado');
+      return;
     }
-
-    if (password.length < 6) {
-        showToast('A senha deve ter no mínimo 6 caracteres', 'error');
-        return;
+    
+    // Filtrar músicas
+    let filteredMusicas = [...this.musicas];
+    
+    if (filter !== 'all') {
+      filteredMusicas = filteredMusicas.filter(music => 
+        music.genero && music.genero.toLowerCase() === filter.toLowerCase()
+      );
     }
-
-    if (!validateEmailField(document.getElementById('registerEmail'))) {
-        showToast('Digite um e-mail válido', 'error');
-        return;
+    
+    // Ordenar por mais vendidas primeiro
+    filteredMusicas.sort((a, b) => {
+      const vendidasA = parseFloat(a.acoes_vendidas || 0);
+      const vendidasB = parseFloat(b.acoes_vendidas || 0);
+      return vendidasB - vendidasA;
+    });
+    
+    if (filteredMusicas.length === 0) {
+      this.showEmptyState();
+      return;
     }
-
-    registerBtn.disabled = true;
-    registerBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Criando...';
-    showLoading('Criando conta...');
-
-    try {
-        const result = await dataManager.register({
-            nome: name,
-            email: email,
-            password: password,
-            tipo: type,
-            workLink: link
-        });
-
+    
+    // Gerar HTML das músicas
+    container.innerHTML = filteredMusicas.map(music => this.createMusicCard(music)).join('');
+    
+    // Adicionar event listeners aos botões de compra
+    this.setupBuyButtons();
+  }
+  
+  createMusicCard(music) {
+    const valorAcao = parseFloat(music.valor_acao || 0);
+    const acoesVendidas = parseFloat(music.acoes_vendidas || 0);
+    const percentualDisponivel = parseFloat(music.percentual_disponivel || 0);
+    const totalAcoes = percentualDisponivel / 0.01; // Cada 1% = 1 ação
+    const acoesDisponiveis = Math.max(0, totalAcoes - acoesVendidas);
+    const percentualVendido = totalAcoes > 0 ? (acoesVendidas / totalAcoes * 100).toFixed(1) : 0;
+    
+    return `
+      <div class="music-card" data-music-id="${music.id}">
+        <div class="music-card-header">
+          <img src="${music.link_capa || 'https://via.placeholder.com/300x200?text=Música'}" 
+               alt="${music.titulo}" 
+               class="music-cover"
+               onerror="this.src='https://via.placeholder.com/300x200?text=Música'">
+          <div class="music-badges">
+            <span class="badge genre">${music.genero || 'Gênero'}</span>
+            <span class="badge price">R$ ${valorAcao.toFixed(2)}</span>
+          </div>
+        </div>
+        
+        <div class="music-card-body">
+          <h3 class="music-title">${music.titulo || 'Título não disponível'}</h3>
+          <p class="music-artist">🎤 ${music.artista || 'Artista desconhecido'}</p>
+          
+          <div class="music-stats">
+            <div class="stat">
+              <span class="stat-label">Ações Vendidas</span>
+              <span class="stat-value">${acoesVendidas} / ${totalAcoes}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Percentual</span>
+              <span class="stat-value">${percentualVendido}%</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Disponível</span>
+              <span class="stat-value">${acoesDisponiveis} ações</span>
+            </div>
+          </div>
+          
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${percentualVendido}%"></div>
+          </div>
+          
+          <div class="music-actions">
+            <button class="btn btn-outline listen-btn" data-youtube="${music.link_youtube || ''}" data-spotify="${music.link_spotify || ''}">
+              <i class="fas fa-play"></i> Ouvir
+            </button>
+            
+            ${acoesDisponiveis > 0 ? `
+              <button class="btn btn-primary buy-btn" 
+                      data-music-id="${music.id}"
+                      data-music-title="${music.titulo}"
+                      data-music-artist="${music.artista}"
+                      data-music-price="${valorAcao}"
+                      data-available-shares="${acoesDisponiveis}">
+                <i class="fas fa-shopping-cart"></i> Comprar Ações
+              </button>
+            ` : `
+              <button class="btn btn-disabled" disabled>
+                <i class="fas fa-sold-out"></i> Esgotado
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  setupBuyButtons() {
+    document.querySelectorAll('.buy-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        if (!authManager.isLoggedIn()) {
+          showNotification('Faça login para comprar ações', 'warning');
+          return;
+        }
+        
+        const musicId = button.dataset.musicId;
+        const musicTitle = button.dataset.musicTitle;
+        const musicArtist = button.dataset.musicArtist;
+        const musicPrice = parseFloat(button.dataset.musicPrice);
+        const availableShares = parseInt(button.dataset.availableShares);
+        
+        this.showBuyModal(musicId, musicTitle, musicArtist, musicPrice, availableShares);
+      });
+    });
+    
+    // Botões de ouvir
+    document.querySelectorAll('.listen-btn').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const youtubeUrl = button.dataset.youtube;
+        const spotifyUrl = button.dataset.spotify;
+        
+        if (youtubeUrl) {
+          window.open(youtubeUrl, '_blank');
+        } else if (spotifyUrl) {
+          window.open(spotifyUrl, '_blank');
+        } else {
+          showNotification('Link de reprodução não disponível', 'warning');
+        }
+      });
+    });
+  }
+  
+  showBuyModal(musicId, title, artist, price, availableShares) {
+    // Criar modal de compra
+    const modalHTML = `
+      <div class="modal-overlay" id="buy-modal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3>Comprar Ações</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="buy-info">
+              <h4>${title}</h4>
+              <p>Artista: ${artist}</p>
+              <p>Preço por ação: <strong>R$ ${price.toFixed(2)}</strong></p>
+              <p>Ações disponíveis: <strong>${availableShares}</strong></p>
+            </div>
+            
+            <div class="form-group">
+              <label for="share-quantity">Quantidade de ações:</label>
+              <input type="number" 
+                     id="share-quantity" 
+                     min="1" 
+                     max="${availableShares}" 
+                     value="1"
+                     class="form-control">
+              <small class="form-text">Máximo: ${availableShares} ações</small>
+            </div>
+            
+            <div class="form-group">
+              <label>Valor total:</label>
+              <div class="total-amount" id="total-amount">
+                R$ ${price.toFixed(2)}
+              </div>
+            </div>
+            
+            <div class="user-balance-check">
+              <p>Seu saldo: <span id="user-current-balance">R$ 0,00</span></p>
+              <p id="balance-check-message"></p>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-buy">Cancelar</button>
+            <button class="btn btn-primary" id="confirm-buy" disabled>
+              <i class="fas fa-shopping-cart"></i> Confirmar Compra
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    // Adicionar modal ao body
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('buy-modal');
+    
+    // Atualizar valor total quando quantidade mudar
+    const quantityInput = document.getElementById('share-quantity');
+    const totalAmount = document.getElementById('total-amount');
+    const confirmBtn = document.getElementById('confirm-buy');
+    
+    const updateTotal = () => {
+      const quantity = parseInt(quantityInput.value) || 1;
+      const total = quantity * price;
+      totalAmount.textContent = `R$ ${total.toFixed(2)}`;
+      
+      // Verificar saldo do usuário
+      const user = authManager.getUser();
+      const userBalance = parseFloat(user?.saldo || 0);
+      
+      document.getElementById('user-current-balance').textContent = 
+        `R$ ${userBalance.toFixed(2)}`;
+      
+      const balanceCheck = document.getElementById('balance-check-message');
+      
+      if (total > userBalance) {
+        balanceCheck.textContent = 'Saldo insuficiente';
+        balanceCheck.className = 'text-danger';
+        confirmBtn.disabled = true;
+      } else {
+        balanceCheck.textContent = 'Saldo suficiente';
+        balanceCheck.className = 'text-success';
+        confirmBtn.disabled = false;
+      }
+    };
+    
+    quantityInput.addEventListener('input', updateTotal);
+    updateTotal(); // Calcular inicial
+    
+    // Botão de confirmar compra
+    confirmBtn.addEventListener('click', async () => {
+      const quantity = parseInt(quantityInput.value) || 1;
+      const total = quantity * price;
+      
+      try {
+        showLoading('Processando compra...');
+        
+        const result = await callApi('buy', {
+          user_id: authManager.getUserId(),
+          music_id: musicId,
+          quantidade: quantity,
+          valor_total: total
+        }, 'POST');
+        
         if (result.success) {
-            showToast('Conta criada com sucesso! Aguarde aprovação.', 'success');
-            
-            // Limpar campos e voltar para login
-            document.getElementById('registerName').value = '';
-            document.getElementById('registerEmail').value = '';
-            document.getElementById('registerPassword').value = '';
-            document.getElementById('registerType').value = '';
-            document.getElementById('registerLink').value = '';
-            
-            showLoginForm();
+          showNotification('Compra realizada com sucesso!', 'success');
+          
+          // Atualizar dados do usuário
+          await authManager.loadUserData();
+          
+          // Recarregar músicas
+          await this.loadMusicas();
+          
+          // Fechar modal
+          modal.remove();
+          
+          // Mostrar confirmação
+          setTimeout(() => {
+            showNotification('Contrato enviado para seu email!', 'info');
+          }, 1000);
         } else {
-            showToast(result.message || 'Erro ao criar conta', 'error');
+          throw new Error(result.message || 'Erro na compra');
         }
-    } catch (error) {
-        console.error('Erro no registro:', error);
-        
-        // Fallback: salvar localmente
-        const userId = Date.now();
-        const newUser = {
-            id: userId,
-            nome: name,
-            email: email,
-            tipo: type,
-            saldo: 0,
-            acesso: 'pendente',
-            workLink: link,
-            password: password
-        };
-        
-        dataManager.offlineData.users.push(newUser);
-        dataManager.saveOfflineData();
-        
-        showToast('Conta criada localmente. Será sincronizada quando online.', 'warning');
-        showLoginForm();
-    } finally {
-        registerBtn.disabled = false;
-        registerBtn.innerHTML = '<i class="bi bi-person-plus"></i> Solicitar Cadastro';
+      } catch (error) {
+        console.error('❌ Erro na compra:', error);
+        showNotification(error.message, 'error');
+      } finally {
         hideLoading();
-    }
-}
-
-// Logout
-function logout() {
-    if (confirm('Tem certeza que deseja sair?')) {
-        // Limpar player
-        cleanupPlayer();
+      }
+    });
+    
+    // Fechar modal
+    document.querySelector('.modal-close').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    document.getElementById('cancel-buy').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+  
+  async renderTopInvestments() {
+    try {
+      const result = await callApi('get_top_investments');
+      
+      if (result.success && result.data && result.data.length > 0) {
+        const container = document.querySelector('.top-investments-list, .investments-grid');
         
-        // Pausar música se estiver tocando
-        if (window.youtubePlayer && state.isPlaying) {
-            window.youtubePlayer.pauseVideo();
+        if (container) {
+          const top5 = result.data.slice(0, 5);
+          container.innerHTML = top5.map(investment => `
+            <div class="investment-card">
+              <div class="investment-rank">#${result.data.indexOf(investment) + 1}</div>
+              <h4>${investment.titulo}</h4>
+              <p class="investment-artist">${investment.artista}</p>
+              <div class="investment-stats">
+                <span class="stat">
+                  <i class="fas fa-chart-line"></i>
+                  ${parseFloat(investment.investment_score || 0).toFixed(1)} pts
+                </span>
+                <span class="stat">
+                  <i class="fas fa-money-bill-wave"></i>
+                  R$ ${parseFloat(investment.valor_acao || 0).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          `).join('');
         }
-        
-        // Limpar dados da sessão
-        localStorage.removeItem('miv_user');
-        localStorage.removeItem('miv_session');
-        
-        // Esconder app e mostrar auth
-        document.getElementById('playerBar').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
-        
-        // Voltar para formulário de login
-        showLoginForm();
-        
-        // Resetar estado
-        state.currentUser = null;
-        state.userBalance = 0;
-        state.playlist = [];
-        state.portfolioAssets = [];
-        state.ledgerData = [];
-        state.currentTrackIndex = -1;
-        state.isPlaying = false;
-        state.offlineMode = false;
-        state.appInitialized = false;
-        
-        showToast('Logout realizado com sucesso', 'success');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar top investimentos:', error);
     }
+  }
+  
+  showEmptyState() {
+    const container = document.getElementById('musicas-container') || 
+                     document.querySelector('.marketplace-grid, .music-grid');
+    
+    if (container) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-music empty-icon"></i>
+          <h3>Nenhuma música disponível</h3>
+          <p>As músicas aparecerão aqui quando forem cadastradas.</p>
+          ${authManager.isLoggedIn() && authManager.getUser()?.tipo === 'artista' ? 
+            `<button class="btn btn-primary" id="upload-first-music">
+               <i class="fas fa-upload"></i> Cadastrar Primeira Música
+             </button>` : 
+            ''}
+        </div>
+      `;
+      
+      // Adicionar event listener para o botão de upload
+      const uploadBtn = document.getElementById('upload-first-music');
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', () => {
+          // Abrir modal de upload de música
+          if (window.artistManager) {
+            window.artistManager.showUploadModal();
+          }
+        });
+      }
+    }
+  }
+  
+  setupEventListeners() {
+    // Filtros de gênero
+    document.querySelectorAll('.genre-filter').forEach(filter => {
+      filter.addEventListener('click', (e) => {
+        e.preventDefault();
+        const genre = filter.dataset.genre || 'all';
+        
+        // Atualar botões ativos
+        document.querySelectorAll('.genre-filter').forEach(f => {
+          f.classList.remove('active');
+        });
+        filter.classList.add('active');
+        
+        // Filtrar músicas
+        this.renderMusicas(genre);
+      });
+    });
+    
+    // Botão de recarregar
+    const reloadBtn = document.getElementById('reload-musicas');
+    if (reloadBtn) {
+      reloadBtn.addEventListener('click', () => {
+        this.loadMusicas();
+      });
+    }
+  }
 }
 
-// Atualizar interface do usuário
-function updateUserInterface() {
-    if (!state.currentUser) return;
-    
-    // Badge do usuário
-    const userBadge = document.getElementById('userBadge');
-    if (userBadge) {
-        const userType = state.currentUser.tipo || 'ouvinte';
-        const badges = {
-            'ouvinte': { text: 'Ouvinte', color: 'var(--neon-green)' },
-            'artista': { text: 'Artista', color: '#007bff' },
-            'admin': { text: 'Admin', color: '#ff3232' }
-        };
-        const badge = badges[userType] || badges.ouvinte;
-        userBadge.textContent = badge.text;
-        userBadge.style.background = badge.color;
-    }
-    
-    // Item de navegação do artista
-    const artistNavItem = document.getElementById('artistNavItem');
-    if (artistNavItem) {
-        const userType = state.currentUser.tipo || 'ouvinte';
-        artistNavItem.style.display = (userType === 'artista' || userType === 'admin') ? 'block' : 'none';
-    }
-    
-    // Atualizar saldo
-    updateBalanceDisplay();
-}
-
-// Exportar funções para uso global
-window.showRegisterForm = showRegisterForm;
-window.showLoginForm = showLoginForm;
-window.toggleArtistField = toggleArtistField;
-window.handleLogin = handleLogin;
-window.handleRegister = handleRegister;
-window.logout = logout;
-window.updateUserInterface = updateUserInterface;
+// Inicializar marketplace quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+  window.marketplaceManager = new MarketplaceManager();
+});
