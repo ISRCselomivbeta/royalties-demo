@@ -9,6 +9,8 @@
 
     <!-- Bootstrap 5.3.0 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <!-- Google Fonts -->
@@ -18,33 +20,26 @@
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/components.css">
     <link rel="stylesheet" href="assets/css/responsive.css">
-    
-    <!-- YouTube Iframe API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
 <!-- Loading Screen -->
-<div id="loadingScreen" class="loading-screen">
+<div id="global-loading" class="loading-overlay" style="display: none;">
     <div class="loading-content">
         <div class="loading-spinner"></div>
-        <h4 class="text-success mb-2">SELO MIV</h4>
-        <p class="text-muted" id="loadingMessage">Inicializando plataforma...</p>
-        <div class="progress-loading">
-            <div class="progress-loading-bar"></div>
-        </div>
+        <p class="loading-message">Carregando...</p>
     </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+<!-- Notifications Container -->
+<div class="notification-container" id="notification-container"></div>
 
 <!-- Authentication Screen -->
 <div id="authScreen" class="auth-screen">
     <div class="auth-card">
         <div class="logo-header">
             <div class="logo-icon">
-                <i class="bi bi-shield-lock"></i>
+                <i class="fas fa-shield-alt"></i>
             </div>
             <h2 class="text-white mb-2">SELO MIV</h2>
             <p class="text-muted">Plataforma de Investimento em Música</p>
@@ -59,15 +54,15 @@
             <div class="form-group">
                 <input type="password" id="loginPassword" class="form-control-custom" placeholder="Senha" required>
             </div>
-            <button class="btn-miv mb-3" onclick="handleLogin()" id="loginBtn">
-                <i class="bi bi-box-arrow-in-right"></i> Entrar
+            <button class="btn-miv mb-3" onclick="authManager.login(loginEmail.value, loginPassword.value)" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Entrar
             </button>
             <p class="text-center text-muted">
                 Novo por aqui? <a href="javascript:void(0)" class="auth-link" onclick="showRegisterForm()">Criar conta</a>
             </p>
             <div class="text-center mt-3">
                 <small class="text-muted">
-                    <i class="bi bi-info-circle me-1"></i> Conta de teste: admin@miv.com / admin123
+                    <i class="fas fa-info-circle me-1"></i> Conta de teste: admin@miv.com / admin123
                 </small>
             </div>
         </div>
@@ -96,7 +91,7 @@
                 <small class="text-muted">Para artistas: informe um link do seu portfólio</small>
             </div>
             <button class="btn-miv mb-3" onclick="handleRegister()" id="registerBtn">
-                <i class="bi bi-person-plus"></i> Solicitar Cadastro
+                <i class="fas fa-user-plus"></i> Solicitar Cadastro
             </button>
             <p class="text-center text-muted">
                 Já tem conta? <a href="javascript:void(0)" class="auth-link" onclick="showLoginForm()">Fazer login</a>
@@ -106,44 +101,54 @@
 </div>
 
 <!-- Main Application -->
-<div id="mainApp" class="main-app">
+<div id="mainApp" class="main-app" style="display: none;">
     <!-- Sidebar -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <h4 class="text-white mb-0">🎵 MIV PRO</h4>
             <button class="sidebar-close" onclick="toggleSidebar()">
-                <i class="bi bi-x-lg"></i>
+                <i class="fas fa-times"></i>
             </button>
         </div>
         <ul class="nav-menu">
             <li class="nav-item">
-                <a href="#" class="nav-link active" onclick="changeSection('marketplace')">
-                    <i class="bi bi-house"></i> <span>Marketplace</span>
+                <a href="#" class="nav-link active" data-target="dashboard">
+                    <i class="fas fa-home"></i> <span>Dashboard</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link" onclick="changeSection('portfolio')">
-                    <i class="bi bi-briefcase"></i> <span>Portfólio</span>
+                <a href="#" class="nav-link" data-target="marketplace">
+                    <i class="fas fa-store"></i> <span>Marketplace</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link" onclick="changeSection('ledger')">
-                    <i class="bi bi-receipt"></i> <span>Extrato</span>
+                <a href="#" class="nav-link" data-target="portfolio">
+                    <i class="fas fa-briefcase"></i> <span>Portfólio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link" data-target="ledger">
+                    <i class="fas fa-receipt"></i> <span>Extrato</span>
                 </a>
             </li>
             <li class="nav-item" id="artistNavItem" style="display: none;">
-                <a href="#" class="nav-link" onclick="changeSection('artist')">
-                    <i class="bi bi-mic"></i> <span>Painel Artista</span>
+                <a href="#" class="nav-link" data-target="artist">
+                    <i class="fas fa-microphone"></i> <span>Painel Artista</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link" onclick="openAddBalanceModal()">
-                    <i class="bi bi-plus-circle text-success"></i> <span class="text-success">Adicionar Saldo</span>
+                <a href="#" class="nav-link" data-target="withdraw">
+                    <i class="fas fa-money-bill-wave text-success"></i> <span class="text-success">Solicitar Saque</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a href="#" class="nav-link text-danger" onclick="logout()">
-                    <i class="bi bi-box-arrow-right"></i> <span>Sair</span>
+                <a href="#" class="nav-link" data-target="playlists">
+                    <i class="fas fa-list-music"></i> <span>Playlists</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link text-danger" onclick="authManager.logout()">
+                    <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
                 </a>
             </li>
         </ul>
@@ -154,152 +159,294 @@
         <div class="header-content">
             <div class="d-flex align-items-center">
                 <button class="btn text-white me-3" onclick="toggleSidebar()">
-                    <i class="bi bi-list fs-3"></i>
+                    <i class="fas fa-bars fs-4"></i>
                 </button>
                 <div class="saldo-display">
                     <h6>CRÉDITO DISPONÍVEL</h6>
-                    <h4 id="currentBalance">R$ 0,00</h4>
+                    <h4 id="currentBalance" class="user-balance">R$ 0,00</h4>
                 </div>
             </div>
-            <div class="user-badge" id="userBadge">Ouvinte</div>
+            <div class="user-badge" id="userBadge">
+                <span class="user-type">Ouvinte</span>
+                <span class="user-name ms-2">Convidado</span>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <main>
+        <!-- Dashboard Section -->
+        <section id="dashboard-view" class="app-view">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i> Visão Geral</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-icon text-success">
+                                                <i class="fas fa-wallet"></i>
+                                            </div>
+                                            <div class="stat-value" id="dashboard-balance">R$ 0,00</div>
+                                            <div class="stat-label">Saldo Disponível</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="stat-card">
+                                            <div class="stat-icon text-primary">
+                                                <i class="fas fa-chart-pie"></i>
+                                            </div>
+                                            <div class="stat-value" id="dashboard-investments">0</div>
+                                            <div class="stat-label">Investimentos</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="dashboard-updates">
+                                    <!-- Updates will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i> Notícias</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="update-card">
+                                    <div class="update-icon">
+                                        <i class="fas fa-bullhorn"></i>
+                                    </div>
+                                    <div class="update-content">
+                                        <h5>Bem-vindo ao SELO MIV!</h5>
+                                        <p>Plataforma de investimento em música.</p>
+                                        <small class="update-time">Hoje</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Marketplace Section -->
-        <section id="marketplaceSection" class="section active">
+        <section id="marketplace-view" class="app-view" style="display: none;">
             <div class="section-header">
-                <h2 class="section-title">🎵 Marketplace</h2>
+                <h2 class="section-title"><i class="fas fa-store me-2"></i> Marketplace</h2>
                 <div>
                     <small class="text-muted">Taxa 0% em compras</small>
-                    <button class="btn btn-sm btn-outline-success ms-2" onclick="loadMarketplace(true)">
-                        <i class="bi bi-arrow-clockwise"></i>
+                    <button class="btn btn-sm btn-outline-success ms-2" id="reload-musicas">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
-            <div id="marketplaceContent" class="music-grid">
+            <div class="genre-filters mb-4">
+                <button class="btn btn-sm btn-outline-secondary genre-filter active" data-genre="all">Todas</button>
+                <button class="btn btn-sm btn-outline-secondary genre-filter" data-genre="rock">Rock</button>
+                <button class="btn btn-sm btn-outline-secondary genre-filter" data-genre="pop">Pop</button>
+                <button class="btn btn-sm btn-outline-secondary genre-filter" data-genre="hiphop">Hip Hop</button>
+                <button class="btn btn-sm btn-outline-secondary genre-filter" data-genre="mpb">MPB</button>
+            </div>
+            <div id="musicas-container" class="music-grid">
                 <!-- Music cards will be loaded here -->
             </div>
         </section>
 
         <!-- Portfolio Section -->
-        <section id="portfolioSection" class="section">
+        <section id="portfolio-view" class="app-view" style="display: none;">
             <div class="portfolio-summary">
                 <h6 class="text-muted">VALOR TOTAL DA CARTEIRA</h6>
-                <div class="portfolio-value" id="portfolioValue">R$ 0,00</div>
+                <div class="portfolio-value" id="portfolio-total-value">R$ 0,00</div>
                 <small class="text-muted" id="portfolioUpdateTime">Atualizado em tempo real</small>
             </div>
             <div class="section-header">
-                <h2 class="section-title">📊 Meus Ativos</h2>
+                <h2 class="section-title"><i class="fas fa-briefcase me-2"></i> Meus Ativos</h2>
                 <span class="badge bg-secondary" id="assetsCount">0 ativos</span>
             </div>
-            <div id="portfolioContent">
+            <div id="portfolio-assets" class="portfolio-grid">
                 <!-- Portfolio assets will be loaded here -->
+            </div>
+            
+            <div class="mt-5">
+                <div class="section-header">
+                    <h2 class="section-title"><i class="fas fa-history me-2"></i> Histórico de Transações</h2>
+                    <button class="btn btn-sm btn-outline-success" id="refresh-extrato-btn">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th width="25%">Data e Tipo</th>
+                                <th width="50%">Descrição</th>
+                                <th width="25%" class="text-end">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerContent">
+                            <!-- Transactions will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
         <!-- Ledger Section -->
-        <section id="ledgerSection" class="section">
-            <div class="section-header">
-                <h2 class="section-title">📋 Histórico de Transações</h2>
-                <div>
-                    <button class="btn btn-sm btn-outline-success" onclick="loadLedger(true)">
-                        <i class="bi bi-arrow-clockwise"></i> Atualizar
-                    </button>
-                    <button class="btn btn-sm btn-outline-info ms-2" onclick="exportExtrato()">
-                        <i class="bi bi-download"></i> Exportar
-                    </button>
+        <section id="ledger-view" class="app-view" style="display: none;">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt me-2"></i> Extrato Financeiro
+                    </h5>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-secondary" id="refresh-extrato-btn2">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" id="filter-extrato-btn">
+                            <i class="fas fa-filter"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" id="export-extrato-btn">
+                            <i class="fas fa-file-export"></i> Exportar
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="table-responsive">
-                <table class="ledger-table">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Descrição</th>
-                            <th class="text-end">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ledgerContent">
-                        <!-- Transactions will be loaded here -->
-                    </tbody>
-                </table>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card">
+                                <small class="text-muted">Total Depositado</small>
+                                <div class="fw-bold text-success" id="stats-total-depositos">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card">
+                                <small class="text-muted">Total Investido</small>
+                                <div class="fw-bold text-danger" id="stats-total-investimentos">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card">
+                                <small class="text-muted">Royalties Recebidos</small>
+                                <div class="fw-bold text-primary" id="stats-total-royalties">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="stat-card">
+                                <small class="text-muted">Última Transação</small>
+                                <div class="small text-muted" id="last-transaction-info">Nenhuma transação</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th width="25%">Data e Tipo</th>
+                                    <th width="50%">Descrição</th>
+                                    <th width="25%" class="text-end">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledgerContent2">
+                                <!-- Transactions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- Artist Panel Section -->
-        <section id="artistSection" class="section">
+        <section id="artist-view" class="app-view" style="display: none;">
             <div class="section-header">
-                <h2 class="section-title">🎤 Painel Artista</h2>
+                <h2 class="section-title"><i class="fas fa-microphone me-2"></i> Painel Artista</h2>
                 <div>
-                    <button class="btn-miv btn-sm" onclick="openAddMusicModal()">
-                        <i class="bi bi-plus-circle"></i> Nova Música
+                    <button class="btn-miv btn-sm" id="upload-music-btn">
+                        <i class="fas fa-plus-circle"></i> Nova Música
                     </button>
-                    <button class="btn btn-sm btn-outline-info ms-2" onclick="loadArtistData(true)">
-                        <i class="bi bi-arrow-clockwise"></i>
+                    <button class="btn btn-sm btn-outline-info ms-2" id="refresh-artist-data">
+                        <i class="fas fa-sync-alt"></i>
                     </button>
                 </div>
             </div>
-            <div class="artist-stats">
+            <div class="artist-stats mb-4">
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="bi bi-music-note-beamed"></i>
+                        <i class="fas fa-music"></i>
                     </div>
-                    <div class="stat-value" id="artistMusicCount">0</div>
+                    <div class="stat-value" id="total-musicas">0</div>
                     <div class="stat-label">Músicas Cadastradas</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="bi bi-cash-coin"></i>
+                        <i class="fas fa-crown"></i>
                     </div>
-                    <div class="stat-value" id="artistRoyalties">R$ 0,00</div>
+                    <div class="stat-value" id="total-royalties">R$ 0,00</div>
                     <div class="stat-label">Royalties Acumulados</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="bi bi-bar-chart"></i>
+                        <i class="fas fa-chart-bar"></i>
                     </div>
-                    <div class="stat-value" id="artistSharesSold">0</div>
+                    <div class="stat-value" id="acoes-vendidas">0</div>
                     <div class="stat-label">Ações Vendidas</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon">
-                        <i class="bi bi-currency-exchange"></i>
+                        <i class="fas fa-money-bill-wave"></i>
                     </div>
-                    <div class="stat-value" id="artistMonthlyEarnings">R$ 0,00</div>
+                    <div class="stat-value" id="receita-mensal">R$ 0,00</div>
                     <div class="stat-label">Receita Mensal</div>
                 </div>
             </div>
             <h5 class="mb-3">Minhas Músicas</h5>
-            <div id="artistMusicContent" class="music-grid">
+            <div id="artist-musics-list" class="music-grid">
                 <!-- Artist's music will be loaded here -->
+            </div>
+        </section>
+
+        <!-- Withdraw Section -->
+        <section id="withdraw-view" class="app-view" style="display: none;">
+            <!-- Withdraw content will be loaded here by JavaScript -->
+        </section>
+
+        <!-- Playlists Section -->
+        <section id="playlists-view" class="app-view" style="display: none;">
+            <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-list-music me-2"></i> Minhas Playlists</h2>
+                <button class="btn-miv btn-sm" id="create-playlist-btn">
+                    <i class="fas fa-plus"></i> Nova Playlist
+                </button>
+            </div>
+            <div id="playlists-container" class="playlists-grid">
+                <!-- Playlists will be loaded here -->
             </div>
         </section>
     </main>
 
     <!-- Music Player -->
-    <div id="playerBar" class="player-bar">
+    <div id="playerBar" class="player-bar" style="display: none;">
         <div class="player-content">
-            <div class="video-container" id="videoContainer">
-                <div id="youtubePlayer"></div>
-            </div>
-            <div class="player-info" onclick="togglePlayerExpansion()">
+            <div id="youtube-player"></div>
+            <div class="player-info">
                 <img src="https://via.placeholder.com/60x60/111418/00ff88?text=MIV" class="player-album-art" alt="Album Art" id="playerAlbumArt">
                 <div class="player-text">
                     <div class="player-title" id="playerTitle">Título da Música</div>
                     <div class="player-artist" id="playerArtist">Artista</div>
                     <div class="player-price" id="playerPrice">R$ 0,00 por ação</div>
                 </div>
-                <button class="btn-miv btn-sm" onclick="event.stopPropagation(); openInvestModal(state.currentTrackIndex)">
-                    <i class="bi bi-currency-dollar"></i> Investir
+                <button class="btn-miv btn-sm" id="player-invest-btn">
+                    <i class="fas fa-shopping-cart"></i> Investir
                 </button>
-                <!-- Botão para minimizar/expandir -->
-                <button class="btn btn-sm btn-outline-secondary ms-2" onclick="event.stopPropagation(); togglePlayerExpansion()" id="expandCollapseBtn">
-                    <i class="bi bi-chevron-up" id="expandCollapseIcon"></i>
+                <button class="btn btn-sm btn-outline-secondary ms-2" id="expandCollapseBtn">
+                    <i class="fas fa-chevron-up" id="expandCollapseIcon"></i>
                 </button>
             </div>
-            <div class="progress-container" onclick="seekMusic(event)" id="progressContainer">
+            <div class="progress-container" id="progressContainer">
                 <div class="progress-bar" id="musicProgress"></div>
             </div>
             <div class="player-time d-flex justify-content-between mt-1 small">
@@ -307,208 +454,141 @@
                 <span id="durationTime">0:00</span>
             </div>
             <div class="player-controls mt-2 d-flex justify-content-center gap-3">
-                <button class="control-btn" onclick="toggleShuffle()" id="shuffleBtn">
-                    <i class="bi bi-shuffle" id="shuffleIcon"></i>
+                <button class="control-btn" id="shuffleBtn">
+                    <i class="fas fa-random" id="shuffleIcon"></i>
                 </button>
-                <button class="control-btn" onclick="playPrevious()">
-                    <i class="bi bi-skip-start-fill"></i>
+                <button class="control-btn" id="prevBtn">
+                    <i class="fas fa-step-backward"></i>
                 </button>
-                <button class="control-btn play-btn fs-1" id="playButton" onclick="togglePlay()">
-                    <i class="bi bi-play-circle-fill"></i>
+                <button class="control-btn play-btn fs-4" id="playButton">
+                    <i class="fas fa-play-circle" id="playIcon"></i>
                 </button>
-                <button class="control-btn" onclick="playNext()">
-                    <i class="bi bi-skip-end-fill"></i>
+                <button class="control-btn" id="nextBtn">
+                    <i class="fas fa-step-forward"></i>
                 </button>
-                <button class="control-btn" onclick="toggleRepeat()" id="repeatBtn">
-                    <i class="bi bi-repeat" id="repeatIcon"></i>
+                <button class="control-btn" id="repeatBtn">
+                    <i class="fas fa-redo" id="repeatIcon"></i>
                 </button>
                 <div class="d-flex align-items-center gap-2 ms-3">
-                    <i class="bi bi-volume-up" id="volumeIcon"></i>
+                    <i class="fas fa-volume-up" id="volumeIcon"></i>
                     <input type="range" id="volumeSlider" min="0" max="100" value="80" 
-                           class="form-range" style="width: 100px;" 
-                           oninput="setVolume(this.value)">
+                           class="form-range" style="width: 100px;">
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Invest Modal -->
-<div id="investModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-currency-dollar me-2"></i> Investir em Música</h5>
-            <button class="modal-close" onclick="closeModal('investModal')">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="text-center mb-4">
-                <h6 id="investTrackTitle" class="fw-bold">Título da Música</h6>
-                <p class="text-muted" id="investTrackArtist">Artista</p>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2">Valor por ação:</label>
-                <div class="d-flex align-items-center justify-content-between">
-                    <span class="fw-bold fs-5" id="investUnitPrice">R$ 0,00</span>
-                    <span class="badge bg-success" id="sharesAvailable">Disponível: 0 ações</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2">Quantidade de ações:</label>
-                <div class="input-group">
-                    <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(-1)">
-                        <i class="bi bi-dash"></i>
-                    </button>
-                    <input type="number" id="investQuantity" class="form-control-custom text-center" value="1" min="1" oninput="updateInvestmentTotal()">
-                    <button class="btn btn-outline-secondary" type="button" onclick="adjustQuantity(1)">
-                        <i class="bi bi-plus"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2">Valor total do investimento:</label>
-                <div class="fw-bold fs-4 text-success" id="investTotalPrice">R$ 0,00</div>
-            </div>
-            <div class="alert alert-info bg-dark border-info mt-3">
-                <i class="bi bi-info-circle me-2"></i> 
-                Saldo disponível: <span id="investAvailableBalance" class="fw-bold">R$ 0,00</span>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('investModal')">Cancelar</button>
-            <button class="btn btn-miv" onclick="confirmInvestment()" id="confirmInvestBtn">
-                <i class="bi bi-check-circle me-2"></i> Confirmar Investimento
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Add Music Modal -->
-<div id="addMusicModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-music-note-beamed me-2"></i> Cadastrar Nova Música</h5>
-            <button class="modal-close" onclick="closeModal('addMusicModal')">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Título da Música *</label>
-                <input type="text" id="musicTitle" class="form-control-custom" placeholder="Digite o título da música" required>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Gênero Musical *</label>
-                <select id="musicGenre" class="form-control-custom" required>
-                    <option value="">Selecione um gênero</option>
-                    <option value="POP">🎵 POP</option>
-                    <option value="HIPHOP_RAP">🎤 HIP HOP / RAP</option>
-                    <option value="ROCK">🤘 ROCK</option>
-                    <option value="ELETRONICA">⚡ ELETRÔNICA</option>
-                    <option value="MPB">🎸 MPB</option>
-                    <option value="SERTANEJO">🎶 SERTANEJO</option>
-                    <option value="FUNK">💃 FUNK</option>
-                    <option value="OUTRO">🎼 OUTRO</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Link do YouTube *</label>
-                <input type="url" id="musicYoutube" class="form-control-custom" placeholder="https://youtube.com/watch?v=..." required>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Link da Capa (opcional)</label>
-                <input type="url" id="musicCover" class="form-control-custom" placeholder="https://exemplo.com/capa.jpg">
-                <small class="text-muted">Recomendado: 300x300 pixels</small>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Valor por Ação *</label>
-                <input type="number" id="musicPrice" class="form-control-custom" value="10.00" min="1" step="0.01" required>
-            </div>
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Percentual Disponível *</label>
-                <div class="input-group">
-                    <input type="number" id="musicPercent" class="form-control-custom" value="20" min="1" max="100" required>
-                    <span class="input-group-text bg-dark text-white border-secondary">%</span>
-                </div>
-                <small class="text-muted">Este percentual será disponibilizado para investimento</small>
-            </div>
-            <div class="form-check mt-3">
-                <input class="form-check-input" type="checkbox" id="musicTerms" required>
-                <label class="form-check-label text-muted">
-                    Aceito os termos de distribuição e compartilhamento de royalties
-                </label>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('addMusicModal')">Cancelar</button>
-            <button class="btn-miv" onclick="registerMusic()" id="registerMusicBtn">
-                <i class="bi bi-save me-2"></i> Cadastrar Música
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Add Balance Modal -->
-<div id="addBalanceModal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title"><i class="bi bi-wallet2 me-2"></i> Adicionar Saldo</h5>
-            <button class="modal-close" onclick="closeModal('addBalanceModal')">
-                <i class="bi bi-x"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="form-group">
-                <label class="text-muted mb-2 d-block">Valor para adicionar</label>
-                <div class="btn-group w-100 mb-3" role="group">
-                    <button type="button" class="btn btn-outline-success" onclick="setBalanceAmount(50)">R$ 50</button>
-                    <button type="button" class="btn btn-outline-success" onclick="setBalanceAmount(100)">R$ 100</button>
-                    <button type="button" class="btn btn-outline-success" onclick="setBalanceAmount(200)">R$ 200</button>
-                    <button type="button" class="btn btn-outline-success" onclick="setBalanceAmount(500)">R$ 500</button>
-                </div>
-                <input type="number" id="balanceAmount" class="form-control-custom" value="100" min="10" step="10" oninput="validateBalanceAmount()">
-            </div>
-            <div class="alert alert-info bg-dark border-info">
-                <i class="bi bi-info-circle me-2"></i> O saldo será adicionado instantaneamente à sua conta
-            </div>
-            <div class="mt-4">
-                <h6>Métodos de pagamento:</h6>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="paymentMercadoPago" checked>
-                    <label class="form-check-label" for="paymentMercadoPago">
-                        <i class="bi bi-credit-card me-2"></i> Mercado Pago
-                    </label>
-                </div>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="radio" name="paymentMethod" id="paymentPix">
-                    <label class="form-check-label" for="paymentPix">
-                        <i class="bi bi-qr-code me-2"></i> PIX
-                    </label>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeModal('addBalanceModal')">Cancelar</button>
-            <button class="btn-miv" onclick="processBalanceAdd()">
-                <i class="bi bi-currency-dollar me-2"></i> Adicionar Saldo
-            </button>
-        </div>
-    </div>
-</div>
+<!-- Modals will be dynamically created by JavaScript -->
 
 <!-- JavaScript -->
 <script src="assets/js/config.js"></script>
 <script src="assets/js/utils.js"></script>
-<script src="assets/js/data-manager.js"></script>
 <script src="assets/js/auth.js"></script>
 <script src="assets/js/marketplace.js"></script>
-<script src="assets/js/portfolio.js"></script>
-<script src="assets/js/ledger.js"></script>
 <script src="assets/js/artist.js"></script>
+<script src="assets/js/ledger.js"></script>
 <script src="assets/js/player.js"></script>
 <script src="assets/js/app.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Funções auxiliares para o HTML antigo
+function toggleArtistField() {
+    const typeSelect = document.getElementById('registerType');
+    const artistField = document.getElementById('artistLinkField');
+    artistField.style.display = typeSelect.value === 'artista' ? 'block' : 'none';
+}
+
+function showRegisterForm() {
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('registerForm').style.display = 'block';
+}
+
+function showLoginForm() {
+    document.getElementById('registerForm').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'block';
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
+// Inicialização quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Esconder loading inicial após 1.5 segundos
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+        
+        // Mostrar auth screen se não estiver logado
+        if (!window.authManager || !window.authManager.isLoggedIn()) {
+            const authScreen = document.getElementById('authScreen');
+            if (authScreen) {
+                authScreen.style.display = 'flex';
+            }
+        } else {
+            // Se já estiver logado, mostrar main app
+            const mainApp = document.getElementById('mainApp');
+            if (mainApp) {
+                mainApp.style.display = 'block';
+                authScreen.style.display = 'none';
+                
+                // Atualizar UI
+                window.authManager.updateUIAfterLogin();
+            }
+        }
+    }, 1500);
+    
+    // Configurar botões de navegação
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.target;
+            if (target && window.mivApp) {
+                window.mivApp.navigateTo(target);
+            }
+        });
+    });
+});
+
+// Função para lidar com registro (mantida para compatibilidade)
+async function handleRegister() {
+    const nome = document.getElementById('registerName').value;
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+    const tipo = document.getElementById('registerType').value;
+    const workLink = document.getElementById('registerLink').value || '';
+    
+    if (!nome || !email || !password || !tipo) {
+        showNotification('Preencha todos os campos obrigatórios', 'error');
+        return;
+    }
+    
+    if (password.length < 6) {
+        showNotification('A senha deve ter pelo menos 6 caracteres', 'error');
+        return;
+    }
+    
+    try {
+        const result = await authManager.register({
+            nome, email, password, tipo, workLink
+        });
+        
+        if (result.success) {
+            // Mostrar formulário de login após registro
+            showLoginForm();
+            showNotification(result.message, 'success');
+        }
+    } catch (error) {
+        // O erro já é tratado no authManager.register
+    }
+}
+</script>
+
 </body>
 </html>
