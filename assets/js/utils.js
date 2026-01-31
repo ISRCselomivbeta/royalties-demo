@@ -1,279 +1,337 @@
-// ========== UTILITÁRIOS ==========
+/* Adicione ao final do arquivo */
 
-// Sistema de notificações Toast
-function showToast(message, type = 'success', duration = 3000) {
-    const container = document.getElementById('toastContainer');
-    if (!container) return null;
-    
-    const toast = document.createElement('div');
-    const toastId = 'toast_' + Date.now();
-    
-    toast.id = toastId;
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="bi ${getToastIcon(type)} toast-icon"></i>
-        <div class="toast-message">${message}</div>
-        <button class="btn btn-sm btn-link text-white p-0" onclick="dismissToast('${toastId}')">
-            <i class="bi bi-x"></i>
-        </button>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    if (duration > 0) {
-        setTimeout(() => {
-            dismissToast(toastId);
-        }, duration);
-    }
-    
-    return toastId;
+/* Notificações */
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-radius: 8px;
+  padding: 15px 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 9999;
+  max-width: 350px;
+  transform: translateX(150%);
+  transition: transform 0.3s ease;
+  border-left: 4px solid #007bff;
 }
 
-function getToastIcon(type) {
-    const icons = {
-        'success': 'bi-check-circle',
-        'error': 'bi-exclamation-circle',
-        'warning': 'bi-exclamation-triangle',
-        'info': 'bi-info-circle'
-    };
-    return icons[type] || 'bi-info-circle';
+.notification.show {
+  transform: translateX(0);
 }
 
-function dismissToast(toastId) {
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
-            }
-        }, 300);
-    }
+.notification-success {
+  border-left-color: #00ff88;
 }
 
-// Sistema de loading
-function showLoading(message = 'Carregando...') {
-    const loadingScreen = document.getElementById('loadingScreen');
-    const loadingMessage = document.getElementById('loadingMessage');
-    
-    if (loadingScreen) {
-        loadingScreen.style.display = 'flex';
-    }
-    
-    if (loadingMessage) {
-        loadingMessage.textContent = message;
-    }
+.notification-error {
+  border-left-color: #ff4757;
 }
 
-function hideLoading() {
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'none';
-    }
+.notification-warning {
+  border-left-color: #ffc107;
 }
 
-// Sistema de modais
-function showModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
+.notification-info {
+  border-left-color: #17a2b8;
 }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.classList.remove('show');
-        document.body.style.overflow = 'auto';
-    }
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-// Formatação de dados
-function formatCurrency(value) {
-    if (value === null || value === undefined || isNaN(value)) value = 0;
-    return new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-    }).format(Number(value));
+.notification-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  color: #666;
 }
 
-function formatDate(dateString) {
-    if (!dateString) return '-';
-    try {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-        
-        if (diffMins < 1) return 'Agora mesmo';
-        if (diffMins < 60) return `Há ${diffMins} min`;
-        if (diffHours < 24) return `Há ${diffHours} h`;
-        if (diffDays === 1) return 'Ontem';
-        if (diffDays < 7) return `Há ${diffDays} dias`;
-        
-        return date.toLocaleDateString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch (e) {
-        return dateString;
-    }
+/* Loading */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-function formatTime(seconds) {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+.loading-overlay.show {
+  opacity: 1;
 }
 
-// Validação de email
-function validateEmailField(field) {
-    const email = field.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    if (email && !emailRegex.test(email)) {
-        field.classList.add('is-invalid');
-        return false;
-    } else {
-        field.classList.remove('is-invalid');
-        return true;
-    }
+.loading-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
 }
 
-// Normalização de dados da planilha
-function normalizeSheetData(data) {
-    if (!data || !Array.isArray(data)) return data;
-    
-    return data.map(item => {
-        const normalized = {};
-        
-        // Normaliza propriedades para minúsculas com underscore
-        for (const key in item) {
-            if (item.hasOwnProperty(key)) {
-                const normalizedKey = key.toLowerCase().replace(/ /g, '_');
-                normalized[normalizedKey] = item[key];
-            }
-        }
-        
-        return normalized;
-    });
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #00ff88;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
 }
 
-// Cálculo de ações disponíveis
-function calculateAvailableShares(track) {
-    if (!track) return 0;
-    
-    const percentAvailable = parseFloat(track.percentual_disponivel) || 0;
-    const sharesSold = parseFloat(track.acoes_vendidas) || 0;
-    
-    // Percentual disponível representa o total de ações
-    // Ex: 25% disponível = 25 ações (se 1% = 1 ação)
-    const totalShares = percentAvailable; // Já está em número de ações
-    
-    return Math.max(0, totalShares - sharesSold);
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-// Exportar dados
-function exportToCSV(data, filename) {
-    if (!data || data.length === 0) {
-        showToast('Nenhum dado para exportar', 'warning');
-        return;
-    }
-    
-    const headers = Object.keys(data[0]);
-    const csvContent = [
-        headers.join(','),
-        ...data.map(row => headers.map(header => {
-            const value = row[header];
-            // Escapa vírgulas e aspas
-            if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-                return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-        }).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    showToast('Arquivo exportado com sucesso', 'success');
+/* Modais */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9997;
+  padding: 20px;
 }
 
-// Atualizar display do saldo
-function updateBalanceDisplay() {
-    const balanceElement = document.getElementById('currentBalance');
-    if (balanceElement) {
-        balanceElement.textContent = formatCurrency(state.userBalance);
-        
-        if (state.offlineMode) {
-            balanceElement.innerHTML = `${formatCurrency(state.userBalance)} <small class="text-warning">(offline)</small>`;
-        }
-    }
+.modal {
+  background: white;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
-// Extrair ID do YouTube
-function extractYouTubeId(url) {
-    if (!url) return null;
-    
-    const cleanUrl = url.split('&')[0];
-    
-    const patterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/|youtube\.com\/e\/)([^#&?]{11})/,
-        /^([^#&?]{11})$/
-    ];
-    
-    for (const pattern of patterns) {
-        const match = cleanUrl.match(pattern);
-        if (match && match[1]) {
-            return match[1];
-        }
-    }
-    
-    return null;
+.modal-lg {
+  max-width: 700px;
 }
 
-// Gerar spinner
-function createSpinner() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    `;
-    document.head.appendChild(style);
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-// Exportar funções para uso global
-window.showToast = showToast;
-window.dismissToast = dismissToast;
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-window.showModal = showModal;
-window.closeModal = closeModal;
-window.formatCurrency = formatCurrency;
-window.formatDate = formatDate;
-window.formatTime = formatTime;
-window.validateEmailField = validateEmailField;
-window.updateBalanceDisplay = updateBalanceDisplay;
-window.extractYouTubeId = extractYouTubeId;
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.modal-footer {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Cards de música */
+.music-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.music-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.music-cover {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.music-badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 5px;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge.genre {
+  background: #00ff88;
+  color: black;
+}
+
+.badge.price {
+  background: #007bff;
+  color: white;
+}
+
+.music-card-body {
+  padding: 15px;
+}
+
+.music-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+}
+
+.stat-value {
+  display: block;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.progress-bar {
+  height: 5px;
+  background: #eee;
+  border-radius: 3px;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #00ff88;
+  transition: width 0.3s ease;
+}
+
+.music-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Estados vazios */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+/* Botões */
+.btn {
+  padding: 10px 20px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #00ff88;
+  color: black;
+}
+
+.btn-primary:hover {
+  background: #00cc6a;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid #00ff88;
+  color: #00ff88;
+}
+
+.btn-outline:hover {
+  background: #00ff88;
+  color: black;
+}
+
+.btn-disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Forms */
+.form-control {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-text {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .music-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .music-actions {
+    flex-direction: column;
+  }
+  
+  .modal {
+    max-width: 95%;
+  }
+}
