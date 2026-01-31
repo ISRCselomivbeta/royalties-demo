@@ -2,7 +2,7 @@
 const API_CONFIG = {
   // ⚠️ SUBSTITUA pela URL REAL do seu Google Apps Script
   // Exemplo: https://script.google.com/macros/s/SEU_ID_AQUI/exec
-  BASE_URL: 'https://script.google.com/macros/s/AKfycbxZPd-HCis21bpnWsKOKSIToQDlaNg9hH1f9zaaj1W9SGzs6RPFIiiJHBaPVvQA-Go/exec',
+  BASE_URL: 'https://script.google.com/macros/s/AKfycbz2YAhOVFhcae3BGegp46J7inDnpRbRyJFSvlpUctRMoNc9qzk3OmkY3r7yG8NyJc8/exec',
   
   ENDPOINTS: {
     TEST: 'test',
