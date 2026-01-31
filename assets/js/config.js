@@ -1,7 +1,7 @@
 // ========== CONFIGURAÇÃO AVANÇADA ==========
 const CONFIG = {
     // IMPORTANTE: Substituir com sua URL real ou usar proxy
-    API_URL: 'https://script.google.com/macros/s/AKfycbwPHARLeQ-6j6D0dCnOgFQPyA_pzNsvqcJpU7OeTmYWTk3GN01KaT9BdGdpKtuTVXI/exec',
+    API_URL: 'https://script.google.com/macros/s/AKfycbxZPd-HCis21bpnWsKOKSIToQDlaNg9hH1f9zaaj1W9SGzs6RPFIiiJHBaPVvQA-Go/exec',
     SPREADSHEET_ID: '1CwF9hf-lsjYkol-V7r3WOT5ld3dQFqKRTQ8nHcV45Wo',
     LOCAL_STORAGE_KEY: 'selo_miv_data_v2',
     VERSION: '2.1.0',
