@@ -1,766 +1,960 @@
-/**
- * app.js
- * Núcleo da aplicação SELO MIV - Gerenciamento de estado e navegação
- */
-
-class AppCore {
-    constructor() {
-        this.config = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbwPHARLeQ-6j6D0dCnOgFQPyA_pzNsvqcJpU7OeTmYWTk3GN01KaT9BdGdpKtuTVXI/exec',
-            VERSION: '3.0.0',
-            AUTO_REFRESH_INTERVAL: 30000,
-            MERCADO_PAGO_LINK: 'https://link.mercadopago.com.br/selomiv'
-        };
-
-        this.state = {
-            currentUser: null,
-            userBalance: 0,
-            playlist: [],
-            portfolioAssets: [],
-            ledgerData: [],
-            topInvestments: [],
-            userPlaylists: [],
-            favoriteMusicIds: [],
-            currentTrackIndex: -1,
-            isPlaying: false,
-            currentInvestTrack: null,
-            currentVolume: 80,
-            isShuffle: false,
-            isRepeat: false,
-            offlineMode: false,
-            appInitialized: false,
-            playerMinimized: false
-        };
-
-        this.init();
+// Substitua TODO o conteúdo por:
+class MIVApp {
+  constructor() {
+    this.currentView = 'dashboard';
+    this.init();
+  }
+  
+  init() {
+    this.setupNavigation();
+    this.setupEventListeners();
+    this.checkInitialLoad();
+    
+    // Verificar status da API
+    setTimeout(() => {
+      checkApiStatus();
+    }, 1000);
+  }
+  
+  checkInitialLoad() {
+    // Verificar se está na página principal
+    if (window.location.hash) {
+      const view = window.location.hash.replace('#', '');
+      this.navigateTo(view);
+    } else {
+      this.navigateTo('dashboard');
     }
-
-    init() {
-        this.bindGlobalEvents();
-        this.restoreSession();
-        this.setupRealTimeUpdates();
-    }
-
-    // ========== GERENCIAMENTO DE ESTADO ==========
-
-    bindGlobalEvents() {
-        // Teclas de atalho
-        document.addEventListener('keydown', (e) => {
-            // Espaço para play/pause
-            if (e.code === 'Space' && !e.target.matches('input, textarea, select')) {
-                e.preventDefault();
-                if (window.togglePlay) window.togglePlay();
-            }
-            
-            // Setas para navegação
-            if (e.code === 'ArrowRight' && e.altKey) {
-                if (window.playNext) window.playNext();
-            }
-            if (e.code === 'ArrowLeft' && e.altKey) {
-                if (window.playPrevious) window.playPrevious();
-            }
-        });
-
-        // Monitorar conexão
-        window.addEventListener('online', () => this.handleOnlineStatus());
-        window.addEventListener('offline', () => this.handleOfflineStatus());
-    }
-
-    restoreSession() {
-        try {
-            const savedUser = localStorage.getItem('miv_user');
-            const savedSession = localStorage.getItem('miv_session');
-            
-            if (savedUser && savedSession) {
-                this.state.currentUser = JSON.parse(savedUser);
-                const sessionAge = Date.now() - parseInt(savedSession, 16);
-                
-                if (sessionAge < 24 * 60 * 60 * 1000) { // 24 horas
-                    this.initializeApp();
-                    return true;
-                } else {
-                    localStorage.removeItem('miv_user');
-                    localStorage.removeItem('miv_session');
-                    this.showToast('Sessão expirada. Faça login novamente.', 'warning');
-                }
-            }
-        } catch (e) {
-            console.error('Erro ao restaurar sessão:', e);
-            localStorage.removeItem('miv_user');
-            localStorage.removeItem('miv_session');
-        }
+  }
+  
+  setupNavigation() {
+    // Configurar links de navegação
+    document.querySelectorAll('.nav-link, .sidebar-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
         
-        return false;
-    }
-
-    setupRealTimeUpdates() {
-        // Atualizações automáticas
-        setInterval(() => {
-            if (this.state.currentUser && !this.state.offlineMode) {
-                this.loadBalance(true);
-            }
-        }, this.config.AUTO_REFRESH_INTERVAL);
-
-        // Atualização de horário
-        setInterval(() => {
-            this.updatePortfolioTime();
-        }, 60000);
-    }
-
-    // ========== AUTENTICAÇÃO ==========
-
-    async handleLogin(email, password) {
-        if (!email || !password) {
-            this.showToast('Preencha todos os campos', 'error');
-            return false;
-        }
-
-        this.showLoading('Autenticando...');
-
-        try {
-            // Tenta login com DataManager
-            const result = await dataManager.fetchWithFallback('login', { email, password });
-
-            if (result.success && result.data) {
-                this.state.currentUser = result.data;
-                this.state.userBalance = result.data.saldo || 0;
-
-                // Carrega favoritos
-                if (this.state.currentUser.favorite_music_ids) {
-                    this.state.favoriteMusicIds = this.state.currentUser.favorite_music_ids
-                        .split(',')
-                        .filter(id => id.trim() !== '');
-                }
-
-                // Salva sessão
-                localStorage.setItem('miv_user', JSON.stringify(this.state.currentUser));
-                localStorage.setItem('miv_session', Date.now().toString(16));
-
-                this.showToast('Login realizado com sucesso!', 'success');
-                this.initializeApp();
-                return true;
-            } else {
-                // Modo de demonstração
-                if (email === 'admin@miv.com' && password === 'admin123') {
-                    this.state.currentUser = {
-                        id: 1,
-                        nome: 'Administrador',
-                        email: 'admin@miv.com',
-                        tipo: 'admin',
-                        saldo: 1500,
-                        acesso: 'aprovado',
-                        favorite_music_ids: '1,2,3'
-                    };
-                    this.state.userBalance = 1500;
-                    this.state.favoriteMusicIds = ['1', '2', '3'];
-
-                    localStorage.setItem('miv_user', JSON.stringify(this.state.currentUser));
-                    this.showToast('Modo de demonstração ativado', 'info');
-                    this.initializeApp();
-                    return true;
-                }
-
-                this.showToast(result.message || 'Credenciais inválidas', 'error');
-                return false;
-            }
-        } catch (error) {
-            console.error('Erro no login:', error);
-            this.showToast('Erro de conexão. Tente novamente.', 'error');
-            return false;
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    async handleRegister(userData) {
-        this.showLoading('Criando conta...');
-
-        try {
-            const result = await dataManager.fetchWithFallback('register', userData);
-
-            if (result.success) {
-                this.showToast('Conta criada com sucesso! Aguarde aprovação.', 'success');
-                return true;
-            } else {
-                this.showToast(result.message || 'Erro ao criar conta', 'error');
-                return false;
-            }
-        } catch (error) {
-            console.error('Erro no registro:', error);
-            this.showToast('Conta criada localmente. Será sincronizada quando online.', 'warning');
-            return true; // Aceita registro offline
-        } finally {
-            this.hideLoading();
-        }
-    }
-
-    logout() {
-        if (confirm('Tem certeza que deseja sair?')) {
-            // Limpa player
-            if (window.musicPlayer?.cleanup) {
-                window.musicPlayer.cleanup();
-            }
-
-            // Limpa sessão
-            dataManager.clearUserSession();
-            
-            // Oculta player
-            document.getElementById('playerBar').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('authScreen').style.display = 'flex';
-            
-            // Mostra formulário de login
-            this.showLoginForm();
-
-            // Reseta estado
-            this.state.currentUser = null;
-            this.state.userBalance = 0;
-            this.state.playlist = [];
-            this.state.portfolioAssets = [];
-            this.state.ledgerData = [];
-            this.state.topInvestments = [];
-            this.state.userPlaylists = [];
-            this.state.favoriteMusicIds = [];
-            this.state.currentTrackIndex = -1;
-            this.state.isPlaying = false;
-            this.state.offlineMode = false;
-            this.state.appInitialized = false;
-            this.state.playerMinimized = false;
-
-            this.showToast('Logout realizado com sucesso', 'success');
-        }
-    }
-
-    // ========== INICIALIZAÇÃO DO APP ==========
-
-    initializeApp() {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'block';
+        const target = link.dataset.target || link.hash || 'dashboard';
+        const view = target.replace('#', '');
         
-        this.updateUserInterface();
-        this.loadAllData();
-    }
-
-    updateUserInterface() {
-        if (!this.state.currentUser) return;
+        this.navigateTo(view);
         
-        // Atualiza badge do usuário
-        const userBadge = document.getElementById('userBadge');
-        if (userBadge) {
-            const userType = this.state.currentUser.tipo || 'ouvinte';
-            const badges = {
-                'ouvinte': { text: 'Ouvinte', color: 'var(--neon-green)' },
-                'artista': { text: 'Artista', color: '#007bff' },
-                'admin': { text: 'Admin', color: '#ff3232' }
-            };
-            const badge = badges[userType] || badges.ouvinte;
-            userBadge.textContent = badge.text;
-            userBadge.style.background = badge.color;
-        }
-        
-        // Mostra/oculta painel do artista
-        const artistNavItem = document.getElementById('artistNavItem');
-        if (artistNavItem) {
-            const userType = this.state.currentUser.tipo || 'ouvinte';
-            artistNavItem.style.display = (userType === 'artista' || userType === 'admin') ? 'block' : 'none';
-        }
-        
-        this.updateBalanceDisplay();
+        // Atualizar URL
+        window.location.hash = view;
+      });
+    });
+    
+    // Lidar com mudanças no hash da URL
+    window.addEventListener('hashchange', () => {
+      const view = window.location.hash.replace('#', '');
+      this.navigateTo(view);
+    });
+  }
+  
+  navigateTo(view) {
+    this.currentView = view;
+    
+    // Esconder todas as views
+    document.querySelectorAll('.app-view').forEach(view => {
+      view.style.display = 'none';
+    });
+    
+    // Mostrar view atual
+    const currentViewEl = document.getElementById(`${view}-view`);
+    if (currentViewEl) {
+      currentViewEl.style.display = 'block';
+    } else {
+      // Fallback para dashboard
+      document.getElementById('dashboard-view').style.display = 'block';
     }
-
-    async loadAllData() {
-        this.showLoading('Carregando dados...');
-        
-        try {
-            await Promise.allSettled([
-                this.loadBalance(),
-                this.loadMarketplace(),
-                this.loadPortfolio(),
-                this.loadLedger(),
-                this.loadTopInvestments(),
-                this.loadUserPlaylists(),
-                (this.state.currentUser.tipo === 'artista' || this.state.currentUser.tipo === 'admin') ? 
-                    this.loadArtistData() : Promise.resolve()
-            ]);
-            
-            this.state.appInitialized = true;
-            this.showToast('Sistema carregado com sucesso!', 'success');
-            
-            // Sincroniza pendências se offline
-            if (this.state.offlineMode) {
-                dataManager.syncPendingTransactions();
-            }
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            this.showToast('Alguns dados podem não estar atualizados', 'warning');
-        } finally {
-            this.hideLoading();
-        }
+    
+    // Atualizar links ativos
+    document.querySelectorAll('.nav-link, .sidebar-link').forEach(link => {
+      const linkView = (link.dataset.target || link.hash || '#dashboard').replace('#', '');
+      if (linkView === view) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+    
+    // Executar ações específicas da view
+    this.onViewChange(view);
+    
+    console.log(`📍 Navegou para: ${view}`);
+  }
+  
+  onViewChange(view) {
+    switch(view) {
+      case 'dashboard':
+        this.loadDashboard();
+        break;
+      case 'marketplace':
+        this.loadMarketplace();
+        break;
+      case 'portfolio':
+        this.loadPortfolio();
+        break;
+      case 'artist':
+        this.loadArtistPanel();
+        break;
+      case 'withdraw':
+        this.loadWithdrawPanel();
+        break;
+      case 'playlists':
+        this.loadPlaylists();
+        break;
     }
-
-    // ========== CARREGAMENTO DE DADOS ==========
-
-    async loadBalance(silent = false) {
-        if (!this.state.currentUser) return;
-        
-        if (!silent) this.showLoading('Carregando saldo...');
-        
-        try {
-            const result = await dataManager.getSaldo(this.state.currentUser.id || this.state.currentUser.email);
-            
-            if (result.success && result.data) {
-                this.state.userBalance = parseFloat(result.data.saldo) || 0;
-                this.updateBalanceDisplay();
-                
-                if (result.offline) {
-                    this.state.offlineMode = true;
-                }
-            }
-        } catch (error) {
-            console.error('Erro ao carregar saldo:', error);
-        } finally {
-            if (!silent) this.hideLoading();
-        }
+  }
+  
+  async loadDashboard() {
+    // Atualizar dados do usuário
+    if (authManager.isLoggedIn()) {
+      await authManager.loadUserData();
     }
-
-    async loadMarketplace() {
-        try {
-            const result = await dataManager.fetchWithFallback('get_musicas');
-            
-            if (result.success && result.data) {
-                this.state.playlist = result.data.filter(music => 
-                    music && (music.status || '').toLowerCase() === 'ativo'
-                ) || [];
-                
-                if (result.offline) {
-                    this.state.offlineMode = true;
-                }
-            }
-            
-            this.renderMarketplace();
-        } catch (error) {
-            console.error('Erro ao carregar marketplace:', error);
-            this.renderMarketplace();
-        }
+    
+    // Carregar notícias ou atualizações
+    this.loadDashboardUpdates();
+  }
+  
+  async loadMarketplace() {
+    // Inicializar marketplace se não estiver inicializado
+    if (!window.marketplaceManager) {
+      window.marketplaceManager = new MarketplaceManager();
+    } else {
+      // Recarregar músicas
+      await window.marketplaceManager.loadMusicas();
     }
-
-    async loadPortfolio() {
-        if (!this.state.currentUser) return;
-        
-        try {
-            const result = await dataManager.fetchWithFallback('get_carteira', {
-                user_id: this.state.currentUser.id || this.state.currentUser.email
-            });
-            
-            if (result.success) {
-                this.state.portfolioAssets = result.data || [];
-                this.renderPortfolio();
-            }
-        } catch (error) {
-            console.error('Erro ao carregar portfólio:', error);
-            this.renderPortfolio();
-        }
+  }
+  
+  async loadPortfolio() {
+    if (!authManager.isLoggedIn()) {
+      this.showLoginRequired();
+      return;
     }
-
-    async loadLedger() {
-        if (!this.state.currentUser) return;
-        
-        try {
-            const result = await dataManager.fetchWithFallback('get_extrato', {
-                user_id: this.state.currentUser.id || this.state.currentUser.email
-            });
-            
-            if (result.success) {
-                this.state.ledgerData = result.data || [];
-                this.renderLedger();
-            }
-        } catch (error) {
-            console.error('Erro ao carregar extrato:', error);
-            this.renderLedger();
-        }
+    
+    try {
+      showLoading('Carregando carteira...');
+      
+      // Carregar carteira
+      const carteiraResult = await callApi('get_carteira', {
+        user_id: authManager.getUserId()
+      });
+      
+      // Carregar extrato
+      const extratoResult = await callApi('get_extrato', {
+        user_id: authManager.getUserId()
+      });
+      
+      this.renderPortfolio(carteiraResult, extratoResult);
+      
+    } catch (error) {
+      console.error('❌ Erro ao carregar portfólio:', error);
+      showNotification('Erro ao carregar carteira', 'error');
+    } finally {
+      hideLoading();
     }
-
-    async loadTopInvestments() {
-        try {
-            const result = await dataManager.fetchWithFallback('get_top_investments');
-            
-            if (result.success && result.data) {
-                this.state.topInvestments = result.data;
-                this.renderTopInvestments();
-            }
-        } catch (error) {
-            console.error('Erro ao carregar top investimentos:', error);
-            this.renderTopInvestments();
-        }
-    }
-
-    async loadUserPlaylists() {
-        if (!this.state.currentUser) return;
-        
-        try {
-            const result = await dataManager.fetchWithFallback('get_user_playlists', {
-                user_id: this.state.currentUser.id || this.state.currentUser.email
-            });
-            
-            if (result.success) {
-                this.state.userPlaylists = result.data || [];
-                this.renderPlaylists();
-                this.renderFavorites();
-            }
-        } catch (error) {
-            console.error('Erro ao carregar playlists:', error);
-            this.renderPlaylists();
-            this.renderFavorites();
-        }
-    }
-
-    // ========== RENDERIZAÇÃO ==========
-
-    renderMarketplace() {
-        // Esta função será implementada no arquivo específico
-        if (window.renderMarketplace) {
-            window.renderMarketplace();
-        }
-    }
-
-    renderPortfolio() {
-        if (window.renderPortfolio) {
-            window.renderPortfolio();
-        }
-    }
-
-    renderLedger() {
-        if (window.renderLedger) {
-            window.renderLedger();
-        }
-    }
-
-    renderTopInvestments() {
-        if (window.renderTopInvestments) {
-            window.renderTopInvestments();
-        }
-    }
-
-    renderPlaylists() {
-        if (window.renderPlaylists) {
-            window.renderPlaylists();
-        }
-    }
-
-    renderFavorites() {
-        if (window.renderFavorites) {
-            window.renderFavorites();
-        }
-    }
-
-    // ========== UTILITÁRIOS DE UI ==========
-
-    updateBalanceDisplay() {
-        const balanceElement = document.getElementById('currentBalance');
-        if (balanceElement) {
-            balanceElement.textContent = this.formatCurrency(this.state.userBalance);
-            
-            if (this.state.offlineMode) {
-                balanceElement.innerHTML = `${this.formatCurrency(this.state.userBalance)} <small class="text-warning">(offline)</small>`;
-            }
-        }
-    }
-
-    updatePortfolioTime() {
-        const updateEl = document.getElementById('portfolioUpdateTime');
-        if (updateEl) {
-            updateEl.textContent = `Atualizado: ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
-        }
-    }
-
-    showLoading(message = 'Carregando...') {
-        const loadingScreen = document.getElementById('loadingScreen');
-        const loadingMessage = document.getElementById('loadingMessage');
-        
-        if (loadingScreen) loadingScreen.style.display = 'flex';
-        if (loadingMessage) loadingMessage.textContent = message;
-    }
-
-    hideLoading() {
-        const loadingScreen = document.getElementById('loadingScreen');
-        if (loadingScreen) loadingScreen.style.display = 'none';
-    }
-
-    showToast(message, type = 'success', duration = 3000) {
-        const container = document.getElementById('toastContainer');
-        if (!container) {
-            console.log(`[${type.toUpperCase()}] ${message}`);
-            return;
-        }
-
-        const toast = document.createElement('div');
-        const toastId = 'toast_' + Date.now();
-        
-        toast.id = toastId;
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-            <i class="bi ${this.getToastIcon(type)} toast-icon"></i>
-            <div class="toast-message">${message}</div>
-            <button class="btn btn-sm btn-link text-white p-0" onclick="dismissToast('${toastId}')">
-                <i class="bi bi-x"></i>
-            </button>
+  }
+  
+  renderPortfolio(carteiraResult, extratoResult) {
+    // Renderizar carteira
+    const carteiraContainer = document.getElementById('portfolio-assets') || 
+                             document.querySelector('.portfolio-grid');
+    
+    if (carteiraContainer && carteiraResult.success && carteiraResult.data) {
+      if (carteiraResult.data.length === 0) {
+        carteiraContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-wallet"></i>
+            <h3>Carteira vazia</h3>
+            <p>Você ainda não possui ações de músicas.</p>
+            <a href="#marketplace" class="btn btn-primary">
+              <i class="fas fa-shopping-cart"></i> Explorar Marketplace
+            </a>
+          </div>
         `;
+      } else {
+        // Calcular valor total da carteira
+        let totalValue = 0;
         
-        container.appendChild(toast);
+        carteiraContainer.innerHTML = carteiraResult.data.map(item => {
+          const total = parseFloat(item.valor_total || 0);
+          totalValue += total;
+          
+          return `
+            <div class="portfolio-item">
+              <div class="portfolio-item-header">
+                <h4>Música #${item.music_id}</h4>
+                <span class="portfolio-value">R$ ${total.toFixed(2)}</span>
+              </div>
+              
+              <div class="portfolio-item-details">
+                <p><strong>Ações:</strong> ${item.quantidade}</p>
+                <p><strong>Preço médio:</strong> R$ ${parseFloat(item.valor_pago_por_acao || 0).toFixed(2)}</p>
+                <p><strong>Data da compra:</strong> ${new Date(item.data_compra).toLocaleDateString('pt-BR')}</p>
+                <p><strong>Contrato:</strong> ${item.contrato_id || 'N/A'}</p>
+              </div>
+              
+              <div class="portfolio-item-actions">
+                <button class="btn btn-sm btn-outline view-contract-btn" 
+                        data-contract-id="${item.contrato_id}">
+                  <i class="fas fa-file-contract"></i> Ver Contrato
+                </button>
+                
+                <button class="btn btn-sm btn-outline sell-btn" 
+                        data-item-id="${item.id}"
+                        data-music-id="${item.music_id}"
+                        data-quantity="${item.quantidade}">
+                  <i class="fas fa-dollar-sign"></i> Vender
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
         
-        setTimeout(() => {
-            toast.classList.add('show');
-        }, 10);
-        
-        if (duration > 0) {
-            setTimeout(() => {
-                this.dismissToast(toastId);
-            }, duration);
-        }
-    }
-
-    getToastIcon(type) {
-        const icons = {
-            'success': 'bi-check-circle',
-            'error': 'bi-exclamation-circle',
-            'warning': 'bi-exclamation-triangle',
-            'info': 'bi-info-circle'
-        };
-        return icons[type] || 'bi-info-circle';
-    }
-
-    dismissToast(toastId) {
-        const toast = document.getElementById(toastId);
-        if (toast) {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }
-    }
-
-    showModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    showLoginForm() {
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        
-        if (loginForm) loginForm.style.display = 'block';
-        if (registerForm) registerForm.style.display = 'none';
-    }
-
-    showRegisterForm() {
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        
-        if (loginForm) loginForm.style.display = 'none';
-        if (registerForm) registerForm.style.display = 'block';
-    }
-
-    toggleArtistField() {
-        const type = document.getElementById('registerType')?.value;
-        const field = document.getElementById('artistLinkField');
-        if (field) {
-            field.style.display = type === 'artista' ? 'block' : 'none';
-        }
-    }
-
-    // ========== NAVEGAÇÃO ==========
-
-    toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        if (sidebar) {
-            sidebar.classList.toggle('open');
-        }
-    }
-
-    changeSection(sectionId) {
-        // Oculta todas as seções
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
+        // Atualizar valor total da carteira
+        document.querySelectorAll('.portfolio-total-value, .carteira-total').forEach(el => {
+          el.textContent = `R$ ${totalValue.toFixed(2)}`;
         });
+      }
+    }
+    
+    // Renderizar extrato
+    const extratoContainer = document.getElementById('transaction-history') || 
+                            document.querySelector('.extrato-table tbody');
+    
+    if (extratoContainer && extratoResult.success && extratoResult.data) {
+      if (extratoResult.data.length === 0) {
+        if (extratoContainer.tagName === 'TBODY') {
+          extratoContainer.innerHTML = `
+            <tr>
+              <td colspan="4" class="text-center">
+                <i class="fas fa-history"></i> Nenhuma transação realizada
+              </td>
+            </tr>
+          `;
+        } else {
+          extratoContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-history"></i>
+              <h3>Nenhuma transação</h3>
+              <p>Seu histórico de transações aparecerá aqui.</p>
+            </div>
+          `;
+        }
+      } else {
+        const transactions = extratoResult.data.slice(0, 10); // Últimas 10 transações
         
-        // Mostra a seção selecionada
-        const sectionElement = document.getElementById(`${sectionId}Section`);
-        if (sectionElement) {
-            sectionElement.classList.add('active');
+        if (extratoContainer.tagName === 'TBODY') {
+          extratoContainer.innerHTML = transactions.map(trans => `
+            <tr>
+              <td>${new Date(trans.data).toLocaleDateString('pt-BR')}</td>
+              <td>${trans.descricao || trans.tipo}</td>
+              <td class="${parseFloat(trans.valor || 0) >= 0 ? 'text-success' : 'text-danger'}">
+                R$ ${Math.abs(parseFloat(trans.valor || 0)).toFixed(2)}
+              </td>
+              <td>
+                ${trans.contrato_id ? 
+                  `<button class="btn btn-sm btn-outline view-transaction-contract" 
+                           data-contract-id="${trans.contrato_id}">
+                    <i class="fas fa-eye"></i>
+                   </button>` : 
+                  '—'}
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          extratoContainer.innerHTML = transactions.map(trans => `
+            <div class="transaction-item ${parseFloat(trans.valor || 0) >= 0 ? 'income' : 'expense'}">
+              <div class="transaction-icon">
+                <i class="fas fa-${parseFloat(trans.valor || 0) >= 0 ? 'arrow-down' : 'arrow-up'}"></i>
+              </div>
+              
+              <div class="transaction-details">
+                <h5>${trans.descricao || trans.tipo}</h5>
+                <p class="transaction-date">${new Date(trans.data).toLocaleDateString('pt-BR')}</p>
+              </div>
+              
+              <div class="transaction-amount">
+                <span>R$ ${Math.abs(parseFloat(trans.valor || 0)).toFixed(2)}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+  }
+  
+  loadArtistPanel() {
+    if (!authManager.isLoggedIn()) {
+      this.showLoginRequired();
+      return;
+    }
+    
+    const user = authManager.getUser();
+    if (user?.tipo !== 'artista') {
+      this.showNotAnArtist();
+      return;
+    }
+    
+    // Inicializar painel do artista
+    if (!window.artistManager) {
+      window.artistManager = new ArtistManager();
+    }
+  }
+  
+  loadWithdrawPanel() {
+    if (!authManager.isLoggedIn()) {
+      this.showLoginRequired();
+      return;
+    }
+    
+    this.renderWithdrawPanel();
+  }
+  
+  renderWithdrawPanel() {
+    const container = document.getElementById('withdraw-view') || 
+                     document.querySelector('.withdraw-container');
+    
+    if (!container) return;
+    
+    const user = authManager.getUser();
+    const balance = parseFloat(user?.saldo || 0);
+    
+    container.innerHTML = `
+      <div class="withdraw-card">
+        <h3><i class="fas fa-money-bill-wave"></i> Solicitar Saque</h3>
+        
+        <div class="balance-display">
+          <p>Saldo disponível para saque:</p>
+          <h2 class="available-balance">R$ ${balance.toFixed(2)}</h2>
+        </div>
+        
+        ${balance > 0 ? `
+          <form id="withdraw-form">
+            <div class="form-group">
+              <label for="withdraw-amount">Valor do saque (R$)</label>
+              <input type="number" 
+                     id="withdraw-amount" 
+                     class="form-control" 
+                     min="10" 
+                     max="${balance}" 
+                     step="0.01"
+                     value="${balance}"
+                     required>
+              <small class="form-text">Valor mínimo: R$ 10,00</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="payment-method">Método de pagamento</label>
+              <select id="payment-method" class="form-control" required>
+                <option value="PIX">PIX</option>
+                <option value="TED">TED/DOC</option>
+                <option value="BOLETO">Boleto</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="bank-details-group" style="display: none;">
+              <label for="bank-details">Dados bancários</label>
+              <textarea id="bank-details" 
+                        class="form-control" 
+                        rows="3"
+                        placeholder="Banco, Agência, Conta, CPF/CNPJ"></textarea>
+            </div>
+            
+            <div class="withdraw-info">
+              <p><i class="fas fa-info-circle"></i> O saque será processado em 5 a 9 dias úteis.</p>
+              <p><i class="fas fa-info-circle"></i> Uma confirmação por email será enviada.</p>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">
+              <i class="fas fa-paper-plane"></i> Solicitar Saque
+            </button>
+          </form>
+        ` : `
+          <div class="empty-state">
+            <i class="fas fa-wallet"></i>
+            <h3>Saldo insuficiente</h3>
+            <p>Você precisa de saldo para realizar um saque.</p>
+            <button class="btn btn-primary" id="add-funds-btn">
+              <i class="fas fa-plus-circle"></i> Adicionar Fundos
+            </button>
+          </div>
+        `}
+      </div>
+    `;
+    
+    // Configurar formulário de saque
+    if (balance > 0) {
+      const form = document.getElementById('withdraw-form');
+      const paymentMethod = document.getElementById('payment-method');
+      const bankDetailsGroup = document.getElementById('bank-details-group');
+      
+      // Mostrar/ocultar dados bancários
+      paymentMethod.addEventListener('change', () => {
+        if (paymentMethod.value === 'TED') {
+          bankDetailsGroup.style.display = 'block';
+        } else {
+          bankDetailsGroup.style.display = 'none';
+        }
+      });
+      
+      // Submeter formulário
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const amount = parseFloat(document.getElementById('withdraw-amount').value);
+        const method = document.getElementById('payment-method').value;
+        const bankDetails = document.getElementById('bank-details')?.value || '';
+        
+        if (amount > balance) {
+          showNotification('Valor maior que o saldo disponível', 'error');
+          return;
         }
         
-        // Atualiza navegação
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('onclick')?.includes(sectionId)) {
-                link.classList.add('active');
-            }
-        });
-        
-        // Fecha sidebar no mobile
-        if (window.innerWidth < 768) {
-            this.toggleSidebar();
+        if (amount < 10) {
+          showNotification('Valor mínimo: R$ 10,00', 'error');
+          return;
         }
         
-        // Atualiza título
-        const titles = {
-            'marketplace': 'Marketplace',
-            'portfolio': 'Portfólio',
-            'ledger': 'Extrato',
-            'investments': 'Melhores Investimentos',
-            'playlists': 'Playlists',
-            'artist': 'Painel Artista'
-        };
-        document.title = `SELO MIV | ${titles[sectionId] || 'Fintech Musical'}`;
-    }
-
-    // ========== MANIPULAÇÃO DE OFFLINE ==========
-
-    handleOnlineStatus() {
-        if (this.state.offlineMode) {
-            this.state.offlineMode = false;
-            this.showToast('Conexão restaurada. Sincronizando dados...', 'success');
-            dataManager.syncPendingTransactions();
-            this.loadAllData();
-        }
-    }
-
-    handleOfflineStatus() {
-        this.state.offlineMode = true;
-        this.showToast('Modo offline ativado', 'warning');
-    }
-
-    // ========== UTILITÁRIOS ==========
-
-    formatCurrency(value) {
-        if (value === null || value === undefined || isNaN(value)) value = 0;
-        return new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }).format(Number(value));
-    }
-
-    formatDate(dateString) {
-        if (!dateString) return '-';
         try {
-            const date = new Date(dateString);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMs / 3600000);
-            const diffDays = Math.floor(diffMs / 86400000);
+          showLoading('Processando solicitação...');
+          
+          const result = await callApi('request_withdrawal', {
+            user_id: authManager.getUserId(),
+            amount: amount,
+            payment_method: method,
+            bank_details: bankDetails
+          }, 'POST');
+          
+          if (result.success) {
+            showNotification('Solicitação enviada! Verifique seu email para confirmar.', 'success');
             
-            if (diffMins < 1) return 'Agora mesmo';
-            if (diffMins < 60) return `Há ${diffMins} min`;
-            if (diffHours < 24) return `Há ${diffHours} h`;
-            if (diffDays === 1) return 'Ontem';
-            if (diffDays < 7) return `Há ${diffDays} dias`;
+            // Recarregar dados do usuário
+            await authManager.loadUserData();
             
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        } catch (e) {
-            return dateString;
+            // Recarregar painel de saque
+            this.renderWithdrawPanel();
+          } else {
+            throw new Error(result.message || 'Erro ao solicitar saque');
+          }
+        } catch (error) {
+          console.error('❌ Erro ao solicitar saque:', error);
+          showNotification(error.message, 'error');
+        } finally {
+          hideLoading();
         }
+      });
+    } else {
+      // Botão para adicionar fundos
+      document.getElementById('add-funds-btn')?.addEventListener('click', () => {
+        this.showAddFundsModal();
+      });
     }
-
-    formatTime(seconds) {
-        if (!seconds || isNaN(seconds)) return '0:00';
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+  
+  showAddFundsModal() {
+    const modalHTML = `
+      <div class="modal-overlay" id="add-funds-modal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3><i class="fas fa-plus-circle"></i> Adicionar Fundos</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="payment-options">
+              <div class="payment-option active" data-method="mercadopago">
+                <i class="fas fa-credit-card"></i>
+                <h5>Mercado Pago</h5>
+                <p>Pagamento rápido com PIX ou cartão</p>
+              </div>
+              
+              <div class="payment-option" data-method="transfer">
+                <i class="fas fa-university"></i>
+                <h5>Transferência Bancária</h5>
+                <p>TED/DOC - Até 2 dias úteis</p>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="funds-amount">Valor (R$)</label>
+              <input type="number" 
+                     id="funds-amount" 
+                     class="form-control" 
+                     min="10" 
+                     value="50"
+                     step="0.01">
+              <small class="form-text">Valor mínimo: R$ 10,00</small>
+            </div>
+            
+            <div class="payment-info" id="mercadopago-info">
+              <p><i class="fas fa-bolt"></i> Pagamento instantâneo com PIX</p>
+              <p><i class="fas fa-shield-alt"></i> Ambiente seguro do Mercado Pago</p>
+            </div>
+            
+            <div class="payment-info" id="transfer-info" style="display: none;">
+              <p><strong>Dados para transferência:</strong></p>
+              <p>Banco: 999 - Banco SELO MIV</p>
+              <p>Agência: 0001</p>
+              <p>Conta: 123456-7</p>
+              <p>CNPJ: 12.345.678/0001-99</p>
+              <p><strong>Envie o comprovante para: ${ADMIN_EMAIL}</strong></p>
+            </div>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-payment">Cancelar</button>
+            <button class="btn btn-primary" id="proceed-payment">
+              <i class="fas fa-external-link-alt"></i> Prosseguir para Pagamento
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('add-funds-modal');
+    
+    // Selecionar método de pagamento
+    let selectedMethod = 'mercadopago';
+    
+    document.querySelectorAll('.payment-option').forEach(option => {
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.payment-option').forEach(o => {
+          o.classList.remove('active');
+        });
+        option.classList.add('active');
+        
+        selectedMethod = option.dataset.method;
+        
+        // Mostrar informações do método selecionado
+        document.getElementById('mercadopago-info').style.display = 
+          selectedMethod === 'mercadopago' ? 'block' : 'none';
+        document.getElementById('transfer-info').style.display = 
+          selectedMethod === 'transfer' ? 'block' : 'none';
+      });
+    });
+    
+    // Processar pagamento
+    document.getElementById('proceed-payment').addEventListener('click', async () => {
+      const amount = parseFloat(document.getElementById('funds-amount').value);
+      
+      if (amount < 10) {
+        showNotification('Valor mínimo: R$ 10,00', 'warning');
+        return;
+      }
+      
+      if (selectedMethod === 'mercadopago') {
+        try {
+          showLoading('Gerando link de pagamento...');
+          
+          const result = await callApi('generate_payment_link', {
+            user_id: authManager.getUserId(),
+            amount: amount
+          }, 'POST');
+          
+          if (result.success) {
+            // Abrir link do Mercado Pago
+            window.open(result.data.payment_link, '_blank');
+            showNotification('Redirecionando para pagamento...', 'info');
+            modal.remove();
+          } else {
+            throw new Error(result.message || 'Erro ao gerar link de pagamento');
+          }
+        } catch (error) {
+          console.error('❌ Erro ao gerar link de pagamento:', error);
+          showNotification(error.message, 'error');
+        } finally {
+          hideLoading();
+        }
+      } else {
+        // Para transferência bancária, apenas mostrar informações
+        showNotification('Realize a transferência e envie o comprovante', 'info');
+        modal.remove();
+      }
+    });
+    
+    // Fechar modal
+    document.querySelector('.modal-close').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    document.getElementById('cancel-payment').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+  
+  loadPlaylists() {
+    if (!authManager.isLoggedIn()) {
+      this.showLoginRequired();
+      return;
     }
+    
+    this.renderPlaylists();
+  }
+  
+  async renderPlaylists() {
+    try {
+      const result = await callApi('get_user_playlists', {
+        user_id: authManager.getUserId()
+      });
+      
+      const container = document.getElementById('playlists-container') || 
+                       document.querySelector('.playlists-grid');
+      
+      if (container) {
+        if (result.success && result.data && result.data.length > 0) {
+          container.innerHTML = result.data.map(playlist => `
+            <div class="playlist-card">
+              <div class="playlist-cover">
+                <i class="fas fa-music"></i>
+              </div>
+              
+              <div class="playlist-info">
+                <h4>${playlist.playlist_name}</h4>
+                <p class="playlist-count">
+                  ${playlist.music_ids ? playlist.music_ids.split(',').length : 0} músicas
+                </p>
+                <p class="playlist-date">
+                  Criada em ${new Date(playlist.created_at).toLocaleDateString('pt-BR')}
+                </p>
+              </div>
+              
+              <div class="playlist-actions">
+                <button class="btn btn-sm btn-outline play-playlist-btn"
+                        data-playlist-id="${playlist.id}">
+                  <i class="fas fa-play"></i>
+                </button>
+                
+                <button class="btn btn-sm btn-outline edit-playlist-btn"
+                        data-playlist-id="${playlist.id}">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-list-music"></i>
+              <h3>Nenhuma playlist</h3>
+              <p>Crie sua primeira playlist para organizar suas músicas favoritas.</p>
+              <button class="btn btn-primary" id="create-first-playlist">
+                <i class="fas fa-plus"></i> Criar Playlist
+              </button>
+            </div>
+          `;
+          
+          document.getElementById('create-first-playlist')?.addEventListener('click', () => {
+            this.showCreatePlaylistModal();
+          });
+        }
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar playlists:', error);
+    }
+  }
+  
+  showCreatePlaylistModal() {
+    const modalHTML = `
+      <div class="modal-overlay" id="create-playlist-modal">
+        <div class="modal">
+          <div class="modal-header">
+            <h3><i class="fas fa-plus"></i> Criar Nova Playlist</h3>
+            <button class="modal-close">&times;</button>
+          </div>
+          
+          <div class="modal-body">
+            <form id="create-playlist-form">
+              <div class="form-group">
+                <label for="playlist-name">Nome da Playlist *</label>
+                <input type="text" 
+                       id="playlist-name" 
+                       class="form-control" 
+                       required
+                       placeholder="Ex: Minhas Favoritas">
+              </div>
+              
+              <div class="form-group">
+                <div class="form-check">
+                  <input type="checkbox" 
+                         id="playlist-public" 
+                         class="form-check-input">
+                  <label class="form-check-label" for="playlist-public">
+                    Playlist pública (outros usuários podem ver)
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="playlist-description">Descrição (Opcional)</label>
+                <textarea id="playlist-description" 
+                          class="form-control" 
+                          rows="2"
+                          placeholder="Descreva sua playlist..."></textarea>
+              </div>
+            </form>
+          </div>
+          
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancel-playlist">Cancelar</button>
+            <button class="btn btn-primary" id="create-playlist">
+              <i class="fas fa-save"></i> Criar Playlist
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    const modal = document.getElementById('create-playlist-modal');
+    
+    // Criar playlist
+    document.getElementById('create-playlist').addEventListener('click', async () => {
+      const name = document.getElementById('playlist-name').value;
+      
+      if (!name) {
+        showNotification('Digite um nome para a playlist', 'warning');
+        return;
+      }
+      
+      try {
+        showLoading('Criando playlist...');
+        
+        const result = await callApi('create_playlist', {
+          user_id: authManager.getUserId(),
+          playlist_name: name,
+          is_public: document.getElementById('playlist-public').checked
+        }, 'POST');
+        
+        if (result.success) {
+          showNotification('Playlist criada com sucesso!', 'success');
+          modal.remove();
+          
+          // Recarregar playlists
+          this.renderPlaylists();
+        } else {
+          throw new Error(result.message || 'Erro ao criar playlist');
+        }
+      } catch (error) {
+        console.error('❌ Erro ao criar playlist:', error);
+        showNotification(error.message, 'error');
+      } finally {
+        hideLoading();
+      }
+    });
+    
+    // Fechar modal
+    document.querySelector('.modal-close').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    document.getElementById('cancel-playlist').addEventListener('click', () => {
+      modal.remove();
+    });
+    
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
+  }
+  
+  loadDashboardUpdates() {
+    // Carregar atualizações, notícias ou estatísticas
+    const updatesContainer = document.getElementById('dashboard-updates');
+    if (updatesContainer) {
+      // Você pode adicionar atualizações dinâmicas aqui
+      updatesContainer.innerHTML = `
+        <div class="update-card">
+          <div class="update-icon">
+            <i class="fas fa-bullhorn"></i>
+          </div>
+          <div class="update-content">
+            <h5>Bem-vindo ao SELO MIV!</h5>
+            <p>Plataforma de investimento em música.</p>
+            <small class="update-time">Hoje</small>
+          </div>
+        </div>
+      `;
+    }
+  }
+  
+  showLoginRequired() {
+    const currentView = document.getElementById(`${this.currentView}-view`);
+    if (currentView) {
+      currentView.innerHTML = `
+        <div class="login-required">
+          <i class="fas fa-sign-in-alt"></i>
+          <h3>Login necessário</h3>
+          <p>Faça login para acessar esta funcionalidade.</p>
+          <button class="btn btn-primary" id="go-to-login">
+            <i class="fas fa-sign-in-alt"></i> Fazer Login
+          </button>
+        </div>
+      `;
+      
+      document.getElementById('go-to-login').addEventListener('click', () => {
+        // Implementar redirecionamento para login
+        showNotification('Implemente o modal de login aqui', 'info');
+      });
+    }
+  }
+  
+  showNotAnArtist() {
+    const artistView = document.getElementById('artist-view');
+    if (artistView) {
+      artistView.innerHTML = `
+        <div class="not-artist">
+          <i class="fas fa-user-tie"></i>
+          <h3>Acesso restrito</h3>
+          <p>Esta área é exclusiva para artistas cadastrados.</p>
+          <p>Se você é um artista, entre em contato com a administração.</p>
+          <a href="#marketplace" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Explorar Marketplace
+          </a>
+        </div>
+      `;
+    }
+  }
+  
+  setupEventListeners() {
+    // Logout
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', () => {
+        authManager.logout();
+      });
+    }
+    
+    // Atualizar saldo
+    const refreshBalanceBtn = document.getElementById('refresh-balance');
+    if (refreshBalanceBtn) {
+      refreshBalanceBtn.addEventListener('click', () => {
+        authManager.loadUserData();
+      });
+    }
+    
+    // Botão de ajuda
+    const helpBtn = document.getElementById('help-btn');
+    if (helpBtn) {
+      helpBtn.addEventListener('click', () => {
+        showNotification('Central de ajuda em desenvolvimento', 'info');
+      });
+    }
+    
+    // Configurações
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+      settingsBtn.addEventListener('click', () => {
+        showNotification('Configurações em desenvolvimento', 'info');
+      });
+    }
+  }
 }
 
-// Instância global da aplicação
-const app = new AppCore();
-
-// Exportar funções globais
-window.handleLogin = () => {
-    const email = document.getElementById('loginEmail')?.value.trim();
-    const password = document.getElementById('loginPassword')?.value.trim();
-    if (email && password) {
-        app.handleLogin(email, password);
+// Funções auxiliares globais
+function showNotification(message, type = 'info') {
+  // Remover notificações existentes
+  const existing = document.querySelector('.notification');
+  if (existing) existing.remove();
+  
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                        type === 'error' ? 'exclamation-circle' : 
+                        type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+      <span>${message}</span>
+    </div>
+    <button class="notification-close">&times;</button>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  // Mostrar
+  setTimeout(() => {
+    notification.classList.add('show');
+  }, 10);
+  
+  // Fechar
+  notification.querySelector('.notification-close').addEventListener('click', () => {
+    notification.classList.remove('show');
+    setTimeout(() => {
+      notification.remove();
+    }, 300);
+  });
+  
+  // Auto-remover após 5 segundos
+  setTimeout(() => {
+    if (notification.parentNode) {
+      notification.classList.remove('show');
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 300);
     }
-};
+  }, 5000);
+}
 
-window.handleRegister = () => {
-    const name = document.getElementById('registerName')?.value.trim();
-    const email = document.getElementById('registerEmail')?.value.trim();
-    const password = document.getElementById('registerPassword')?.value.trim();
-    const type = document.getElementById('registerType')?.value;
-    const link = document.getElementById('registerLink')?.value.trim() || '';
-    
-    if (name && email && password && type) {
-        app.handleRegister({ nome: name, email, password, tipo: type, workLink: link });
-    }
-};
+function showLoading(message = 'Carregando...') {
+  // Remover loadings existentes
+  const existing = document.getElementById('global-loading');
+  if (existing) existing.remove();
+  
+  const loading = document.createElement('div');
+  loading.id = 'global-loading';
+  loading.className = 'loading-overlay';
+  loading.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <p class="loading-message">${message}</p>
+    </div>
+  `;
+  
+  document.body.appendChild(loading);
+  
+  // Mostrar
+  setTimeout(() => {
+    loading.classList.add('show');
+  }, 10);
+}
 
-window.showRegisterForm = () => app.showRegisterForm();
-window.showLoginForm = () => app.showLoginForm();
-window.toggleArtistField = () => app.toggleArtistField();
-window.logout = () => app.logout();
-window.toggleSidebar = () => app.toggleSidebar();
-window.changeSection = (sectionId) => app.changeSection(sectionId);
-window.showLoading = (message) => app.showLoading(message);
-window.hideLoading = () => app.hideLoading();
-window.showToast = (message, type, duration) => app.showToast(message, type, duration);
-window.dismissToast = (toastId) => app.dismissToast(toastId);
-window.showModal = (modalId) => app.showModal(modalId);
-window.closeModal = (modalId) => app.closeModal(modalId);
+function hideLoading() {
+  const loading = document.getElementById('global-loading');
+  if (loading) {
+    loading.classList.remove('show');
+    setTimeout(() => {
+      if (loading.parentNode) {
+        loading.remove();
+      }
+    }, 300);
+  }
+}
 
-// Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-    console.log(`SELO MIV v${app.config.VERSION} inicializado`);
-    
-    // Configura eventos de teclado nos inputs
-    document.getElementById('loginPassword')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleLogin();
-    });
-    
-    document.getElementById('registerPassword')?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleRegister();
-    });
-    
-    // Validação de email
-    ['loginEmail', 'registerEmail'].forEach(id => {
-        document.getElementById(id)?.addEventListener('input', (e) => {
-            const email = e.target.value.trim();
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            
-            if (email && !emailRegex.test(email)) {
-                e.target.classList.add('is-invalid');
-            } else {
-                e.target.classList.remove('is-invalid');
-            }
-        });
-    });
+// Inicializar app quando o DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+  // Verificar se API está configurada
+  if (!window.API_CONFIG || !window.API_CONFIG.BASE_URL) {
+    console.error('❌ API não configurada. Verifique config.js');
+    showNotification('Erro de configuração. Contate o administrador.', 'error');
+    return;
+  }
+  
+  // Inicializar aplicação
+  window.mivApp = new MIVApp();
+  
+  // Verificar autenticação
+  if (authManager.isLoggedIn()) {
+    console.log('✅ Usuário logado:', authManager.getUser()?.email);
+  } else {
+    console.log('🔒 Usuário não logado');
+  }
 });
-
-// Exportar estado global
-window.state = app.state;
-
-export default app;
