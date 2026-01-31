@@ -81,30 +81,47 @@ class MIVApp {
     
     console.log(`📍 Navegou para: ${view}`);
   }
-  
   onViewChange(view) {
     switch(view) {
-      case 'dashboard':
-        this.loadDashboard();
-        break;
-      case 'marketplace':
-        this.loadMarketplace();
-        break;
-      case 'portfolio':
-        this.loadPortfolio();
-        break;
-      case 'artist':
-        this.loadArtistPanel();
-        break;
-      case 'withdraw':
-        this.loadWithdrawPanel();
-        break;
-      case 'playlists':
-        this.loadPlaylists();
-        break;
+        case 'dashboard':
+            this.loadDashboard();
+            break;
+        case 'marketplace':
+            this.loadMarketplace();
+            break;
+        case 'portfolio':
+            this.loadPortfolio();
+            // ADICIONE ESTA LINHA:
+            if (window.ledgerManager) {
+                window.ledgerManager.loadLedger();
+            }
+            break;
+        case 'artist':
+            this.loadArtistPanel();
+            break;
+        case 'withdraw':
+            this.loadWithdrawPanel();
+            break;
+        case 'playlists':
+            this.loadPlaylists();
+            break;
+        case 'extrato': // Se você tiver uma view específica para extrato
+            this.loadExtrato();
+            break;
     }
-  }
-  
+}
+
+// Adicione esta função se tiver view específica para extrato
+async loadExtrato() {
+    if (!authManager.isLoggedIn()) {
+        this.showLoginRequired();
+        return;
+    }
+    
+    if (window.ledgerManager) {
+        await window.ledgerManager.loadLedger();
+    }
+}
   async loadDashboard() {
     // Atualizar dados do usuário
     if (authManager.isLoggedIn()) {
