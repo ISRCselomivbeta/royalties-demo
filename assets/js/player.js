@@ -1,30 +1,35 @@
-// Player de Música Corrigido - Spotify Style
+// Player de Música Corrigido - Só aparece após login
 class MusicPlayer {
   constructor() {
     this.currentTrack = null;
     this.isPlaying = false;
     this.isRepeating = false;
     this.isShuffling = false;
-    this.volume = 0.8; // 80% volume padrão
+    this.volume = 0.8;
     this.currentTime = 0;
     this.duration = 0;
     this.youtubePlayer = null;
+    this.isLoggedIn = false;
     
     this.init();
   }
   
   init() {
+    // Criar estrutura do player mas esconder inicialmente
     this.createPlayerElements();
     this.setupEventListeners();
     this.setupYouTubeAPI();
-    this.showPlayer(); // Sempre mostrar o player
+    this.hidePlayer(); // Esconder até o login
+    
+    // Verificar se já está logado
+    this.checkLoginStatus();
   }
   
   createPlayerElements() {
     // Criar container do player se não existir
     if (!document.getElementById('spotify-player')) {
       const playerHTML = `
-        <div id="spotify-player" class="spotify-player">
+        <div id="spotify-player" class="spotify-player" style="display: none;">
           <div class="player-container">
             <!-- Info da Música -->
             <div class="player-track-info">
@@ -34,7 +39,7 @@ class MusicPlayer {
                    id="spotify-track-cover">
               <div class="track-details">
                 <div class="track-title" id="spotify-track-title">SELO MIV Player</div>
-                <div class="track-artist" id="spotify-track-artist">Clique em uma música para tocar</div>
+                <div class="track-artist" id="spotify-track-artist">Faça login para tocar músicas</div>
               </div>
               <button class="btn-favorite" id="spotify-favorite-btn" title="Favoritar">
                 <i class="far fa-heart"></i>
@@ -152,6 +157,17 @@ class MusicPlayer {
         z-index: 9999 !important;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5) !important;
         padding: 0 16px !important;
+        transition: transform 0.3s ease, opacity 0.3s ease !important;
+      }
+      
+      .spotify-player.hidden {
+        transform: translateY(100%) !important;
+        opacity: 0 !important;
+      }
+      
+      .spotify-player.visible {
+        transform: translateY(0) !important;
+        opacity: 1 !important;
       }
       
       .player-container {
@@ -410,6 +426,37 @@ class MusicPlayer {
     document.head.appendChild(style);
   }
   
+  checkLoginStatus() {
+    // Verificar se authManager existe e está logado
+    if (window.authManager && window.authManager.isLoggedIn()) {
+      this.showPlayerAfterLogin();
+    } else {
+      // Configurar listener para quando o login ocorrer
+      document.addEventListener('auth-login-success', () => {
+        this.showPlayerAfterLogin();
+      });
+      
+      // Também verificar periodicamente (fallback)
+      setTimeout(() => {
+        if (window.authManager && window.authManager.isLoggedIn()) {
+          this.showPlayerAfterLogin();
+        }
+      }, 2000);
+    }
+  }
+  
+  showPlayerAfterLogin() {
+    this.isLoggedIn = true;
+    this.showPlayer();
+    
+    // Atualizar mensagem do player
+    if (this.elements.trackArtist) {
+      this.elements.trackArtist.textContent = 'Selecione uma música no marketplace';
+    }
+    
+    console.log('🎵 Player mostrado após login');
+  }
+  
   setupYouTubeAPI() {
     if (window.YT && window.YT.Player) {
       this.createYouTubePlayer();
@@ -501,25 +548,33 @@ class MusicPlayer {
   setupEventListeners() {
     // Botão play/pause
     this.elements.playBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) {
+        showNotification('Faça login para tocar músicas', 'warning');
+        return;
+      }
       this.togglePlayPause();
     });
     
     // Botões de navegação
     this.elements.prevBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) return;
       this.playPrevTrack();
     });
     
     this.elements.nextBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) return;
       this.playNextTrack();
     });
     
     // Botão repeat
     this.elements.repeatBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) return;
       this.toggleRepeat();
     });
     
     // Botão shuffle
     this.elements.shuffleBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) return;
       this.toggleShuffle();
     });
     
@@ -530,6 +585,7 @@ class MusicPlayer {
     
     // Barra de progresso
     this.elements.progressContainer?.addEventListener('click', (e) => {
+      if (!this.isLoggedIn) return;
       const rect = e.currentTarget.getBoundingClientRect();
       const percent = (e.clientX - rect.left) / rect.width;
       this.seekTo(percent * this.duration);
@@ -537,11 +593,19 @@ class MusicPlayer {
     
     // Botão de favoritar
     this.elements.favoriteBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) {
+        showNotification('Faça login para favoritar músicas', 'warning');
+        return;
+      }
       this.toggleFavorite();
     });
     
     // Botão de investir
     this.elements.investBtn?.addEventListener('click', () => {
+      if (!this.isLoggedIn) {
+        showNotification('Faça login para investir', 'warning');
+        return;
+      }
       this.openInvestmentModal();
     });
     
@@ -569,6 +633,11 @@ class MusicPlayer {
   }
   
   loadTrack(track) {
+    if (!this.isLoggedIn) {
+      showNotification('Faça login para tocar músicas', 'warning');
+      return;
+    }
+    
     this.currentTrack = track;
     
     // Atualizar interface
@@ -582,6 +651,10 @@ class MusicPlayer {
     
     // Atualizar botão de investir
     this.elements.investBtn.onclick = () => {
+      if (!this.isLoggedIn) {
+        showNotification('Faça login para investir', 'warning');
+        return;
+      }
       this.openInvestmentModalForTrack(track);
     };
     
@@ -593,6 +666,8 @@ class MusicPlayer {
   }
   
   loadYouTubeTrack(youtubeUrl) {
+    if (!this.isLoggedIn) return;
+    
     if (!youtubeUrl || !this.youtubePlayer) {
       showNotification('Link do YouTube não disponível', 'warning');
       return;
@@ -634,6 +709,8 @@ class MusicPlayer {
   }
   
   play() {
+    if (!this.isLoggedIn) return;
+    
     if (this.youtubePlayer) {
       this.youtubePlayer.playVideo();
       this.isPlaying = true;
@@ -642,6 +719,8 @@ class MusicPlayer {
   }
   
   pause() {
+    if (!this.isLoggedIn) return;
+    
     if (this.youtubePlayer) {
       this.youtubePlayer.pauseVideo();
       this.isPlaying = false;
@@ -650,6 +729,11 @@ class MusicPlayer {
   }
   
   togglePlayPause() {
+    if (!this.isLoggedIn) {
+      showNotification('Faça login para tocar músicas', 'warning');
+      return;
+    }
+    
     if (this.isPlaying) {
       this.pause();
     } else {
@@ -658,6 +742,8 @@ class MusicPlayer {
   }
   
   playCurrentTrack() {
+    if (!this.isLoggedIn) return;
+    
     if (this.currentTrack?.link_youtube) {
       this.loadYouTubeTrack(this.currentTrack.link_youtube);
       this.play();
@@ -665,18 +751,24 @@ class MusicPlayer {
   }
   
   playNextTrack() {
+    if (!this.isLoggedIn) return;
+    
     // Implementar lógica para próxima música da playlist
     console.log('⏭️ Próxima música');
     showNotification('Funcionalidade de playlist em desenvolvimento', 'info');
   }
   
   playPrevTrack() {
+    if (!this.isLoggedIn) return;
+    
     // Implementar lógica para música anterior
     console.log('⏮️ Música anterior');
     showNotification('Funcionalidade de playlist em desenvolvimento', 'info');
   }
   
   toggleRepeat() {
+    if (!this.isLoggedIn) return;
+    
     this.isRepeating = !this.isRepeating;
     
     if (this.elements.repeatBtn) {
@@ -693,6 +785,8 @@ class MusicPlayer {
   }
   
   toggleShuffle() {
+    if (!this.isLoggedIn) return;
+    
     this.isShuffling = !this.isShuffling;
     
     if (this.elements.shuffleBtn) {
@@ -709,6 +803,8 @@ class MusicPlayer {
   }
   
   toggleFavorite() {
+    if (!this.isLoggedIn) return;
+    
     const isFavorite = this.elements.favoriteBtn.classList.contains('active');
     
     if (isFavorite) {
@@ -737,6 +833,8 @@ class MusicPlayer {
   }
   
   seekTo(time) {
+    if (!this.isLoggedIn) return;
+    
     if (this.youtubePlayer) {
       this.youtubePlayer.seekTo(time, true);
       this.updateCurrentTime();
@@ -790,16 +888,51 @@ class MusicPlayer {
   showPlayer() {
     if (this.elements.player) {
       this.elements.player.style.display = 'block';
+      setTimeout(() => {
+        this.elements.player.classList.remove('hidden');
+        this.elements.player.classList.add('visible');
+      }, 10);
     }
   }
   
   hidePlayer() {
     if (this.elements.player) {
-      this.elements.player.style.display = 'none';
+      this.elements.player.classList.remove('visible');
+      this.elements.player.classList.add('hidden');
+      
+      // Esconder completamente após animação
+      setTimeout(() => {
+        this.elements.player.style.display = 'none';
+      }, 300);
     }
   }
   
+  // Método para quando o usuário faz logout
+  handleLogout() {
+    this.isLoggedIn = false;
+    this.currentTrack = null;
+    this.isPlaying = false;
+    this.pause(); // Parar música atual
+    
+    // Resetar interface
+    this.elements.trackTitle.textContent = 'SELO MIV Player';
+    this.elements.trackArtist.textContent = 'Faça login para tocar músicas';
+    this.elements.trackCover.src = 'https://via.placeholder.com/56x56/111418/00ff88?text=MIV';
+    this.elements.progressFill.style.width = '0%';
+    this.elements.currentTimeEl.textContent = '0:00';
+    this.elements.durationEl.textContent = '0:00';
+    this.updatePlayButton();
+    
+    // Esconder player
+    this.hidePlayer();
+  }
+  
   openInvestmentModal() {
+    if (!this.isLoggedIn) {
+      showNotification('Faça login para investir', 'warning');
+      return;
+    }
+    
     if (!this.currentTrack) {
       showNotification('Selecione uma música primeiro', 'warning');
       return;
@@ -809,6 +942,8 @@ class MusicPlayer {
   }
   
   openInvestmentModalForTrack(track) {
+    if (!this.isLoggedIn) return;
+    
     // Usar o marketplace manager para abrir modal de investimento
     if (window.marketplaceManager) {
       window.marketplaceManager.showBuyModal(
@@ -867,7 +1002,36 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
     
-    console.log('✅ Spotify Player inicializado');
+    // Configurar listener para eventos de login/logout
+    if (window.authManager) {
+      // Monitorar login
+      const originalLogin = window.authManager.login;
+      window.authManager.login = async function(...args) {
+        const result = await originalLogin.apply(this, args);
+        if (result.success && window.musicPlayer) {
+          window.musicPlayer.showPlayerAfterLogin();
+        }
+        return result;
+      };
+      
+      // Monitorar logout
+      const originalLogout = window.authManager.logout;
+      window.authManager.logout = function() {
+        if (window.musicPlayer) {
+          window.musicPlayer.handleLogout();
+        }
+        return originalLogout.apply(this, arguments);
+      };
+    }
+    
+    // Evento customizado para login
+    document.addEventListener('auth-login-success', function() {
+      if (window.musicPlayer) {
+        window.musicPlayer.showPlayerAfterLogin();
+      }
+    });
+    
+    console.log('✅ Player inicializado (visível apenas após login)');
   }, 1000);
 });
 
