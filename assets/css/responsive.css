@@ -1,0 +1,56 @@
+@media (max-width: 768px) {
+    .auth-card { 
+        padding: 1.5rem; 
+    }
+    
+    .music-grid { 
+        grid-template-columns: 1fr; 
+    }
+    
+    .artist-stats { 
+        grid-template-columns: 1fr; 
+    }
+    
+    .section { 
+        padding: 1rem; 
+    }
+    
+    .player-bar.expanded {
+        padding-top: env(safe-area-inset-top);
+        height: calc(100vh - env(safe-area-inset-bottom));
+    }
+    
+    .control-btn, .btn-miv {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .player-controls {
+        gap: 1rem;
+    }
+    
+    .play-btn {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .player-info {
+        flex-wrap: wrap;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 0.5rem;
+    }
+}
