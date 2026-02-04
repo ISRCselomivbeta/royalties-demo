@@ -2,7 +2,7 @@
    SELO MIV – FRONTEND CORE
 ===================================== */
 
-const API = "COLE_AQUI_URL_DO_WEB_APP";
+const API = "https://script.google.com/macros/s/AKfycbz7XzdM3MKAOxDXGjxkHG17lUVrKpcmFgOT5VE-UiK4nWVTv35T0gGPszIm7GMa5Gk/exec";
 let SESSION = null;
 let PLAY_TIMER = null;
 
