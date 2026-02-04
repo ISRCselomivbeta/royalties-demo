@@ -1,7 +1,7 @@
 /*********************************
  * CONFIGURAÇÃO
  *********************************/
-const MIV_API_URL = 'COLE_AQUI_A_URL_DO_WEB_APP_GOOGLE';
+const MIV_API_URL = 'https://script.google.com/macros/s/AKfycbzF31lrSN6b2V6AT38VU2qzsRhOO8yiXIkdhknMqm6GVD5v4UgTmwDceKT5MqMe8nA/exec';
 
 /*********************************
  * ESTADO GLOBAL
