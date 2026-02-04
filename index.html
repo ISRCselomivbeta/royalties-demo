@@ -1911,14 +1911,16 @@
 <script>
 // ========== CONFIGURAÇÃO AVANÇADA ==========
 const CONFIG = {
-    API_URL: 'https://script.google.com/macros/s/AKfycbySQkZ-rsXuK_QJGc3CL4Jw_CURuDm0UDMAXyJX-UUbK_EoUNCXsqWuRV9YRvrHx1M/exec',
+  const CONFIG = {
+    API_URL: 'https://script.google.com/macros/s/AKfycbySQkZ-rsXuK_QJGc3CL4Jw_CURuDm0UDMAXyJX-UUbK_EoUNCXsqWuRV9YRvrHx1M/exec
+        ', // <-- COLE AQUI SUA URL
     LOCAL_STORAGE_KEY: 'selo_miv_data_v5',
     VERSION: '5.0.0',
     AUTO_REFRESH_INTERVAL: 30000,
     PLAYER_INACTIVITY_TIMEOUT: 5000,
     MERCADO_PAGO_LINK: 'https://link.mercadopago.com.br/selomiv',
-    MERCADO_PAGO_SIGNATURE: '4a52818018645db0354938f420c619b9f712c5f278df18458ec0b44e6c8ad311',
-    SPREADSHEET_ID: '1CwF9hf-lsjYkol-V7r3WOT5ld3dQFqKRTQ8nHcV45Wo'
+    MERCADO_PAGO_SIGNATURE: 'selomiv_secure_2024', // <-- DEVE SER IGUAL AO DO APPS SCRIPT
+    SPREADSHEET_ID: 'SUA_PLANILHA_ID_AQUI' // <-- COLE AQUI SEU ID
 };
 
 // ========== ESTADO GLOBAL ==========
