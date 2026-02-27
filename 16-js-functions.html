@@ -1,0 +1,800 @@
+<!-- ============================================ -->
+<!-- JAVASCRIPT FUNÇÕES - PARTE 16/16 -->
+<!-- ============================================ -->
+<script>
+    // ========== 4. FUNÇÕES DE API ==========
+    async function callAPI(action, data = {}) {
+        return new Promise((resolve) => {
+            try {
+                // Admin Master
+                if (action === 'login' && data.email === 'selomiv@gmail.com' && data.password === 'selomiv123') {
+                    resolve({
+                        success: true,
+                        data: {
+                            id: 'admin_master',
+                            nome: 'Administrador',
+                            email: data.email,
+                            tipo: 'admin',
+                            saldo: 1000000,
+                            favorite_music_ids: []
+                        }
+                    });
+                    return;
+                }
+
+                // JSONP
+                const callbackName = 'jsonp_' + action + '_' + Date.now();
+                let url = CONFIG.API_URL + '?callback=' + encodeURIComponent(callbackName);
+                url += '&action=' + encodeURIComponent(action);
+                url += '&_=' + Date.now();
+                
+                Object.keys(data).forEach(key => {
+                    if (data[key] !== undefined && data[key] !== null) {
+                        url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
+                    }
+                });
+
+                window[callbackName] = function(response) {
+                    delete window[callbackName];
+                    if (document.head.contains(script)) document.head.removeChild(script);
+                    resolve(response);
+                };
+
+                const script = document.createElement('script');
+                script.src = url;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    if (document.head.contains(script)) document.head.removeChild(script);
+                    resolve(getFallbackData(action, data));
+                };
+                document.head.appendChild(script);
+                
+                setTimeout(() => {
+                    if (window[callbackName]) {
+                        delete window[callbackName];
+                        if (document.head.contains(script)) document.head.removeChild(script);
+                        resolve(getFallbackData(action, data));
+                    }
+                }, 10000);
+            } catch (error) {
+                console.error('API Error:', error);
+                resolve(getFallbackData(action, data));
+            }
+        });
+    }
+
+    function getFallbackData(action, data) {
+        if (action === 'get_musicas') {
+            return {
+                success: true,
+                data: [
+                    {
+                        id: '1',
+                        titulo: 'Bohemian Rhapsody',
+                        artista: 'Queen',
+                        valor_acao: 25.50,
+                        percentual_disponivel: 30,
+                        acoes_vendidas: 150
+                    }
+                ]
+            };
+        }
+        return { success: true, data: [] };
+    }
+
+    // ========== 5. FUNÇÕES DE AUTENTICAÇÃO ==========
+    async function handleLogin() {
+        const email = document.getElementById('loginEmailField')?.value?.trim();
+        const password = document.getElementById('loginPasswordField')?.value?.trim();
+        
+        if (!email || !password) {
+            showToast('Preencha todos os campos', 'error');
+            return;
+        }
+
+        showLoading('Autenticando...');
+        const result = await callAPI('login', { email, password });
+        
+        if (result?.success && result?.data) {
+            state.currentUser = result.data;
+            state.userBalance = result.data.saldo || 0;
+            state.favoriteMusicIds = result.data.favorite_music_ids || [];
+            localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
+            initializeApp();
+        } else {
+            showToast(result?.message || 'Credenciais inválidas', 'error');
+        }
+        hideLoading();
+    }
+
+    async function handleRegister() {
+        const name = document.getElementById('registerNameField')?.value?.trim();
+        const email = document.getElementById('registerEmailField')?.value?.trim();
+        const password = document.getElementById('registerPasswordField')?.value?.trim();
+        const type = document.getElementById('registerTypeField')?.value;
+
+        if (!name || !email || !password || !type) {
+            showToast('Preencha todos os campos', 'error');
+            return;
+        }
+
+        showLoading('Criando conta...');
+        const result = await callAPI('register', { nome: name, email, senha: password, tipo: type });
+        
+        if (result?.success) {
+            showToast('Cadastro solicitado!', 'success');
+            showLoginForm();
+        } else {
+            showToast(result?.message || 'Erro ao cadastrar', 'error');
+        }
+        hideLoading();
+    }
+
+    function logout() {
+        if (confirm('Deseja realmente sair?')) {
+            state.currentUser = null;
+            localStorage.removeItem('miv_user');
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('authScreen').style.display = 'flex';
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        }
+    }
+
+    // ========== 6. INICIALIZAÇÃO ==========
+    function initializeApp() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        updateUserInterface();
+        loadAllData();
+        loadYouTubeAPI();
+    }
+
+    function updateUserInterface() {
+        const badge = document.getElementById('userBadge');
+        if (badge && state.currentUser) {
+            badge.textContent = state.currentUser.tipo || 'Ouvinte';
+        }
+        document.getElementById('currentBalance').textContent = formatCurrency(state.userBalance);
+    }
+
+    // ========== 7. CARREGAMENTO DE DADOS ==========
+    async function loadAllData() {
+        showLoading('Carregando dados...');
+        await Promise.all([
+            loadMarketplace(),
+            loadExternalMarketplace(),
+            loadPortfolio(),
+            loadLedger()
+        ]);
+        hideLoading();
+    }
+
+    async function loadMarketplace() {
+        const result = await callAPI('get_musicas');
+        if (result?.success) state.playlist = result.data || [];
+        renderMarketplace();
+    }
+
+    async function loadExternalMarketplace() {
+        const result = await callAPI('get_external_musicas');
+        if (result?.success) state.externalPlaylist = result.data || [];
+        renderExternalMarketplace();
+    }
+
+    async function loadPortfolio() {
+        if (!state.currentUser) return;
+        const result = await callAPI('get_carteira', { user_id: state.currentUser.id });
+        if (result?.success) state.portfolioAssets = result.data || [];
+        renderPortfolio();
+    }
+
+    async function loadLedger() {
+        if (!state.currentUser) return;
+        const result = await callAPI('get_extrato', { user_id: state.currentUser.id });
+        if (result?.success) state.ledgerData = result.data || [];
+        renderLedger();
+    }
+
+    // ========== 8. FUNÇÕES DE RENDERIZAÇÃO ==========
+    function renderMarketplace() {
+        const container = document.getElementById('marketplaceContent');
+        if (!container) return;
+        
+        if (!state.playlist.length) {
+            container.innerHTML = '<div class="empty-state-actionable">Nenhuma música disponível</div>';
+            return;
+        }
+        
+        container.innerHTML = state.playlist.map((track, index) => `
+            <div class="music-card" onclick="playTrack(${index})">
+                <img src="${PLACEHOLDERS.MIV_300}" class="music-cover" alt="${track.titulo}">
+                <div class="music-info">
+                    <h6 class="music-title">${track.titulo}</h6>
+                    <p class="music-artist">${track.artista}</p>
+                    <div class="music-meta">
+                        <span class="music-price">${formatCurrency(track.valor_acao)}</span>
+                        <span class="music-percent">${track.percentual_disponivel}%</span>
+                    </div>
+                    <button class="btn-miv btn-sm w-100" onclick="event.stopPropagation(); openInvestModal(${index})">
+                        Investir
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderExternalMarketplace() {
+        const container = document.getElementById('externalContent');
+        if (!container) return;
+        
+        if (!state.externalPlaylist.length) {
+            container.innerHTML = '<div class="empty-state-actionable">Nenhuma música externa</div>';
+            return;
+        }
+        
+        container.innerHTML = state.externalPlaylist.map((track, index) => `
+            <div class="music-card" onclick="playExternalTrack(${index})">
+                <div class="music-info">
+                    <h6 class="music-title">${track.titulo}</h6>
+                    <p class="music-artist">${track.artista}</p>
+                    <button class="btn btn-warning btn-sm w-100" onclick="event.stopPropagation(); openInvestExternalModal(${index})">
+                        Investir
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function renderPortfolio() {
+        const container = document.getElementById('portfolioContent');
+        if (!container) return;
+        
+        if (!state.portfolioAssets.length) {
+            container.innerHTML = '<div class="empty-state-actionable">Nenhum investimento</div>';
+            return;
+        }
+        
+        // Cálculo do valor total
+        const totalValue = state.portfolioAssets.reduce((sum, a) => sum + (a.valor_total || 0), 0);
+        document.getElementById('portfolioValue').textContent = formatCurrency(totalValue);
+        document.getElementById('assetsCount').textContent = `${state.portfolioAssets.length} ativos`;
+    }
+
+    function renderLedger() {
+        const container = document.getElementById('ledgerContent');
+        if (!container) return;
+        
+        if (!state.ledgerData.length) {
+            container.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma transação</td></tr>';
+            return;
+        }
+    }
+
+    // ========== 9. FUNÇÕES DO PLAYER ==========
+    function playTrack(index) {
+        if (index < 0 || index >= state.playlist.length) return;
+        
+        state.currentTrackIndex = index;
+        const track = state.playlist[index];
+        
+        document.getElementById('playerSpotify').style.display = 'flex';
+        document.getElementById('playerTitle').textContent = track.titulo;
+        document.getElementById('playerArtist').textContent = track.artista;
+        
+        if (track.link_youtube) {
+            const videoId = extractYouTubeId(track.link_youtube);
+            if (videoId) initializeYouTubePlayer(videoId);
+        }
+        
+        state.isPlaying = true;
+        updatePlayerIcons();
+    }
+
+    function playExternalTrack(index) {
+        if (index < 0 || index >= state.externalPlaylist.length) return;
+        state.currentTrackIndex = index + 1000;
+        const track = state.externalPlaylist[index];
+        
+        document.getElementById('playerSpotify').style.display = 'flex';
+        document.getElementById('playerTitle').textContent = track.titulo;
+        document.getElementById('playerArtist').textContent = track.artista;
+    }
+
+    function togglePlay() {
+        if (!state.youtubePlayer) {
+            if (state.currentTrackIndex >= 0) {
+                if (state.currentTrackIndex >= 1000) {
+                    playExternalTrack(state.currentTrackIndex - 1000);
+                } else {
+                    playTrack(state.currentTrackIndex);
+                }
+            }
+            return;
+        }
+        
+        if (state.isPlaying) {
+            state.youtubePlayer.pauseVideo();
+        } else {
+            state.youtubePlayer.playVideo();
+        }
+    }
+
+    function playNext() {
+        if (!state.playlist.length) return;
+        let next = state.isShuffle ? 
+            Math.floor(Math.random() * state.playlist.length) : 
+            (state.currentTrackIndex + 1) % state.playlist.length;
+        playTrack(next);
+    }
+
+    function playPrevious() {
+        if (!state.playlist.length) return;
+        let prev = state.isShuffle ? 
+            Math.floor(Math.random() * state.playlist.length) : 
+            (state.currentTrackIndex > 0 ? state.currentTrackIndex - 1 : state.playlist.length - 1);
+        playTrack(prev);
+    }
+
+    function updatePlayerIcons() {
+        const icon = document.getElementById('playPauseIcon');
+        if (icon) icon.className = state.isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+    }
+
+    function toggleShuffle() {
+        state.isShuffle = !state.isShuffle;
+        document.getElementById('shuffleBtn')?.classList.toggle('active', state.isShuffle);
+    }
+
+    function toggleRepeat() {
+        state.isRepeat = !state.isRepeat;
+        document.getElementById('repeatBtn')?.classList.toggle('active', state.isRepeat);
+    }
+
+    function toggleMute() {
+        if (state.currentVolume > 0) {
+            state.lastVolume = state.currentVolume;
+            setVolume(0);
+        } else {
+            setVolume(state.lastVolume || 80);
+        }
+    }
+
+    function setVolume(value) {
+        state.currentVolume = Math.max(0, Math.min(100, parseInt(value)));
+        document.getElementById('volumeSliderBar').style.width = `${state.currentVolume}%`;
+        
+        const icon = document.getElementById('volumeIcon');
+        if (state.currentVolume === 0) {
+            icon.className = 'bi bi-volume-mute';
+        } else if (state.currentVolume < 50) {
+            icon.className = 'bi bi-volume-down';
+        } else {
+            icon.className = 'bi bi-volume-up';
+        }
+        
+        if (state.youtubePlayer?.setVolume) {
+            state.youtubePlayer.setVolume(state.currentVolume);
+        }
+    }
+
+    function handleVolumeClick(e) {
+        const slider = document.getElementById('volumeSlider');
+        if (!slider) return;
+        const rect = slider.getBoundingClientRect();
+        const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        setVolume(Math.round(percent * 100));
+    }
+
+    function handleProgressClick(e) {
+        if (!state.youtubePlayer?.seekTo) return;
+        const rect = document.getElementById('progressContainer').getBoundingClientRect();
+        const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+        const duration = state.youtubePlayer.getDuration();
+        state.youtubePlayer.seekTo(duration * percent, true);
+    }
+
+    function togglePlayerExpansion() {
+        const el = document.getElementById('playerExpanded');
+        el.classList.toggle('show');
+        document.getElementById('expandIcon').className = el.classList.contains('show') ? 
+            'bi bi-arrows-angle-contract' : 'bi bi-arrows-angle-expand';
+        document.body.style.overflow = el.classList.contains('show') ? 'hidden' : 'auto';
+    }
+
+    // ========== 10. FUNÇÕES DO YOUTUBE ==========
+    function loadYouTubeAPI() {
+        if (window.YT && YT.Player) {
+            state.youtubeAPILoaded = true;
+            return;
+        }
+        
+        window.onYouTubeIframeAPIReady = () => {
+            state.youtubeAPILoaded = true;
+        };
+        
+        const tag = document.createElement('script');
+        tag.src = 'https://www.youtube.com/iframe_api';
+        document.head.appendChild(tag);
+    }
+
+    function extractYouTubeId(url) {
+        if (!url || typeof url !== 'string') return null;
+        const patterns = [
+            /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/,
+            /youtube\.com\/embed\/([^&\n?#]+)/
+        ];
+        
+        for (let pattern of patterns) {
+            const match = url.match(pattern);
+            if (match) return match[1];
+        }
+        return null;
+    }
+
+    function initializeYouTubePlayer(videoId) {
+        const playerElement = document.getElementById('youtubePlayerExpanded');
+        if (!playerElement) return;
+        
+        playerElement.innerHTML = '';
+        const playerDiv = document.createElement('div');
+        playerDiv.id = 'youtube-player-' + Date.now();
+        playerElement.appendChild(playerDiv);
+        
+        if (typeof YT === 'undefined' || !YT.Player) {
+            loadYouTubeAPI();
+            setTimeout(() => createYouTubePlayer(playerDiv.id, videoId), 1000);
+        } else {
+            createYouTubePlayer(playerDiv.id, videoId);
+        }
+    }
+
+    function createYouTubePlayer(elementId, videoId) {
+        try {
+            state.youtubePlayer = new YT.Player(elementId, {
+                width: '100%',
+                height: '100%',
+                videoId: videoId,
+                playerVars: {
+                    autoplay: 1,
+                    controls: 1,
+                    modestbranding: 1
+                },
+                onReady: (event) => {
+                    event.target.setVolume(state.currentVolume);
+                    state.isPlaying = true;
+                    updatePlayerIcons();
+                    setInterval(updatePlayerProgress, 1000);
+                },
+                onStateChange: (event) => {
+                    if (event.data === YT.PlayerState.PLAYING) state.isPlaying = true;
+                    if (event.data === YT.PlayerState.PAUSED) state.isPlaying = false;
+                    if (event.data === YT.PlayerState.ENDED) {
+                        state.isPlaying = false;
+                        if (state.isRepeat) {
+                            event.target.playVideo();
+                        } else {
+                            playNext();
+                        }
+                    }
+                    updatePlayerIcons();
+                }
+            });
+        } catch (error) {
+            console.error('Erro ao criar player:', error);
+        }
+    }
+
+    function updatePlayerProgress() {
+        if (!state.youtubePlayer?.getCurrentTime) return;
+        try {
+            const current = state.youtubePlayer.getCurrentTime();
+            const duration = state.youtubePlayer.getDuration();
+            if (duration > 0) {
+                const percent = (current / duration) * 100;
+                document.getElementById('playerProgressBar').style.width = `${percent}%`;
+                document.getElementById('currentTimeDisplay').textContent = formatTime(current);
+                document.getElementById('totalTimeDisplay').textContent = formatTime(duration);
+            }
+        } catch (e) {}
+    }
+
+    // ========== 11. FUNÇÕES DE INVESTIMENTO ==========
+    function openInvestModal(trackIndex) {
+        if (trackIndex < 0 || trackIndex >= state.playlist.length) return;
+        state.currentInvestTrack = state.playlist[trackIndex];
+        document.getElementById('investTrackTitle').textContent = state.currentInvestTrack.titulo;
+        document.getElementById('investTrackArtist').textContent = state.currentInvestTrack.artista;
+        document.getElementById('investUnitPriceDisplay').textContent = formatCurrency(state.currentInvestTrack.valor_acao);
+        document.getElementById('investAvailableBalanceDisplay').textContent = formatCurrency(state.userBalance);
+        document.getElementById('investQuantityField').value = 1;
+        showModal('investModal');
+    }
+
+    function openInvestExternalModal(trackIndex) {
+        if (trackIndex < 0 || trackIndex >= state.externalPlaylist.length) return;
+        state.currentExternalTrack = state.externalPlaylist[trackIndex];
+        document.getElementById('investExternalTitleDisplay').textContent = state.currentExternalTrack.titulo;
+        document.getElementById('investExternalArtistDisplay').textContent = state.currentExternalTrack.artista;
+        document.getElementById('investExternalQuantityField').value = 1;
+        showModal('investExternalModal');
+    }
+
+    function updateInvestmentTotal() {
+        if (!state.currentInvestTrack) return;
+        const qty = parseInt(document.getElementById('investQuantityField').value) || 1;
+        const total = qty * (state.currentInvestTrack.valor_acao || 0);
+        document.getElementById('confirmInvestBtn').disabled = total > state.userBalance;
+    }
+
+    async function confirmInvestment() {
+        if (!state.currentUser || !state.currentInvestTrack) return;
+        const qty = parseInt(document.getElementById('investQuantityField').value) || 1;
+        const total = qty * (state.currentInvestTrack.valor_acao || 0);
+        
+        if (total > state.userBalance) {
+            showToast('Saldo insuficiente', 'error');
+            return;
+        }
+        
+        showLoading('Processando...');
+        await callAPI('buy', {
+            music_id: state.currentInvestTrack.id,
+            quantidade: qty,
+            valor_total: total
+        });
+        
+        state.userBalance -= total;
+        updateUserInterface();
+        closeModal('investModal');
+        showToast('Investimento realizado!', 'success');
+        await loadPortfolio();
+        hideLoading();
+    }
+
+    async function confirmExternalInvestment() {
+        if (!state.currentUser || !state.currentExternalTrack) return;
+        const qty = parseInt(document.getElementById('investExternalQuantityField').value) || 1;
+        const total = qty * (state.currentExternalTrack.valor_acao || 0);
+        
+        if (total > state.userBalance) {
+            showToast('Saldo insuficiente', 'error');
+            return;
+        }
+        
+        showLoading('Processando...');
+        await callAPI('buy_external', {
+            external_id: state.currentExternalTrack.id,
+            quantidade: qty,
+            valor_total: total
+        });
+        
+        state.userBalance -= total;
+        updateUserInterface();
+        closeModal('investExternalModal');
+        showToast('Investimento externo realizado!', 'success');
+        hideLoading();
+    }
+
+    // ========== 12. FUNÇÕES DE CADASTRO ==========
+    async function registerMusic() {
+        const title = document.getElementById('musicTitleField').value.trim();
+        const genre = document.getElementById('musicGenreField').value;
+        const youtube = document.getElementById('musicYoutubeField').value.trim();
+        const price = parseFloat(document.getElementById('musicPriceField').value);
+        const percent = parseFloat(document.getElementById('musicPercentField').value);
+        const terms = document.getElementById('musicTermsField').checked;
+        
+        if (!title || !genre || !youtube || !price || !percent || !terms) {
+            showToast('Preencha todos os campos', 'error');
+            return;
+        }
+        
+        showLoading('Cadastrando...');
+        await callAPI('upload_music', {
+            titulo: title,
+            genero: genre,
+            link_youtube: youtube,
+            valor_acao: price,
+            percentual_disponivel: percent
+        });
+        
+        closeModal('addMusicModal');
+        showToast('Música cadastrada!', 'success');
+        await loadMarketplace();
+        hideLoading();
+    }
+
+    async function submitExternalMusic() {
+        const youtube = document.getElementById('externalYoutubeLinkField').value.trim();
+        const title = document.getElementById('externalTitleField').value.trim();
+        const artist = document.getElementById('externalArtistField').value.trim();
+        const price = parseFloat(document.getElementById('externalPriceField').value);
+        
+        if (!youtube || !title || !artist || !price) {
+            showToast('Preencha todos os campos', 'error');
+            return;
+        }
+        
+        showLoading('Enviando...');
+        await callAPI('suggest_external_music', {
+            link_youtube: youtube,
+            titulo: title,
+            artista: artist,
+            valor_acao: price
+        });
+        
+        closeModal('addExternalMusicModal');
+        showToast('Música sugerida!', 'success');
+        await loadExternalMarketplace();
+        hideLoading();
+    }
+
+    async function createPlaylist() {
+        const name = document.getElementById('playlistNameField').value.trim();
+        if (!name) {
+            showToast('Digite um nome', 'error');
+            return;
+        }
+        
+        showLoading('Criando...');
+        await callAPI('create_playlist', {
+            nome: name,
+            publica: document.getElementById('playlistPublicField').checked
+        });
+        
+        closeModal('createPlaylistModal');
+        showToast('Playlist criada!', 'success');
+        hideLoading();
+    }
+
+    // ========== 13. FUNÇÕES DE SALDO ==========
+    function openAddBalanceModal() {
+        document.getElementById('balanceAmountField').value = 100;
+        showModal('addBalanceModal');
+    }
+
+    function processBalanceAdd() {
+        const amount = parseFloat(document.getElementById('balanceAmountField').value) || 0;
+        if (amount < 10) {
+            showToast('Valor mínimo: R$ 10', 'error');
+            return;
+        }
+        state.userBalance += amount;
+        updateUserInterface();
+        closeModal('addBalanceModal');
+        showToast(`Saldo de ${formatCurrency(amount)} adicionado!`, 'success');
+        window.open(CONFIG.MERCADO_PAGO_LINK, '_blank');
+    }
+
+    function openWithdrawalModal() {
+        if (state.userBalance < 10) {
+            showToast('Saldo mínimo para saque: R$ 10', 'warning');
+            return;
+        }
+        document.getElementById('withdrawalAmountField').value = state.userBalance;
+        showModal('withdrawalModal');
+    }
+
+    async function requestWithdrawal() {
+        const amount = parseFloat(document.getElementById('withdrawalAmountField').value) || 0;
+        const method = document.getElementById('withdrawalMethodField').value;
+        const details = document.getElementById('bankDetailsField').value.trim();
+        
+        if (amount < 10 || amount > state.userBalance || !method || !details) {
+            showToast('Dados inválidos', 'error');
+            return;
+        }
+        
+        showLoading('Solicitando...');
+        await callAPI('request_withdrawal', {
+            valor: amount,
+            metodo: method,
+            dados_bancarios: details
+        });
+        
+        state.userBalance -= amount;
+        updateUserInterface();
+        closeModal('withdrawalModal');
+        showToast('Saque solicitado!', 'success');
+        hideLoading();
+    }
+
+    // ========== 14. FUNÇÕES DE NAVEGAÇÃO ==========
+    function toggleSidebar() {
+        document.getElementById('sidebar')?.classList.toggle('open');
+    }
+
+    function changeSection(section) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(section + 'Section')?.classList.add('active');
+        toggleSidebar();
+    }
+
+    function showRegisterForm() {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    }
+
+    function showLoginForm() {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    }
+
+    function toggleArtistField() {
+        const field = document.getElementById('artistLinkField');
+        if (field) {
+            field.style.display = document.getElementById('registerTypeField').value === 'artista' ? 'block' : 'none';
+        }
+    }
+
+    // ========== 15. INICIALIZAÇÃO DO DOM ==========
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('SELO MIV v' + CONFIG.VERSION);
+        
+        const stored = localStorage.getItem('miv_user');
+        if (stored) {
+            try {
+                state.currentUser = JSON.parse(stored);
+                state.userBalance = state.currentUser.saldo || 0;
+                state.favoriteMusicIds = state.currentUser.favorite_music_ids || [];
+                initializeApp();
+            } catch (e) {
+                localStorage.removeItem('miv_user');
+                hideLoading();
+            }
+        } else {
+            hideLoading();
+        }
+    });
+
+    // ========== 16. EXPOSIÇÃO GLOBAL ==========
+    window.handleLogin = handleLogin;
+    window.handleRegister = handleRegister;
+    window.logout = logout;
+    window.toggleSidebar = toggleSidebar;
+    window.changeSection = changeSection;
+    window.showRegisterForm = showRegisterForm;
+    window.showLoginForm = showLoginForm;
+    window.toggleArtistField = toggleArtistField;
+    
+    // Player
+    window.playTrack = playTrack;
+    window.playExternalTrack = playExternalTrack;
+    window.togglePlay = togglePlay;
+    window.playNext = playNext;
+    window.playPrevious = playPrevious;
+    window.toggleShuffle = toggleShuffle;
+    window.toggleRepeat = toggleRepeat;
+    window.toggleMute = toggleMute;
+    window.handleVolumeClick = handleVolumeClick;
+    window.handleProgressClick = handleProgressClick;
+    window.togglePlayerExpansion = togglePlayerExpansion;
+    
+    // Modais
+    window.openInvestModal = openInvestModal;
+    window.openInvestExternalModal = openInvestExternalModal;
+    window.openAddBalanceModal = openAddBalanceModal;
+    window.openWithdrawalModal = openWithdrawalModal;
+    window.openCreatePlaylistModal = () => showModal('createPlaylistModal');
+    window.openAddExternalMusicModal = () => showModal('addExternalMusicModal');
+    window.openAddMusicModal = () => showModal('addMusicModal');
+    window.closeModal = closeModal;
+    window.confirmInvestment = confirmInvestment;
+    window.confirmExternalInvestment = confirmExternalInvestment;
+    window.submitExternalMusic = submitExternalMusic;
+    window.registerMusic = registerMusic;
+    window.createPlaylist = createPlaylist;
+    window.requestWithdrawal = requestWithdrawal;
+    window.processBalanceAdd = processBalanceAdd;
+    
+    // Data loading
+    window.loadMarketplace = loadMarketplace;
+    window.loadExternalMarketplace = loadExternalMarketplace;
+    window.loadPortfolio = loadPortfolio;
+    window.loadLedger = loadLedger;
+    window.updateInvestmentTotal = updateInvestmentTotal;
+    window.updateExternalInvestmentTotal = updateExternalInvestmentTotal;
+</script>
+</body>
+</html>
