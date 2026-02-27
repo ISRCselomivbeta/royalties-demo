@@ -1,0 +1,236 @@
+<!-- ============================================ -->
+<!-- HTML APLICAÇÃO PRINCIPAL - PARTE 13/16 -->
+<!-- ============================================ -->
+    <!-- APLICAÇÃO PRINCIPAL -->
+    <div id="mainApp" class="main-app">
+        
+        <!-- SIDEBAR -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h4 class="text-white mb-0">🎵 MIV PRO</h4>
+                <button class="sidebar-close" onclick="toggleSidebar()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" onclick="changeSection('marketplace')">
+                        <i class="bi bi-house"></i> <span>Marketplace</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('portfolio')">
+                        <i class="bi bi-briefcase"></i> <span>Portfólio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('ledger')">
+                        <i class="bi bi-receipt"></i> <span>Extrato</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('investments')">
+                        <i class="bi bi-graph-up-arrow"></i> <span>Melhores Investimentos</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('playlists')">
+                        <i class="bi bi-music-note-list"></i> <span>Playlists</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="changeSection('external')">
+                        <i class="bi bi-globe text-warning"></i> <span class="text-warning">Bolsa Externa</span>
+                    </a>
+                </li>
+                <li class="nav-item" id="artistNavItem" style="display: none;">
+                    <a href="#" class="nav-link" onclick="changeSection('artist')">
+                        <i class="bi bi-mic"></i> <span>Painel Artista</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="openAddBalanceModal()">
+                        <i class="bi bi-plus-circle text-success"></i> <span class="text-success">Adicionar Saldo</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" onclick="openWithdrawalModal()">
+                        <i class="bi bi-cash-coin text-info"></i> <span class="text-info">Solicitar Saque</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link text-danger" onclick="logout()">
+                        <i class="bi bi-box-arrow-right"></i> <span>Sair</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- HEADER PRINCIPAL -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="d-flex align-items-center">
+                    <button class="btn text-white me-3" onclick="toggleSidebar()">
+                        <i class="bi bi-list fs-3"></i>
+                    </button>
+                    <div class="saldo-display">
+                        <h6>CRÉDITO DISPONÍVEL</h6>
+                        <h4 id="currentBalance">R$ 0,00</h4>
+                    </div>
+                </div>
+                <div class="user-badge" id="userBadge">Ouvinte</div>
+            </div>
+        </header>
+
+        <!-- CONTEÚDO PRINCIPAL - SEÇÕES -->
+        <main>
+            <!-- Marketplace -->
+            <section id="marketplaceSection" class="section active">
+                <div class="section-header">
+                    <h2 class="section-title">🎵 Marketplace</h2>
+                    <div>
+                        <small class="text-muted">Taxa 0% em compras</small>
+                        <button class="btn btn-sm btn-outline-success ms-2" onclick="loadMarketplace(true)">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="marketplaceContent" class="music-grid"></div>
+            </section>
+
+            <!-- Portfólio -->
+            <section id="portfolioSection" class="section">
+                <div class="portfolio-summary">
+                    <h6 class="text-muted">VALOR TOTAL DA CARTEIRA</h6>
+                    <div class="portfolio-value" id="portfolioValue">R$ 0,00</div>
+                    <small class="text-muted" id="portfolioUpdateTime">Atualizado em tempo real</small>
+                </div>
+                <div class="section-header">
+                    <h2 class="section-title">📊 Meus Ativos</h2>
+                    <span class="badge bg-secondary" id="assetsCount">0 ativos</span>
+                </div>
+                <div id="portfolioContent"></div>
+            </section>
+
+            <!-- Extrato -->
+            <section id="ledgerSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Histórico de Transações</h2>
+                    <div>
+                        <button class="btn btn-sm btn-outline-success" onclick="loadLedger(true)">
+                            <i class="bi bi-arrow-clockwise"></i> Atualizar
+                        </button>
+                        <button class="btn btn-sm btn-outline-info ms-2" onclick="exportExtrato()">
+                            <i class="bi bi-download"></i> Exportar
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="ledger-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Descrição</th>
+                                <th class="text-end">Valor</th>
+                                <th>Contrato</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerContent"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Melhores Investimentos -->
+            <section id="investmentsSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📈 Melhores Investimentos</h2>
+                    <div>
+                        <small class="text-muted">Baseado em algoritmo inteligente</small>
+                        <button class="btn btn-sm btn-outline-success ms-2" onclick="loadTopInvestments(true)">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="alert alert-info bg-dark border-info mb-3">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    Nosso algoritmo analisa vendas, disponibilidade e potencial de retorno para indicar os melhores investimentos.
+                </div>
+                <div id="investmentsContent" class="music-grid"></div>
+            </section>
+
+            <!-- Playlists -->
+            <section id="playlistsSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🎶 Minhas Playlists</h2>
+                    <div>
+                        <button class="btn-miv btn-sm" onclick="openCreatePlaylistModal()">
+                            <i class="bi bi-plus-circle"></i> Nova Playlist
+                        </button>
+                    </div>
+                </div>
+                <div id="playlistsContent"></div>
+                <div class="mt-4">
+                    <h5 class="section-title">⭐ Músicas Favoritas</h5>
+                    <div id="favoritesContent" class="music-grid"></div>
+                </div>
+            </section>
+
+            <!-- Bolsa Externa -->
+            <section id="externalSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🌐 Bolsa Externa</h2>
+                    <div>
+                        <button class="btn-miv btn-sm" onclick="openAddExternalMusicModal()">
+                            <i class="bi bi-plus-circle"></i> Sugerir Música
+                        </button>
+                        <button class="btn btn-sm btn-outline-success ms-2" onclick="loadExternalMarketplace(true)">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="alert alert-warning bg-dark border-warning mb-3">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Investimento Antecipado:</strong> Músicas que ainda não são do SELO MIV.
+                </div>
+                <div id="externalContent" class="music-grid"></div>
+            </section>
+
+            <!-- Painel Artista -->
+            <section id="artistSection" class="section">
+                <div class="section-header">
+                    <h2 class="section-title">🎤 Painel Artista</h2>
+                    <div>
+                        <button class="btn-miv btn-sm" onclick="openAddMusicModal()">
+                            <i class="bi bi-plus-circle"></i> Nova Música
+                        </button>
+                        <button class="btn btn-sm btn-outline-info ms-2" onclick="loadArtistData(true)">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="artist-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-music-note-beamed"></i></div>
+                        <div class="stat-value" id="artistMusicCount">0</div>
+                        <div class="stat-label">Músicas Cadastradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-cash-coin"></i></div>
+                        <div class="stat-value" id="artistRoyalties">R$ 0,00</div>
+                        <div class="stat-label">Royalties Acumulados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-bar-chart"></i></div>
+                        <div class="stat-value" id="artistSharesSold">0</div>
+                        <div class="stat-label">Ações Vendidas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="bi bi-currency-exchange"></i></div>
+                        <div class="stat-value" id="artistMonthlyEarnings">R$ 0,00</div>
+                        <div class="stat-label">Receita Mensal</div>
+                    </div>
+                </div>
+                <h5 class="mb-3">Minhas Músicas</h5>
+                <div id="artistMusicContent" class="music-grid"></div>
+            </section>
+        </main>
