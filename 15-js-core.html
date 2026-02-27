@@ -1,0 +1,99 @@
+<!-- ============================================ -->
+<!-- JAVASCRIPT CORE - PARTE 15/16 -->
+<!-- ============================================ -->
+<script>
+    // ========== 1. CONFIGURAÇÕES E CONSTANTES ==========
+    const CONFIG = {
+        API_URL: 'https://script.google.com/macros/s/AKfycbwgjor-tLLzVrnJGNHOifL1O2sRBhysKJ3IbVJy_AHgtNqjk-6hazH8xuO6OaDXF_s/exec',
+        VERSION: '5.1.0',
+        MERCADO_PAGO_LINK: 'https://link.mercadopago.com.br/selomiv'
+    };
+
+    const PLACEHOLDERS = {
+        MIV_56: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'56\' height=\'56\' viewBox=\'0 0 56 56\'%3E%3Crect width=\'56\' height=\'56\' fill=\'%23111418\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' font-family=\'Arial\' font-size=\'14\' fill=\'%2300ff88\'%3EMIV%3C/text%3E%3C/svg%3E',
+        MIV_300: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'300\' viewBox=\'0 0 300 300\'%3E%3Crect width=\'300\' height=\'300\' fill=\'%23111418\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' font-family=\'Arial\' font-size=\'24\' fill=\'%2300ff88\'%3EMIV%3C/text%3E%3C/svg%3E'
+    };
+
+    // ========== 2. ESTADO GLOBAL ==========
+    const state = {
+        currentUser: null,
+        userBalance: 0,
+        playlist: [],
+        externalPlaylist: [],
+        portfolioAssets: [],
+        ledgerData: [],
+        topInvestments: [],
+        userPlaylists: [],
+        favoriteMusicIds: [],
+        currentTrackIndex: -1,
+        isPlaying: false,
+        youtubePlayer: null,
+        youtubeAPILoaded: false,
+        currentVolume: 80,
+        isShuffle: false,
+        isRepeat: false
+    };
+
+    // ========== 3. FUNÇÕES UTILITÁRIAS ==========
+    function formatCurrency(value) {
+        if (value === null || value === undefined) value = 0;
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+            minimumFractionDigits: 2
+        }).format(Number(value));
+    }
+
+    function formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function showToast(message, type = 'success', duration = 3000) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<div class="toast-message">${message}</div>`;
+        container.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    function showLoading(message = 'Carregando...') {
+        const loading = document.getElementById('loadingScreen');
+        if (loading) {
+            loading.style.display = 'flex';
+            const msg = document.getElementById('loadingMessage');
+            if (msg) msg.textContent = message;
+        }
+    }
+
+    function hideLoading() {
+        const loading = document.getElementById('loadingScreen');
+        if (loading) loading.style.display = 'none';
+    }
+
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
