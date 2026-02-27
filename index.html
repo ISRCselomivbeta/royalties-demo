@@ -1,49 +1,1430 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- Incluir arquivo 01-meta-config.html -->
+    <!-- ============================================ -->
+    <!-- PARTE 1/16: META TAGS E CONFIGURAÇÕES       -->
+    <!-- ============================================ -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="SELO MIV - Plataforma de Investimento em Música">
     <meta name="theme-color" content="#00ff88">
     <title>SELO MIV | Fintech Musical</title>
+    
+    <!-- Cookies e Políticas de Segurança -->
     <meta http-equiv="Set-Cookie" content="SameSite=None; Secure">
     <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com https://script.google.com https://script.googleusercontent.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com;">
+
+    <!-- Bibliotecas Externas -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
 
-    <!-- CSS Components -->
-    <style>@import url('02-css-variables.html');</style>
-    <style>@import url('03-css-base.html');</style>
-    <style>@import url('04-css-components.html');</style>
-    <style>@import url('05-css-auth.html');</style>
-    <style>@import url('06-css-header-sidebar.html');</style>
-    <style>@import url('07-css-music-cards.html');</style>
-    <style>@import url('08-css-player.html');</style>
-    <style>@import url('09-css-portfolio-tables.html');</style>
-    <style>@import url('10-css-modals-toasts.html');</style>
-    <style>@import url('11-css-responsive.html');</style>
+    <!-- ============================================ -->
+    <!-- PARTE 2/16: CSS VARIÁVEIS GLOBAIS           -->
+    <!-- ============================================ -->
+    <style>
+        :root {
+            --neon-green: #00ff88;
+            --miv-blue: #0072ff;
+            --bg-dark: #07090c;
+            --bg-card: #111418;
+            --border: #1e2329;
+            --text-light: #f8f9fa;
+            --text-muted: #6c757d;
+            --spotify-green: #1DB954;
+            --player-height: 90px;
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 3/16: CSS RESET E BASE                -->
+    <!-- ============================================ -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding-bottom: var(--player-height);
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 4/16: CSS COMPONENTES DE CARREGAMENTO -->
+    <!-- ============================================ -->
+    <style>
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 4rem;
+            height: 4rem;
+            border: 0.25rem solid rgba(0, 255, 136, 0.3);
+            border-top-color: var(--neon-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .progress-loading {
+            height: 4px;
+            background: rgba(0, 255, 136, 0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 1rem auto;
+            max-width: 200px;
+        }
+        
+        .progress-loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green), #00cc6a);
+            border-radius: 2px;
+            width: 0%;
+            animation: loading 2s infinite;
+        }
+        
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 5/16: CSS TELAS DE AUTENTICAÇÃO       -->
+    <!-- ============================================ -->
+    <style>
+        .auth-screen {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #0c0e12 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            z-index: 9998;
+            overflow-y: auto;
+        }
+        
+        .auth-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .auth-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .logo-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+        
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--neon-green);
+        }
+        
+        .logo-icon i {
+            font-size: 2.5rem;
+            color: var(--neon-green);
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-control-custom {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            color: var(--text-light);
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .form-control-custom:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--neon-green);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(0, 255, 136, 0.25);
+            outline: none;
+        }
+        
+        .btn-miv {
+            background: linear-gradient(135deg, var(--neon-green) 0%, #00cc6a 100%);
+            border: none;
+            border-radius: 0.75rem;
+            color: #000;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .btn-miv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+        }
+        
+        .auth-link {
+            color: var(--neon-green);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .auth-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 6/16: CSS HEADER E SIDEBAR            -->
+    <!-- ============================================ -->
+    <style>
+        .main-app {
+            display: none;
+            min-height: 100vh;
+        }
+        
+        .app-header {
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.1) 0%, rgba(7, 9, 12, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .saldo-display h6 {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .saldo-display h4 {
+            color: var(--neon-green);
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .user-badge {
+            background: var(--neon-green);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: #000;
+            border-right: 1px solid var(--border);
+            z-index: 1100;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .sidebar.open {
+            left: 0;
+        }
+        
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .sidebar-close {
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--neon-green);
+        }
+        
+        .section {
+            display: none;
+            padding: 1.5rem;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 7/16: CSS CARDS DE MÚSICA             -->
+    <!-- ============================================ -->
+    <style>
+        .music-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .music-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .music-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neon-green);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.1);
+        }
+        
+        .music-cover {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+        
+        .music-info {
+            padding: 1rem;
+        }
+        
+        .music-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: var(--text-light);
+        }
+        
+        .music-artist {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .music-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .music-price {
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .music-percent {
+            background: rgba(0, 123, 255, 0.1);
+            color: #007bff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 8/16: CSS PLAYER DE MÚSICA            -->
+    <!-- ============================================ -->
+    <style>
+        .player-miv {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--player-height);
+            background: rgba(18, 18, 18, 0.98);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .player-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+        
+        .player-track-info {
+            flex: 0 0 25%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            min-width: 180px;
+        }
+        
+        .track-image-container {
+            position: relative;
+            width: 56px;
+            height: 56px;
+            flex-shrink: 0;
+        }
+        
+        .track-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .track-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .track-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .track-artist {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .player-controls-center {
+            flex: 1;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            width: 32px;
+            height: 32px;
+        }
+        
+        .control-btn.play-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--neon-green);
+            color: #000;
+            font-size: 1.25rem;
+        }
+        
+        .progress-container {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--neon-green);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .player-controls-right {
+            flex: 0 0 25%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+            min-width: 180px;
+        }
+        
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .volume-slider-container {
+            width: 100px;
+        }
+        
+        .volume-slider {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .volume-slider-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--neon-green);
+            border-radius: 2px;
+            width: 80%;
+        }
+        
+        .player-expanded {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            z-index: 10000;
+            display: none;
+            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .player-expanded.show {
+            display: block;
+        }
+        
+        .expanded-header {
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: linear-gradient(180deg, rgba(0, 255, 136, 0.1) 0%, transparent 100%);
+        }
+        
+        .expanded-track-info {
+            display: flex;
+            gap: 2rem;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .expanded-album-art {
+            width: 300px;
+            height: 300px;
+            border-radius: 12px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        
+        .expanded-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .expanded-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin: 0 0 1rem 0;
+        }
+        
+        .expanded-artist {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .youtube-container-expanded {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 9/16: CSS PORTFÓLIO E TABELAS         -->
+    <!-- ============================================ -->
+    <style>
+        .portfolio-summary {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 123, 255, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .portfolio-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--neon-green);
+            margin: 0.5rem 0;
+        }
+        
+        .artist-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            color: var(--neon-green);
+            margin-bottom: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin: 0.5rem 0;
+        }
+        
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .ledger-table th {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .ledger-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 10/16: CSS MODAIS E TOASTS            -->
+    <!-- ============================================ -->
+    <style>
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            color: var(--text-light);
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1300;
+            max-width: 350px;
+        }
+        
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .toast.error {
+            border-color: #ff3232;
+            background: rgba(255, 50, 50, 0.1);
+        }
+        
+        .toast-message {
+            flex: 1;
+            color: var(--text-light);
+        }
+    </style>
+
+    <!-- ============================================ -->
+    <!-- PARTE 11/16: CSS RESPONSIVO E UTILITÁRIOS   -->
+    <!-- ============================================ -->
+    <style>
+        .badge-success {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--neon-green);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+        
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .badge-danger {
+            background: rgba(255, 50, 50, 0.2);
+            color: #ff3232;
+            border: 1px solid rgba(255, 50, 50, 0.3);
+        }
+        
+        .favorite-btn {
+            background: none;
+            border: none;
+            color: #ffc107;
+            font-size: 1.25rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .favorite-btn:hover {
+            transform: scale(1.2);
+        }
+        
+        .favorite-btn.active {
+            color: #ff3232;
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        .empty-state-actionable {
+            text-align: center;
+            padding: 2rem 1rem;
+            border: 2px dashed var(--border);
+            border-radius: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        @media (max-width: 768px) {
+            .player-bar {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+                gap: 1rem;
+            }
+            
+            .expanded-track-info {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .expanded-title {
+                font-size: 2rem;
+            }
+            
+            .expanded-album-art {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .artist-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- HTML Components -->
-    <div id="loadingScreen" class="loading-screen"><!-- Conteúdo do 12-html-loading-auth.html --></div>
-    <div class="toast-container" id="toastContainer"></div>
-    <div id="authScreen" class="auth-screen"><!-- Conteúdo do 12-html-loading-auth.html --></div>
-    <div id="mainApp" class="main-app"><!-- Conteúdo do 13-html-main-app.html --></div>
-    
-    <!-- Modais -->
-    <div id="investModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="investExternalModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="addExternalMusicModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="addMusicModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="addBalanceModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="withdrawalModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="createPlaylistModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
-    <div id="contractModal" class="modal-overlay"><!-- Conteúdo do 14-html-modals.html --></div>
+    <!-- ============================================ -->
+    <!-- PARTE 12/16: HTML LOADING E AUTENTICAÇÃO    -->
+    <!-- ============================================ -->
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h4 class="text-success mb-2">SELO MIV</h4>
+            <p class="text-muted" id="loadingMessage">Conectando ao servidor...</p>
+            <div class="progress-loading">
+                <div class="progress-loading-bar"></div>
+            </div>
+        </div>
+    </div>
 
-    <!-- JavaScript -->
-    <script src="15-js-core.html"></script>
-    <script src="16-js-functions.html"></script>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Auth Screen -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-card">
+            <div class="logo-header">
+                <div class="logo-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2 class="text-white mb-2">SELO MIV</h2>
+                <p class="text-muted">Plataforma de Investimento em Música</p>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <input type="email" id="loginEmailField" class="form-control-custom" placeholder="E-mail">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="loginPasswordField" class="form-control-custom" placeholder="Senha">
+                </div>
+                <button class="btn-miv mb-3" onclick="handleLogin()" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </button>
+                <p class="text-center text-muted">
+                    Novo? <a href="javascript:void(0)" class="auth-link" onclick="showRegisterForm()">Criar conta</a>
+                </p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" style="display: none;">
+                <div class="form-group">
+                    <input type="text" id="registerNameField" class="form-control-custom" placeholder="Nome completo">
+                </div>
+                <div class="form-group">
+                    <input type="email" id="registerEmailField" class="form-control-custom" placeholder="E-mail">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="registerPasswordField" class="form-control-custom" placeholder="Senha">
+                </div>
+                <div class="form-group">
+                    <select id="registerTypeField" class="form-control-custom" onchange="toggleArtistField()">
+                        <option value="">Perfil</option>
+                        <option value="ouvinte">Ouvinte</option>
+                        <option value="artista">Artista</option>
+                    </select>
+                </div>
+                <div id="artistLinkField" style="display: none;">
+                    <input type="url" id="registerLinkField" class="form-control-custom" placeholder="Link do trabalho">
+                </div>
+                <button class="btn-miv mb-3" onclick="handleRegister()" id="registerBtn">
+                    <i class="bi bi-person-plus"></i> Cadastrar
+                </button>
+                <p class="text-center text-muted">
+                    Já tem conta? <a href="javascript:void(0)" class="auth-link" onclick="showLoginForm()">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PARTE 13/16: HTML APLICAÇÃO PRINCIPAL       -->
+    <!-- ============================================ -->
+    <div id="mainApp" class="main-app">
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h4 class="text-white mb-0">🎵 MIV</h4>
+                <button class="sidebar-close" onclick="toggleSidebar()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#" class="nav-link active" onclick="changeSection('marketplace')"><i class="bi bi-house"></i> Marketplace</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="changeSection('portfolio')"><i class="bi bi-briefcase"></i> Portfólio</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="changeSection('ledger')"><i class="bi bi-receipt"></i> Extrato</a></li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="changeSection('external')"><i class="bi bi-globe"></i> Bolsa Externa</a></li>
+                <li class="nav-item" id="artistNavItem" style="display: none;">
+                    <a href="#" class="nav-link" onclick="changeSection('artist')"><i class="bi bi-mic"></i> Artista</a>
+                </li>
+                <li class="nav-item"><a href="#" class="nav-link" onclick="openAddBalanceModal()"><i class="bi bi-plus-circle"></i> Adicionar Saldo</a></li>
+                <li class="nav-item"><a href="#" class="nav-link text-danger" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
+            </ul>
+        </div>
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="d-flex align-items-center">
+                    <button class="btn text-white me-3" onclick="toggleSidebar()">
+                        <i class="bi bi-list fs-3"></i>
+                    </button>
+                    <div class="saldo-display">
+                        <h6>SALDO</h6>
+                        <h4 id="currentBalance">R$ 0,00</h4>
+                    </div>
+                </div>
+                <div class="user-badge" id="userBadge">Ouvinte</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Marketplace -->
+            <section id="marketplaceSection" class="section active">
+                <div class="section-header">
+                    <h2 class="section-title">Marketplace</h2>
+                </div>
+                <div id="marketplaceContent" class="music-grid"></div>
+            </section>
+
+            <!-- Portfolio -->
+            <section id="portfolioSection" class="section">
+                <div class="portfolio-summary">
+                    <h6>VALOR TOTAL</h6>
+                    <div class="portfolio-value" id="portfolioValue">R$ 0,00</div>
+                </div>
+                <div id="portfolioContent"></div>
+            </section>
+
+            <!-- Ledger -->
+            <section id="ledgerSection" class="section">
+                <h2 class="section-title">Extrato</h2>
+                <table class="ledger-table">
+                    <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead>
+                    <tbody id="ledgerContent"></tbody>
+                </table>
+            </section>
+
+            <!-- External -->
+            <section id="externalSection" class="section">
+                <h2 class="section-title">Bolsa Externa</h2>
+                <div id="externalContent" class="music-grid"></div>
+            </section>
+
+            <!-- Artist -->
+            <section id="artistSection" class="section">
+                <h2 class="section-title">Painel Artista</h2>
+                <div class="artist-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="artistMusicCount">0</div>
+                        <div class="stat-label">Músicas</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PARTE 14/16: HTML MODAIS                    -->
+    <!-- ============================================ -->
+    <!-- Player -->
+    <div id="playerSpotify" class="player-miv" style="display: none;">
+        <div class="player-bar">
+            <div class="player-track-info">
+                <div class="track-image-container">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Crect width='56' height='56' fill='%23111418'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='14' fill='%2300ff88'%3EMIV%3C/text%3E%3C/svg%3E" class="track-image" id="playerAlbumArt">
+                </div>
+                <div class="track-details">
+                    <div class="track-title" id="playerTitle">Nenhuma música</div>
+                    <div class="track-artist" id="playerArtist">Selecione uma música</div>
+                </div>
+            </div>
+            <div class="player-controls-center">
+                <div class="control-buttons">
+                    <button class="control-btn" onclick="togglePlay()" id="playPauseBtn">
+                        <i class="bi bi-play-fill" id="playPauseIcon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="player-expanded" id="playerExpanded">
+            <div class="expanded-header">
+                <div class="expanded-track-info">
+                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23111418'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='Arial' font-size='24' fill='%2300ff88'%3EMIV%3C/text%3E%3C/svg%3E" class="expanded-album-art" id="expandedAlbumArt">
+                    <div class="expanded-details">
+                        <h1 class="expanded-title" id="expandedTitle">Título</h1>
+                        <div class="expanded-artist" id="expandedArtist">Artista</div>
+                    </div>
+                </div>
+            </div>
+            <div class="expanded-content">
+                <div class="youtube-container-expanded" id="youtubeContainerExpanded">
+                    <div id="youtubePlayerExpanded"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invest Modal -->
+    <div id="investModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Investir</h5>
+                <button class="modal-close" onclick="closeModal('investModal')"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="number" id="investQuantityField" class="form-control-custom" value="1" min="1" oninput="updateInvestmentTotal()">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('investModal')">Cancelar</button>
+                <button class="btn-miv" onclick="confirmInvestment()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Balance Modal -->
+    <div id="addBalanceModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar Saldo</h5>
+                <button class="modal-close" onclick="closeModal('addBalanceModal')"><i class="bi bi-x"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="number" id="balanceAmountField" class="form-control-custom" value="100" min="10">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('addBalanceModal')">Cancelar</button>
+                <button class="btn-miv" onclick="processBalanceAdd()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- PARTE 15/16: JAVASCRIPT CORE                -->
+    <!-- ============================================ -->
+    <script>
+        // Configurações
+        const CONFIG = {
+            API_URL: 'https://script.google.com/macros/s/AKfycbwgjor-tLLzVrnJGNHOifL1O2sRBhysKJ3IbVJy_AHgtNqjk-6hazH8xuO6OaDXF_s/exec',
+            VERSION: '5.1.0'
+        };
+
+        // Estado Global
+        const state = {
+            currentUser: null,
+            userBalance: 0,
+            playlist: [],
+            externalPlaylist: [],
+            portfolioAssets: [],
+            ledgerData: [],
+            currentTrackIndex: -1,
+            isPlaying: false,
+            youtubePlayer: null,
+            currentVolume: 80
+        };
+
+        // Utilitários
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<div class="toast-message">${message}</div>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        function showLoading(message = 'Carregando...') {
+            document.getElementById('loadingScreen').style.display = 'flex';
+            document.getElementById('loadingMessage').textContent = message;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }
+
+        function showModal(id) {
+            document.getElementById(id).classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+    </script>
+
+    <!-- ============================================ -->
+    <!-- PARTE 16/16: JAVASCRIPT FUNÇÕES             -->
+    <!-- ============================================ -->
+    <script>
+        // API
+        async function callAPI(action, data = {}) {
+            // Admin master
+            if (action === 'login' && data.email === 'selomiv@gmail.com' && data.password === 'selomiv123') {
+                return { success: true, data: { id: 'admin', nome: 'Admin', tipo: 'admin', saldo: 1000000 } };
+            }
+            
+            // Mock data
+            if (action === 'get_musicas') {
+                return {
+                    success: true,
+                    data: [
+                        { id: '1', titulo: 'Bohemian Rhapsody', artista: 'Queen', valor_acao: 25.50, percentual_disponivel: 30 },
+                        { id: '2', titulo: 'Blinding Lights', artista: 'The Weeknd', valor_acao: 32.80, percentual_disponivel: 25 }
+                    ]
+                };
+            }
+            
+            return { success: true, data: [] };
+        }
+
+        // Auth
+        async function handleLogin() {
+            const email = document.getElementById('loginEmailField').value;
+            const password = document.getElementById('loginPasswordField').value;
+            
+            if (!email || !password) {
+                showToast('Preencha todos os campos', 'error');
+                return;
+            }
+
+            showLoading('Autenticando...');
+            const result = await callAPI('login', { email, password });
+            
+            if (result?.success && result?.data) {
+                state.currentUser = result.data;
+                state.userBalance = result.data.saldo || 0;
+                localStorage.setItem('miv_user', JSON.stringify(state.currentUser));
+                initializeApp();
+            } else {
+                showToast('Credenciais inválidas', 'error');
+            }
+            hideLoading();
+        }
+
+        async function handleRegister() {
+            showToast('Cadastro realizado! Aguarde aprovação.', 'success');
+            showLoginForm();
+        }
+
+        function logout() {
+            if (confirm('Deseja sair?')) {
+                state.currentUser = null;
+                localStorage.removeItem('miv_user');
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('authScreen').style.display = 'flex';
+            }
+        }
+
+        // Inicialização
+        function initializeApp() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('currentBalance').textContent = formatCurrency(state.userBalance);
+            loadData();
+        }
+
+        async function loadData() {
+            showLoading('Carregando...');
+            const result = await callAPI('get_musicas');
+            if (result?.success) state.playlist = result.data;
+            renderMarketplace();
+            hideLoading();
+        }
+
+        function renderMarketplace() {
+            const container = document.getElementById('marketplaceContent');
+            if (!state.playlist.length) {
+                container.innerHTML = '<div class="empty-state-actionable">Nenhuma música</div>';
+                return;
+            }
+            
+            container.innerHTML = state.playlist.map((track, i) => `
+                <div class="music-card" onclick="playTrack(${i})">
+                    <div class="music-info">
+                        <h6 class="music-title">${track.titulo}</h6>
+                        <p class="music-artist">${track.artista}</p>
+                        <div class="music-meta">
+                            <span class="music-price">${formatCurrency(track.valor_acao)}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Player
+        function playTrack(index) {
+            state.currentTrackIndex = index;
+            const track = state.playlist[index];
+            document.getElementById('playerSpotify').style.display = 'flex';
+            document.getElementById('playerTitle').textContent = track.titulo;
+            document.getElementById('playerArtist').textContent = track.artista;
+        }
+
+        function togglePlay() {
+            state.isPlaying = !state.isPlaying;
+            const icon = document.getElementById('playPauseIcon');
+            icon.className = state.isPlaying ? 'bi bi-pause-fill' : 'bi bi-play-fill';
+        }
+
+        // Navegação
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function changeSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section + 'Section').classList.add('active');
+            toggleSidebar();
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        function showLoginForm() {
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('loginForm').style.display = 'block';
+        }
+
+        function toggleArtistField() {
+            const field = document.getElementById('artistLinkField');
+            if (field) {
+                field.style.display = document.getElementById('registerTypeField').value === 'artista' ? 'block' : 'none';
+            }
+        }
+
+        // Saldo
+        function processBalanceAdd() {
+            const amount = parseFloat(document.getElementById('balanceAmountField').value) || 0;
+            if (amount < 10) {
+                showToast('Valor mínimo: R$ 10', 'error');
+                return;
+            }
+            state.userBalance += amount;
+            document.getElementById('currentBalance').textContent = formatCurrency(state.userBalance);
+            closeModal('addBalanceModal');
+            showToast(`Saldo de ${formatCurrency(amount)} adicionado!`, 'success');
+        }
+
+        // Investimento
+        function updateInvestmentTotal() {}
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            const stored = localStorage.getItem('miv_user');
+            if (stored) {
+                try {
+                    state.currentUser = JSON.parse(stored);
+                    state.userBalance = state.currentUser.saldo || 0;
+                    initializeApp();
+                } catch (e) {
+                    localStorage.removeItem('miv_user');
+                }
+            }
+            hideLoading();
+        });
+
+        // Exposição global
+        window.handleLogin = handleLogin;
+        window.handleRegister = handleRegister;
+        window.logout = logout;
+        window.toggleSidebar = toggleSidebar;
+        window.changeSection = changeSection;
+        window.showRegisterForm = showRegisterForm;
+        window.showLoginForm = showLoginForm;
+        window.toggleArtistField = toggleArtistField;
+        window.playTrack = playTrack;
+        window.togglePlay = togglePlay;
+        window.openAddBalanceModal = () => showModal('addBalanceModal');
+        window.closeModal = closeModal;
+        window.processBalanceAdd = processBalanceAdd;
+        window.updateInvestmentTotal = updateInvestmentTotal;
+        window.confirmInvestment = () => closeModal('investModal');
+    </script>
 </body>
 </html>
