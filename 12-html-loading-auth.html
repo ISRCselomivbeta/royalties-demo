@@ -1,0 +1,97 @@
+<!-- ============================================ -->
+<!-- HTML LOADING E AUTENTICAÇÃO - PARTE 12/16 -->
+<!-- ============================================ -->
+<body>
+    <!-- TELA DE CARREGAMENTO -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <h4 class="text-success mb-2">SELO MIV</h4>
+            <p class="text-muted" id="loadingMessage">Conectando ao servidor...</p>
+            <div class="progress-loading">
+                <div class="progress-loading-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOASTS (NOTIFICAÇÕES) -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- TELA DE AUTENTICAÇÃO -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-card">
+            <div class="logo-header">
+                <div class="logo-icon">
+                    <i class="bi bi-shield-lock"></i>
+                </div>
+                <h2 class="text-white mb-2">SELO MIV</h2>
+                <p class="text-muted">Plataforma de Investimento em Música</p>
+            </div>
+
+            <!-- Formulário de Login -->
+            <div id="loginForm">
+                <div id="loginMessage" class="alert d-none"></div>
+                
+                <div class="form-group">
+                    <label for="loginEmailField" class="text-muted mb-2">E-mail</label>
+                    <input type="email" id="loginEmailField" class="form-control-custom" placeholder="Digite seu e-mail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPasswordField" class="text-muted mb-2">Senha</label>
+                    <input type="password" id="loginPasswordField" class="form-control-custom" placeholder="Digite sua senha" required>
+                </div>
+                
+                <button class="btn-miv mb-3" onclick="handleLogin()" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </button>
+                
+                <p class="text-center text-muted">
+                    Novo por aqui? <a href="javascript:void(0)" class="auth-link" onclick="showRegisterForm()">Criar conta</a>
+                </p>
+            </div>
+
+            <!-- Formulário de Registro -->
+            <div id="registerForm" style="display: none;">
+                <div id="registerMessage" class="alert d-none"></div>
+                
+                <div class="form-group">
+                    <label for="registerNameField" class="text-muted mb-2">Nome completo</label>
+                    <input type="text" id="registerNameField" class="form-control-custom" placeholder="Digite seu nome completo" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmailField" class="text-muted mb-2">E-mail</label>
+                    <input type="email" id="registerEmailField" class="form-control-custom" placeholder="Digite seu e-mail" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPasswordField" class="text-muted mb-2">Senha (mínimo 6 caracteres)</label>
+                    <input type="password" id="registerPasswordField" class="form-control-custom" placeholder="Digite sua senha" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerTypeField" class="text-muted mb-2">Selecione seu perfil</label>
+                    <select id="registerTypeField" class="form-control-custom" onchange="toggleArtistField()">
+                        <option value="">Selecione seu perfil...</option>
+                        <option value="ouvinte">🎧 Ouvinte/Investidor</option>
+                        <option value="artista">🎤 Artista</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" id="artistLinkField" style="display: none;">
+                    <label for="registerLinkField" class="text-muted mb-2">Link do seu trabalho</label>
+                    <input type="url" id="registerLinkField" class="form-control-custom" placeholder="YouTube, Spotify, etc.">
+                    <small class="text-muted">Para artistas: informe um link do seu portfólio</small>
+                </div>
+                
+                <button class="btn-miv mb-3" onclick="handleRegister()" id="registerBtn">
+                    <i class="bi bi-person-plus"></i> Solicitar Cadastro
+                </button>
+                
+                <p class="text-center text-muted">
+                    Já tem conta? <a href="javascript:void(0)" class="auth-link" onclick="showLoginForm()">Fazer login</a>
+                </p>
+            </div>
+        </div>
+    </div>
